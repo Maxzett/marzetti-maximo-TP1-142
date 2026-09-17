@@ -1,32 +1,201 @@
+/* La luz de la marquesina cae sobre la parte alta de la página */
 .header {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--superficie-alta) 55%, transparent),
+    transparent
+  );
+}
+
+/*
+ * En celular la barra envuelve: la marca ocupa todo el ancho y el aviso baja al final con order.
+ * Desde escritorio pasa a una sola fila (ver la media query del final).
+ */
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-3);
+  padding-block: var(--e-3);
+}
+
+/* ---- Placa de marquesina ---- */
+.marca {
+  flex-basis: 100%;
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: linear-gradient(180deg, #241a15, #17100d);
+  box-shadow: var(--sombra-marquesina);
+  color: inherit;
+  text-align: center;
+}
+
+/* Gana el color global de los links, así que se lo devuelve */
+.marca:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.marca__bombillas {
+  display: block;
+  height: 0.625rem;
+  background-image: radial-gradient(
+    circle at 9px 5px,
+    var(--bombilla) 0 2.4px,
+    color-mix(in srgb, var(--acento) 30%, transparent) 2.4px 3.6px,
+    transparent 4px
+  );
+  background-size: 18px 10px;
+}
+
+.marca__cine,
+.marca__pie {
+  display: block;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.marca__cine {
+  margin-top: var(--e-2);
+  letter-spacing: 0.42em;
+  /* Compensa el tracking, que solo agrega espacio a la derecha y descentra el texto */
+  text-indent: 0.42em;
+}
+
+.marca__pie {
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+}
+
+.marca__nombre {
+  display: block;
+  margin-block: var(--e-1);
+  color: var(--bombilla);
+  font-family: var(--fuente-display);
+  font-size: var(--t-marquesina);
+  line-height: 0.92;
+  letter-spacing: 0.06em;
+  text-shadow: var(--neon-marquesina);
+  text-transform: uppercase;
+}
+
+.marca__bombillas:last-child {
+  margin-top: var(--e-2);
+}
+
+/* ---- Navegación ---- */
+.nav {
+  flex-grow: 1;
+}
+
+.nav ul {
+  display: flex;
+  gap: var(--e-5);
+}
+
+.nav a {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem clamp(1rem, 4vw, 2.5rem);
-  border-bottom: 1px solid var(--borde);
+  min-height: var(--toque-min);
+  border-bottom: 2px solid transparent;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 
-.marca {
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-decoration: none;
-}
-
-nav a {
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
-  color: var(--texto-suave);
-  text-decoration: none;
-}
-
-nav a:hover {
+.nav a:hover {
   color: var(--texto);
+  text-decoration: none;
 }
 
-/* routerLinkActive agrega esta clase al link de la ruta actual */
-nav a.activo {
+/*
+ * routerLinkActive agrega esta clase al link de la ruta actual.
+ * El activo no se distingue solo por color: suma peso y el subrayado ámbar (RNF-10).
+ */
+.nav a.activo {
+  border-bottom-color: var(--acento);
+  color: var(--texto);
+  font-weight: 600;
+}
+
+/* ---- Aviso de compra anónima ---- */
+.aviso {
+  /* order lo baja al final de la barra en celular, sin cambiar el orden del DOM */
+  order: 1;
+  flex-basis: 100%;
+  padding: var(--e-2) var(--e-3);
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: var(--r-chico);
   background: var(--superficie);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  line-height: 1.4;
+}
+
+.aviso strong {
   color: var(--texto);
+  font-weight: 600;
+}
+
+/* ---- Ingresar ---- */
+.ingresar {
+  display: flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1.5px solid var(--acento);
+  border-radius: var(--r-medio);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ingresar:hover {
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  text-decoration: none;
+}
+
+/* ---- Escritorio: todo en una fila ---- */
+@media (min-width: 64rem) {
+  .barra {
+    flex-wrap: nowrap;
+    gap: var(--e-6);
+    padding-block: var(--e-4);
+  }
+
+  .marca {
+    flex-basis: auto;
+    flex-shrink: 0;
+    padding-inline: var(--e-5);
+  }
+
+  .marca__pie {
+    display: none;
+  }
+
+  .nav a {
+    font-size: var(--t-cuerpo);
+  }
+
+  .aviso {
+    order: 0;
+    flex-basis: auto;
+    max-width: 11rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: var(--t-micro);
+    line-height: 1.35;
+    text-align: right;
+  }
 }

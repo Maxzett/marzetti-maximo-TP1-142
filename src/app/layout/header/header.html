@@ -1,14 +1,36 @@
 <header class="header">
-  <a class="marca" routerLink="/">Cine</a>
+  <div class="barra contenedor">
+    <a class="marca" routerLink="/">
+      <span class="marca__bombillas" aria-hidden="true"></span>
+      <span class="marca__cine">Cine</span>
+      <span class="marca__nombre">Emezeta</span>
+      <span class="marca__pie">Desde 1961 · Sala única</span>
+      <span class="marca__bombillas" aria-hidden="true"></span>
+    </a>
 
-  <nav aria-label="Principal">
-    <!-- exact: sin esto "Inicio" quedaría activo en todas las rutas, porque todas empiezan con "/" -->
-    <a
-      routerLink="/"
-      routerLinkActive="activo"
-      [routerLinkActiveOptions]="{ exact: true }"
-      ariaCurrentWhenActive="page"
-      >Inicio</a
-    >
-  </nav>
+    <nav class="nav" aria-label="Principal">
+      <ul>
+        <!-- exact: sin esto "Cartelera" quedaría activo en todas las rutas, porque todas empiezan con "/" -->
+        <li>
+          <a
+            routerLink="/"
+            routerLinkActive="activo"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            >Cartelera</a
+          >
+        </li>
+        <!-- Próximamente, Candy y Mi entrada se suman cuando exista su ruta -->
+      </ul>
+    </nav>
+
+    <!-- La compra es anónima (D-04): el header nunca asume que hay sesión iniciada -->
+    <p class="aviso">
+      <strong>Comprás sin cuenta.</strong> Te mandamos el QR por mail y entrás con eso.
+    </p>
+
+    <a class="ingresar" routerLink="/ingresar">Ingresar</a>
+  </div>
+
+  <div class="guirnalda" aria-hidden="true"></div>
 </header>
