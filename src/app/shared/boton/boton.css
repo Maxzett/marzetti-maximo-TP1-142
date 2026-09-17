@@ -1,0 +1,7 @@
+/*
+ * display: contents saca al host del layout: el <button> pasa a ser hijo directo del flex
+ * o grid de quien lo use, así que "ancho completo" y los gap funcionan sin envoltorios.
+ */
+:host {
+  display: contents;
+}

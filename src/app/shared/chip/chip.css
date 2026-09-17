@@ -1,0 +1,42 @@
+:host {
+  display: inline-flex;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  height: 2.375rem;
+  padding-inline: var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+  background: transparent;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--acento-hondo);
+  color: var(--texto);
+}
+
+.chip--activo {
+  border: 1.5px solid var(--acento);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-weight: 600;
+}
+
+.chip:disabled {
+  color: var(--borde-fuerte);
+  cursor: not-allowed;
+}
+
+.chip svg {
+  width: 0.6875rem;
+  height: 0.5625rem;
+}

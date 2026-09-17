@@ -207,3 +207,77 @@ svg {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/*
+ * ---- Botón ----
+ * El aspecto del botón vive acá y no en el componente porque hay dos elementos distintos
+ * que lo necesitan: <app-boton>, que envuelve un <button> de verdad, y los <a> que llevan
+ * a otra ruta y solo parecen botón. Un enlace no es un botón, así que no se fuerza el
+ * componente sobre él; comparten estas clases para que no haya dos fuentes de verdad.
+ */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1.5px solid transparent;
+  border-radius: var(--r-medio);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.boton:hover {
+  text-decoration: none;
+}
+
+.boton--primario {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+}
+
+.boton--primario:hover {
+  border-color: var(--bombilla);
+  background: var(--bombilla);
+  color: var(--texto-sobre-acento);
+}
+
+.boton--borde {
+  border-color: var(--acento);
+  background: transparent;
+  color: var(--acento);
+}
+
+.boton--borde:hover {
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+}
+
+.boton--fantasma {
+  border-color: var(--borde-fuerte);
+  background: transparent;
+  color: var(--texto);
+}
+
+.boton--fantasma:hover {
+  background: var(--superficie-alta);
+  color: var(--texto);
+}
+
+/* El deshabilitado no se comunica solo por color: también pierde el borde de acento */
+.boton:disabled {
+  border-color: var(--borde);
+  background: var(--superficie-alta);
+  color: var(--texto-tenue);
+  cursor: not-allowed;
+}
+
+.boton--ancho {
+  width: 100%;
+}

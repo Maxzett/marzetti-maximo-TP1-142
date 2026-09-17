@@ -1,0 +1,22 @@
+<button
+  class="chip"
+  type="button"
+  [class.chip--activo]="activo()"
+  [attr.aria-pressed]="activo()"
+  [disabled]="deshabilitado()"
+  (click)="alternar()"
+>
+  @if (activo()) {
+    <svg viewBox="0 0 12 10" aria-hidden="true">
+      <path
+        d="M1 5l3.5 3.5L11 1.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  }
+  <ng-content />
+</button>

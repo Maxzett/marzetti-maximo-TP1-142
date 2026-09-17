@@ -1,0 +1,67 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.etiqueta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  color: var(--texto);
+  font-size: var(--t-mini);
+}
+
+/* "obligatorio" escrito, no un asterisco: el asterisco solo no lo entiende nadie */
+.requerido {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.control {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+.control:disabled {
+  border-color: var(--borde);
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  cursor: not-allowed;
+}
+
+/* Borde de 2 px: el error también cambia el grosor, no solo el color */
+.control--error {
+  border: 2px solid var(--rojo-claro);
+}
+
+.ayuda,
+.error {
+  font-size: var(--t-mini);
+  line-height: 1.4;
+}
+
+.ayuda {
+  color: var(--texto-tenue);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  color: var(--rojo-claro);
+}
+
+.error svg {
+  flex-shrink: 0;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-top: 0.15rem;
+}

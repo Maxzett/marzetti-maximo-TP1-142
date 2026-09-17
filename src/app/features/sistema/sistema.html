@@ -1,0 +1,124 @@
+<div class="sistema contenedor">
+  <header class="cabecera">
+    <p class="sobretitulo">Cine Emezeta · CSS puro, sin frameworks</p>
+    <h1>Componentes del sistema</h1>
+    <p class="bajada">
+      Los componentes de <code>shared/</code> con sus estados. Probá el foco con Tab: el anillo
+      ámbar se dibuja una sola vez en <code>styles.css</code> y ningún componente puede olvidárselo.
+    </p>
+  </header>
+
+  <section aria-labelledby="s-botones">
+    <h2 id="s-botones">Botones</h2>
+    <div class="fila">
+      <app-boton (presionado)="simularEnvio()">Comprar</app-boton>
+      <app-boton variante="borde">Ingresar</app-boton>
+      <app-boton variante="fantasma">Avisarme</app-boton>
+      <app-boton [deshabilitado]="true">Agotada</app-boton>
+      <app-boton [cargando]="procesando()">Procesando</app-boton>
+    </div>
+    <p class="pie">
+      "Comprar" enciende el estado de carga de "Procesando" por unos segundos. Los enlaces que
+      parecen botón —Ingresar del header, Volver al inicio del 404— no usan este componente: son
+      <code>&lt;a&gt;</code> con las clases <code>.boton</code>.
+    </p>
+  </section>
+
+  <section aria-labelledby="s-campos">
+    <h2 id="s-campos">Campos</h2>
+    <div class="fila fila--campos">
+      <app-campo
+        etiqueta="Mail"
+        tipo="email"
+        marcador="nombre@correo.com"
+        ayuda="Te mandamos el QR de la entrada acá"
+        autocompletado="email"
+        [requerido]="true"
+        [(valor)]="mail"
+      />
+      <app-campo
+        etiqueta="Mail"
+        tipo="email"
+        error="Falta el dominio del mail. Escribilo completo, por ejemplo nombre@correo.com"
+        [(valor)]="mailInvalido"
+      />
+      <app-campo etiqueta="Cupón" marcador="No disponible" [deshabilitado]="true" />
+    </div>
+    <p class="pie">
+      Lo que escribas en el primero aparece acá: <strong>{{ mail() || '—' }}</strong
+      >. El error reemplaza a la ayuda en <code>aria-describedby</code> para que el lector de
+      pantalla no lea dos textos que se contradicen.
+    </p>
+  </section>
+
+  <section aria-labelledby="s-chips">
+    <h2 id="s-chips">Chips de género</h2>
+    <div class="fila">
+      <app-chip [activo]="true">Drama</app-chip>
+      <app-chip [activo]="true">Suspenso</app-chip>
+      <app-chip>Comedia</app-chip>
+      <app-chip>Acción</app-chip>
+      <app-chip>Animación</app-chip>
+      <app-chip [deshabilitado]="true">Sin funciones</app-chip>
+    </div>
+    <p class="pie">Se pueden alternar. El activo suma el tilde y <code>aria-pressed</code>.</p>
+  </section>
+
+  <section aria-labelledby="s-mensajes">
+    <h2 id="s-mensajes">Mensajes</h2>
+    <div class="columna">
+      <app-mensaje tono="exito">Compra confirmada. Te mandamos el QR a tu mail.</app-mensaje>
+      <app-mensaje tono="error">No pudimos reservar las butacas: la reserva venció.</app-mensaje>
+      <app-mensaje tono="aviso">
+        Las filas R, S y T son VIP y tienen un recargo sobre el precio base.
+      </app-mensaje>
+    </div>
+    <p class="pie">
+      Cada tono tiene forma de ícono y palabra propias, así que se distinguen sin ver el color. El
+      error usa <code>role="alert"</code> y los otros <code>role="status"</code>.
+    </p>
+  </section>
+
+  <section aria-labelledby="s-tarjetas">
+    <h2 id="s-tarjetas">Tarjetas, spinner y diálogo</h2>
+    <div class="fila fila--tarjetas">
+      <app-tarjeta>
+        <h3 class="titulo-tarjeta">Tarjeta</h3>
+        <p class="texto-tarjeta">La superficie sobre la que se apoyan póster, función o combo.</p>
+      </app-tarjeta>
+
+      <app-tarjeta [destacada]="true">
+        <h3 class="titulo-tarjeta">Destacada</h3>
+        <p class="texto-tarjeta">Con sombra y borde fuerte, para lo que tiene que sobresalir.</p>
+      </app-tarjeta>
+
+      <app-tarjeta>
+        <h3 class="titulo-tarjeta">Spinner</h3>
+        <div class="fila">
+          <app-spinner etiqueta="Buscando funciones" />
+          <app-spinner tamanio="chico" etiqueta="Buscando funciones" />
+        </div>
+      </app-tarjeta>
+
+      <app-tarjeta>
+        <h3 class="titulo-tarjeta">Diálogo</h3>
+        <app-boton variante="borde" (presionado)="dialogoAbierto.set(true)">Abrir</app-boton>
+      </app-tarjeta>
+    </div>
+    <p class="pie">
+      El diálogo es un <code>&lt;dialog&gt;</code> nativo: probá cerrarlo con Escape, con clic en el
+      fondo o con Tab, que queda atrapado adentro.
+    </p>
+  </section>
+
+  <app-dialogo titulo="Butacas VIP" [(abierto)]="dialogoAbierto">
+    <p class="texto-dialogo">
+      Las filas R, S y T son VIP. Tienen un recargo sobre el precio base de la función y se avisa
+      antes de pagar.
+    </p>
+    <div class="fila">
+      <app-boton (presionado)="dialogoAbierto.set(false)">Entendido</app-boton>
+      <app-boton variante="fantasma" (presionado)="dialogoAbierto.set(false)">Cancelar</app-boton>
+    </div>
+  </app-dialogo>
+</div>

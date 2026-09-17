@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.mensaje {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borde-fuerte);
+  border-left-width: 3px;
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  font-size: var(--t-mini);
+  line-height: 1.5;
+}
+
+.mensaje svg {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.1rem;
+}
+
+/*
+ * El espacio va por CSS y no en la plantilla: Angular borra los nodos de texto que solo
+ * tienen espacios, así que "Error:" quedaría pegado al mensaje proyectado.
+ */
+.palabra {
+  margin-inline-end: 0.35em;
+  font-family: var(--fuente-titulo);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mensaje--exito {
+  border-color: var(--acento-hondo);
+  border-left-color: var(--acento);
+  color: var(--texto);
+}
+
+.mensaje--exito svg,
+.mensaje--exito .palabra {
+  color: var(--acento);
+}
+
+.mensaje--error {
+  border-color: var(--rojo-claro);
+  color: var(--texto);
+}
+
+.mensaje--error svg,
+.mensaje--error .palabra {
+  color: var(--rojo-claro);
+}
+
+.mensaje--aviso {
+  color: var(--texto);
+}
+
+.mensaje--aviso svg,
+.mensaje--aviso .palabra {
+  color: var(--texto-tenue);
+}

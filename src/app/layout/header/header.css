@@ -144,25 +144,10 @@
 }
 
 /* ---- Ingresar ---- */
+/* Toma su aspecto de las clases .boton del sistema; acá solo se ajusta al lugar */
 .ingresar {
-  display: flex;
-  align-items: center;
-  min-height: var(--toque-min);
+  flex-shrink: 0;
   padding-inline: var(--e-4);
-  border: 1.5px solid var(--acento);
-  border-radius: var(--r-medio);
-  color: var(--acento);
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-mini);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.ingresar:hover {
-  background: var(--acento);
-  color: var(--texto-sobre-acento);
-  text-decoration: none;
 }
 
 /* ---- Escritorio: todo en una fila ---- */

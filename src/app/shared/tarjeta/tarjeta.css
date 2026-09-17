@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.tarjeta {
+  height: 100%;
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.tarjeta--destacada {
+  border-color: var(--borde-fuerte);
+  box-shadow: var(--sombra-ficha);
+}

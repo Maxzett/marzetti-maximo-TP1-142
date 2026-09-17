@@ -1,0 +1,6 @@
+<button [class]="clases()" [type]="tipo()" [disabled]="inerte()" (click)="presionado.emit()">
+  @if (cargando()) {
+    <app-spinner tamanio="chico" etiqueta="Procesando" />
+  }
+  <ng-content />
+</button>

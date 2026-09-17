@@ -1,0 +1,36 @@
+:host {
+  display: inline-flex;
+}
+
+/* Anillo abierto: el borde ámbar de arriba es el que se ve girar sobre los otros tres apagados */
+.spinner {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid var(--borde-fuerte);
+  border-top-color: var(--acento);
+  border-radius: 50%;
+  animation: girar 0.9s linear infinite;
+}
+
+.spinner--chico {
+  width: 1rem;
+  height: 1rem;
+  border-width: 2px;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/*
+ * Con movimiento reducido el anillo no se detiene —dejaría de indicar que algo está pasando—
+ * sino que gira despacio, sin el parpadeo que molesta.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}

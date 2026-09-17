@@ -1,0 +1,28 @@
+<dialog
+  #dialogo
+  class="dialogo"
+  [attr.aria-labelledby]="idTitulo"
+  (close)="alCerrar()"
+  (click)="alClicEnFondo($event)"
+>
+  <div class="panel">
+    <div class="cabecera">
+      <h2 class="titulo" [id]="idTitulo">{{ titulo() }}</h2>
+      <button class="cerrar" type="button" aria-label="Cerrar" (click)="cerrar()">
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path
+            d="M4 4l12 12M16 4L4 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div class="cuerpo">
+      <ng-content />
+    </div>
+  </div>
+</dialog>

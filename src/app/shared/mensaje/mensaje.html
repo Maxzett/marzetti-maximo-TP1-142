@@ -1,0 +1,52 @@
+<div class="mensaje" [class]="'mensaje--' + tono()" [attr.role]="rol()">
+  @switch (tono()) {
+    @case ('exito') {
+      <!-- Círculo con tilde -->
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <circle cx="10" cy="10" r="8.2" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <path
+          d="M6 10.3l2.7 2.7L14.2 7.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.9"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    }
+    @case ('error') {
+      <!-- Triángulo -->
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path
+          d="M10 2.2L19 18.2H1z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linejoin="round"
+        />
+        <path d="M10 7.6v4.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+        <circle cx="10" cy="14.9" r="1" fill="currentColor" />
+      </svg>
+    }
+    @default {
+      <!-- Cuadrado con signo -->
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <rect
+          x="1.9"
+          y="1.9"
+          width="16.2"
+          height="16.2"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+        />
+        <path d="M10 8.6v5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+        <circle cx="10" cy="5.9" r="1" fill="currentColor" />
+      </svg>
+    }
+  }
+
+  <p>
+    <span class="palabra">{{ palabra() }}</span> <ng-content />
+  </p>
+</div>

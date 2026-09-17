@@ -27,23 +27,7 @@ p {
   color: var(--texto-tenue);
 }
 
+/* El aspecto lo ponen las clases .boton del sistema */
 a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--toque-min);
   margin-top: var(--e-5);
-  padding-inline: var(--e-5);
-  border: 1.5px solid var(--acento);
-  border-radius: var(--r-medio);
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-mini);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-a:hover {
-  background: var(--acento);
-  color: var(--texto-sobre-acento);
-  text-decoration: none;
 }

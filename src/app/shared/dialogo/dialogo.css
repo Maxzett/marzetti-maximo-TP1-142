@@ -1,0 +1,62 @@
+/*
+ * El <dialog> no lleva padding propio: el panel de adentro lo pone.
+ * Si el padding estuviera acá, un clic en ese borde contaría como clic en el fondo y cerraría.
+ */
+.dialogo {
+  width: min(32rem, calc(100vw - 2 * var(--e-4)));
+  padding: 0;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-grande);
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: 0 32px 60px -30px #000;
+}
+
+.dialogo::backdrop {
+  background: rgb(10 8 7 / 72%);
+}
+
+.panel {
+  padding: var(--e-5);
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e-4);
+  margin-bottom: var(--e-4);
+}
+
+.titulo {
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.cerrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--toque-min);
+  height: var(--toque-min);
+  /* Compensa el área de toque para que el ícono quede alineado con el borde del panel */
+  margin: calc(var(--e-2) * -1) calc(var(--e-2) * -1) 0 0;
+  border: 0;
+  border-radius: var(--r-medio);
+  background: transparent;
+  color: var(--texto-tenue);
+}
+
+.cerrar:hover {
+  background: var(--superficie-alta);
+  color: var(--texto);
+}
+
+.cerrar svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}

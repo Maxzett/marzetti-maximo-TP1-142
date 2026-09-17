@@ -1,0 +1,109 @@
+.sistema {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-7);
+  padding-block: var(--e-7) var(--e-9);
+}
+
+.cabecera {
+  padding-bottom: var(--e-5);
+  border-bottom: 1px solid var(--borde);
+}
+
+.sobretitulo {
+  margin-bottom: var(--e-2);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  line-height: 0.94;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.bajada {
+  max-width: 44rem;
+  margin-top: var(--e-3);
+  color: var(--texto-tenue);
+}
+
+h2 {
+  margin-bottom: var(--e-4);
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+.columna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  max-width: 44rem;
+}
+
+/* align-items: flex-start para que un campo con error no estire a los de al lado */
+.fila--campos {
+  align-items: flex-start;
+}
+
+.fila--campos app-campo {
+  flex: 1 1 15rem;
+  max-width: 22rem;
+}
+
+.fila--tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  align-items: stretch;
+}
+
+.titulo-tarjeta {
+  margin-bottom: var(--e-2);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+}
+
+.texto-tarjeta,
+.pie {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  line-height: 1.5;
+}
+
+.pie {
+  max-width: 44rem;
+  margin-top: var(--e-4);
+}
+
+.texto-dialogo {
+  margin-bottom: var(--e-5);
+  color: var(--texto-tenue);
+}
+
+code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--r-chico);
+  background: var(--superficie-alta);
+  color: var(--texto);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
