@@ -3,7 +3,7 @@
 Trabajo Práctico N.º 1 de Programación IV (UTN, 2026 C2). Aplicación web para vender entradas de un cine: cartelera, compra de butacas en tiempo real, candy bar, fidelización y paneles de empleado y administración.
 
 - **Requerimientos:** [docs/requerimientos.md](docs/requerimientos.md)
-- **Aplicación desplegada:** _pendiente_
+- **Aplicación desplegada:** https://marzetti-maximo-tp-1-142.vercel.app
 
 > Este README se completa en la etapa final con la arquitectura y las decisiones técnicas. Por ahora documenta el setup del proyecto.
 
