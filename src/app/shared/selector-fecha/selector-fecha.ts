@@ -38,6 +38,9 @@ export interface CeldaDia {
 /** 12 años entran en una grilla de 3 × 4 sin scroll */
 const ANIOS_POR_PAGINA = 12;
 
+/** Columnas de las cuadrículas de meses y años, para que ↑ y ↓ salten una fila entera */
+const COLUMNAS_CUADRICULA = 3;
+
 /**
  * Selector de fecha propio (RNF-08). El cliente rechazó las ruedas nativas y el scroll largo,
  * así que:
@@ -46,7 +49,8 @@ const ANIOS_POR_PAGINA = 12;
  * - Para ir lejos en el tiempo están las vistas de meses y años. Una fecha de nacimiento de
  *   1998 sale en tres clics (año, mes, día) en vez de 300 toques a la flecha de mes anterior.
  * - Se maneja entero con el teclado siguiendo el patrón de grilla de WAI-ARIA: flechas para
- *   moverse, PageUp y PageDown para cambiar de mes, Home y End para los bordes de la semana.
+ *   moverse, PageUp y PageDown para cambiar de período, Home y End para los bordes.
+ *   Las tres vistas responden a las mismas teclas; lo único que cambia es cuánto salta cada una.
  */
 @Component({
   imports: [],
@@ -84,7 +88,7 @@ export class SelectorFecha {
   /** Se incrementa en cada movimiento con teclado, para devolver el foco después de redibujar */
   private readonly pedidoDeFoco = signal(0);
 
-  private readonly grilla = viewChild<ElementRef<HTMLElement>>('grilla');
+  private readonly raiz = viewChild<ElementRef<HTMLElement>>('raiz');
 
   /** Buscar en un Set es directo; con la lista habría que recorrerla por cada día dibujado */
   private readonly habilitadas = computed(() => {
@@ -177,9 +181,8 @@ export class SelectorFecha {
         return;
       }
 
-      const iso = this.fechaEnfocada();
-      const contenedor = this.grilla()?.nativeElement;
-      contenedor?.querySelector<HTMLButtonElement>(`[data-iso="${iso}"]`)?.focus();
+      const contenedor = this.raiz()?.nativeElement;
+      contenedor?.querySelector<HTMLButtonElement>(this.selectorDeLoEnfocado())?.focus();
     });
   }
 
@@ -194,11 +197,21 @@ export class SelectorFecha {
 
   protected elegirMes(mes: number): void {
     const { anio } = this.mesVisible();
+
+    // Los botones usan aria-disabled y no disabled, así que el clic hay que frenarlo acá
+    if (!this.hayAlgunDiaHabilitado(anio, mes)) {
+      return;
+    }
+
     this.fechaEnfocada.set(limitar(aIso(anio, mes, 1), this.minimo(), this.maximo()));
     this.vista.set('dias');
   }
 
   protected elegirAnio(anio: number): void {
+    if (!this.hayAlgunMesHabilitado(anio)) {
+      return;
+    }
+
     const { mes } = this.mesVisible();
     this.fechaEnfocada.set(limitar(aIso(anio, mes, 1), this.minimo(), this.maximo()));
     this.vista.set('meses');
@@ -217,43 +230,18 @@ export class SelectorFecha {
     this.desplazar(1);
   }
 
-  /** Patrón de grilla de WAI-ARIA: el calendario se maneja entero con el teclado */
+  /**
+   * Patrón de grilla de WAI-ARIA: el selector se maneja entero con el teclado, en las tres
+   * vistas. No hace falta estado nuevo para eso: fechaEnfocada ya es la única fuente de
+   * verdad del foco, y mesVisible() se deriva de ella, así que en la vista de meses el
+   * elemento enfocado es su mes y en la de años, su año. Mover el foco es mover esa fecha.
+   */
   protected alTeclear(evento: KeyboardEvent): void {
-    if (this.vista() !== 'dias') {
+    const destino =
+      this.vista() === 'dias' ? this.destinoEnDias(evento) : this.destinoEnCuadricula(evento);
+
+    if (destino === null) {
       return;
-    }
-
-    const actual = this.fechaEnfocada();
-    let destino: string;
-
-    switch (evento.key) {
-      case 'ArrowLeft':
-        destino = sumarDias(actual, -1);
-        break;
-      case 'ArrowRight':
-        destino = sumarDias(actual, 1);
-        break;
-      case 'ArrowUp':
-        destino = sumarDias(actual, -7);
-        break;
-      case 'ArrowDown':
-        destino = sumarDias(actual, 7);
-        break;
-      case 'Home':
-        destino = sumarDias(actual, -this.diaDeLaSemana(actual));
-        break;
-      case 'End':
-        destino = sumarDias(actual, 6 - this.diaDeLaSemana(actual));
-        break;
-      // Shift salta de a un año, que es lo que pide una fecha de nacimiento
-      case 'PageUp':
-        destino = sumarMeses(actual, evento.shiftKey ? -12 : -1);
-        break;
-      case 'PageDown':
-        destino = sumarMeses(actual, evento.shiftKey ? 12 : 1);
-        break;
-      default:
-        return;
     }
 
     evento.preventDefault();
@@ -326,6 +314,84 @@ export class SelectorFecha {
     }
 
     return false;
+  }
+
+  /** Devuelve la fecha a la que mueve la tecla, o null si la tecla no es de navegación */
+  private destinoEnDias(evento: KeyboardEvent): string | null {
+    const actual = this.fechaEnfocada();
+
+    switch (evento.key) {
+      case 'ArrowLeft':
+        return sumarDias(actual, -1);
+      case 'ArrowRight':
+        return sumarDias(actual, 1);
+      case 'ArrowUp':
+        return sumarDias(actual, -7);
+      case 'ArrowDown':
+        return sumarDias(actual, 7);
+      case 'Home':
+        return sumarDias(actual, -this.diaDeLaSemana(actual));
+      case 'End':
+        return sumarDias(actual, 6 - this.diaDeLaSemana(actual));
+      // Shift salta de a un año, que es lo que pide una fecha de nacimiento
+      case 'PageUp':
+        return sumarMeses(actual, evento.shiftKey ? -12 : -1);
+      case 'PageDown':
+        return sumarMeses(actual, evento.shiftKey ? 12 : 1);
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Meses y años comparten cuadrícula, así que comparten teclas: lo único que cambia es
+   * cuánto vale un paso. En meses un paso es un mes; en años, doce.
+   */
+  private destinoEnCuadricula(evento: KeyboardEvent): string | null {
+    const actual = this.fechaEnfocada();
+    const enMeses = this.vista() === 'meses';
+    const paso = enMeses ? 1 : 12;
+    const fila = paso * COLUMNAS_CUADRICULA;
+    const { anio, mes } = this.mesVisible();
+
+    switch (evento.key) {
+      case 'ArrowLeft':
+        return sumarMeses(actual, -paso);
+      case 'ArrowRight':
+        return sumarMeses(actual, paso);
+      case 'ArrowUp':
+        return sumarMeses(actual, -fila);
+      case 'ArrowDown':
+        return sumarMeses(actual, fila);
+      // Home y End van a los bordes de lo que se ve: el año en meses, la página en años
+      case 'Home':
+        return enMeses ? aIso(anio, 0, 1) : aIso(this.primerAnioDePagina(), mes, 1);
+      case 'End':
+        return enMeses
+          ? aIso(anio, 11, 1)
+          : aIso(this.primerAnioDePagina() + ANIOS_POR_PAGINA - 1, mes, 1);
+      // Una página entera, que es lo mismo que hacen las flechas de la barra
+      case 'PageUp':
+        return sumarMeses(actual, enMeses ? -12 : -12 * ANIOS_POR_PAGINA);
+      case 'PageDown':
+        return sumarMeses(actual, enMeses ? 12 : 12 * ANIOS_POR_PAGINA);
+      default:
+        return null;
+    }
+  }
+
+  /** Cada vista marca lo enfocado con un atributo distinto, pero el mecanismo es el mismo */
+  private selectorDeLoEnfocado(): string {
+    const { anio, mes } = this.mesVisible();
+
+    switch (this.vista()) {
+      case 'dias':
+        return `[data-iso="${this.fechaEnfocada()}"]`;
+      case 'meses':
+        return `[data-opcion="${mes}"]`;
+      default:
+        return `[data-opcion="${anio}"]`;
+    }
   }
 
   private diaDeLaSemana(iso: string): number {

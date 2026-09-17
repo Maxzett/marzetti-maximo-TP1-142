@@ -1,4 +1,8 @@
-<div class="selector">
+<!--
+  El keydown y la referencia van en la raíz y no en la grilla de días: las tres vistas se
+  manejan con el mismo teclado y con el mismo mecanismo de devolución del foco.
+-->
+<div #raiz class="selector" (keydown)="alTeclear($event)">
   <div class="barra">
     <button
       class="paso"
@@ -19,7 +23,12 @@
     </button>
 
     <!-- El título es el atajo para alejarse: de días salta a la vista de años -->
-    <button class="periodo" type="button" (click)="cambiarVista()">
+    <button
+      class="periodo"
+      type="button"
+      [attr.aria-expanded]="vista() !== 'dias'"
+      (click)="cambiarVista()"
+    >
       {{ titulo() }}
       <svg viewBox="0 0 20 20" aria-hidden="true">
         <path
@@ -49,13 +58,7 @@
 
   @switch (vista()) {
     @case ('dias') {
-      <div
-        #grilla
-        class="dias"
-        role="grid"
-        [attr.aria-label]="etiqueta()"
-        (keydown)="alTeclear($event)"
-      >
+      <div class="dias" role="grid" [attr.aria-label]="etiqueta()">
         <div class="fila encabezado" role="row">
           @for (dia of diasSemana; track dia.largo) {
             <span class="inicial" role="columnheader" [attr.aria-label]="dia.largo">
@@ -96,14 +99,18 @@
     }
 
     @case ('meses') {
-      <div class="cuadricula">
+      <!-- Mismo criterio que la grilla de días: aria-disabled y roving tabindex -->
+      <div class="cuadricula" role="group" [attr.aria-label]="'Mes de ' + titulo()">
         @for (item of meses(); track item.mes) {
           <button
             class="opcion"
             type="button"
             [class.opcion--elegida]="item.seleccionado"
-            [disabled]="!item.habilitado"
+            [class.opcion--sin-funcion]="!item.habilitado"
+            [attr.data-opcion]="item.mes"
+            [attr.aria-disabled]="!item.habilitado"
             [attr.aria-pressed]="item.seleccionado"
+            [tabindex]="item.mes === mesVisible().mes ? 0 : -1"
             (click)="elegirMes(item.mes)"
           >
             {{ item.nombre }}
@@ -113,14 +120,17 @@
     }
 
     @default {
-      <div class="cuadricula">
+      <div class="cuadricula" role="group" [attr.aria-label]="'Año, de ' + titulo()">
         @for (item of anios(); track item.anio) {
           <button
             class="opcion"
             type="button"
             [class.opcion--elegida]="item.seleccionado"
-            [disabled]="!item.habilitado"
+            [class.opcion--sin-funcion]="!item.habilitado"
+            [attr.data-opcion]="item.anio"
+            [attr.aria-disabled]="!item.habilitado"
             [attr.aria-pressed]="item.seleccionado"
+            [tabindex]="item.anio === mesVisible().anio ? 0 : -1"
             (click)="elegirAnio(item.anio)"
           >
             {{ item.anio }}

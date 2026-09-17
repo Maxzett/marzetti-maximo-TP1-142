@@ -50,4 +50,13 @@ describe('Campo', () => {
 
     expect(fixture.componentInstance.valor()).toBe('maxi@correo.com');
   });
+
+  // El describedby solo sirve si el foco está en el campo; el alert cubre el error del submit
+  it('anuncia el error con role alert', async () => {
+    fixture.componentRef.setInput('error', 'Falta el dominio del mail');
+    await fixture.whenStable();
+
+    const error = fixture.nativeElement.querySelector('.error') as HTMLElement;
+    expect(error.getAttribute('role')).toBe('alert');
+  });
 });

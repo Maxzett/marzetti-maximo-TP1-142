@@ -31,8 +31,10 @@
   font-weight: 600;
 }
 
+/* El borde se apaga además del texto: el deshabilitado no se cuenta solo con el color de la letra */
 .chip:disabled {
-  color: var(--borde-fuerte);
+  border-color: var(--borde);
+  color: var(--texto-tenue);
   cursor: not-allowed;
 }
 

@@ -3,7 +3,11 @@
  * Es el único lugar donde se definen colores, tipografías, espaciado, radios y sombras:
  * ningún componente escribe un color a mano.
  *
- * Los contrastes anotados están medidos sobre --fondo y cumplen AA (4,5:1 en texto normal).
+ * Los ratios anotados acá son informativos: la verificación de verdad está en
+ * core/a11y/contraste.spec.ts, que lee este archivo, arma cada par que la interfaz usa
+ * de verdad y falla si baja de AA (4,5:1 en texto normal; 3:1 en bordes de control e íconos).
+ * Se anotan las tres superficies porque casi ningún componente se apoya sobre --fondo:
+ * las tarjetas, los diálogos y los selectores viven sobre --superficie.
  */
 :root {
   /* color-scheme evita que el navegador pinte de claro los controles nativos (scrollbars, inputs) */
@@ -14,20 +18,26 @@
   --fondo-hondo: #0a0807; /* footer y huecos del mapa de butacas */
   --superficie: #1d1613; /* tarjetas, barras de filtro, diálogos */
   --superficie-alta: #2a201b; /* hover, píldoras, celdas elevadas */
-  --borde: #3a2c24;
-  --borde-fuerte: #574236; /* borde de control: inputs, botones secundarios */
+  --borde: #3a2c24; /* solo separadores decorativos: SC 1.4.11 no los alcanza */
+  /*
+   * Borde de control: inputs, botones secundarios, chips, opciones de los selectores.
+   * Es lo que identifica al control como tal, así que SC 1.4.11 le pide 3:1 contra
+   * lo que tenga al lado. El marrón original (#574236) daba 2,0:1 y no llegaba.
+   * fondo 3,7:1 · superficie 3,5:1 · superficie-alta 3,1:1
+   */
+  --borde-fuerte: #856851;
 
   /* ---- Acentos ---- */
-  --acento: #f2b233; /* ámbar de bombilla · 10,2:1 */
-  --acento-hondo: #c98a17;
-  --bombilla: #ffe0a3; /* luz encendida · 14,4:1 */
+  --acento: #f2b233; /* ámbar de bombilla · 10,2:1 sobre fondo · 9,5:1 sobre superficie */
+  --acento-hondo: #c98a17; /* borde punteado de "hoy" · 6,1:1 sobre superficie */
+  --bombilla: #ffe0a3; /* luz encendida · 15,0:1 sobre fondo */
   --rojo-butaca: #b32b27; /* 3,0:1 — SOLO relleno, nunca texto sobre fondo oscuro */
-  --rojo-claro: #e4564c; /* el rojo cuando tiene que leerse: errores y +18 · 5,2:1 */
+  --rojo-claro: #e4564c; /* el rojo cuando tiene que leerse: errores y +18 · 5,2:1 sobre fondo · 4,9:1 sobre superficie */
 
   /* ---- Texto ---- */
-  --texto: #f5ede2; /* blanco de papel · 16,5:1 */
-  --texto-tenue: #b5a492; /* 7,9:1 */
-  --texto-sobre-acento: #1a1005; /* sobre --acento · 9,8:1 */
+  --texto: #f5ede2; /* blanco de papel · 16,5:1 sobre fondo · 15,4:1 sobre superficie */
+  --texto-tenue: #b5a492; /* 7,9:1 sobre fondo · 7,4:1 sobre superficie · 6,6:1 sobre superficie-alta */
+  --texto-sobre-acento: #1a1005; /* sobre --acento · 10,0:1 · sobre --bombilla 14,7:1 */
   --texto-sobre-rojo: #fff3ef; /* sobre --rojo-butaca · 5,9:1 */
 
   /* ---- Tipografía ---- */
@@ -209,6 +219,28 @@ svg {
 }
 
 /*
+ * Salto al contenido (WCAG 2.4.1). Vive escondido arriba de la marquesina y baja cuando
+ * recibe el foco: es el primer elemento enfocable del documento, así que quien navega con
+ * teclado se saltea el header entero con un Tab y un Enter.
+ *
+ * :focus y no :focus-visible: acá no hay ambigüedad que resolver —a este enlace solo se
+ * llega con teclado— y algunos navegadores no consideran "visible" un foco recién revelado,
+ * con lo que el enlace quedaría invisible justo cuando hace falta.
+ */
+.salto {
+  position: fixed;
+  top: var(--e-2);
+  left: var(--e-2);
+  z-index: 100;
+  background: var(--superficie);
+  transform: translateY(-250%);
+}
+
+.salto:focus {
+  transform: translateY(0);
+}
+
+/*
  * ---- Botón ----
  * El aspecto del botón vive acá y no en el componente porque hay dos elementos distintos
  * que lo necesitan: <app-boton>, que envuelve un <button> de verdad, y los <a> que llevan
@@ -280,4 +312,34 @@ svg {
 
 .boton--ancho {
   width: 100%;
+}
+
+/*
+ * ---- Alto contraste de Windows ----
+ * Con forced-colors el sistema reemplaza nuestros colores por su propia paleta y descarta
+ * los background-image. Los estados que hoy se comunican con el relleno ámbar (el chip
+ * activo, el día elegido, la opción elegida) o con un degradado (la barra del día sin
+ * función) se quedarían sin señal, y volveríamos a depender de algo que el usuario no ve.
+ *
+ * Va acá y no en cada componente aunque los estilos de componente sean scoped: es una
+ * corrección transversal del sistema, y repartirla en cuatro archivos serían cuatro
+ * fuentes de verdad para la misma regla.
+ */
+@media (forced-colors: active) {
+  /* var(--acento) ya no existe para el navegador: Highlight es el color de selección del SO */
+  :focus-visible {
+    outline-color: Highlight;
+  }
+
+  .chip--activo,
+  .dia--elegida,
+  .opcion--elegida {
+    outline: 2px solid Highlight;
+    outline-offset: -4px;
+  }
+
+  /* El linear-gradient desaparece; el tachado del texto no */
+  .dia--sin-funcion {
+    text-decoration: line-through;
+  }
 }

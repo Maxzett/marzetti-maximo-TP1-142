@@ -9,9 +9,15 @@ describe('SelectorFecha', () => {
 
   const titulo = () => (fixture.nativeElement.querySelector('.periodo') as HTMLElement).textContent;
 
+  const opcion = (texto: string) =>
+    ([...fixture.nativeElement.querySelectorAll('.opcion')] as HTMLButtonElement[]).find(
+      (boton) => boton.textContent?.trim() === texto,
+    );
+
+  // Se despacha en la raíz porque el keydown vive ahí: las tres vistas comparten teclado
   const teclear = async (key: string, shiftKey = false) => {
-    const grilla = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
-    grilla.dispatchEvent(new KeyboardEvent('keydown', { key, shiftKey, bubbles: true }));
+    const raiz = fixture.nativeElement.querySelector('.selector') as HTMLElement;
+    raiz.dispatchEvent(new KeyboardEvent('keydown', { key, shiftKey, bubbles: true }));
     await fixture.whenStable();
   };
 
@@ -128,5 +134,107 @@ describe('SelectorFecha', () => {
     await fixture.whenStable();
 
     expect(titulo()).toContain('enero');
+  });
+
+  describe('teclado en la vista de meses', () => {
+    beforeEach(async () => {
+      fixture.componentRef.setInput('vistaInicial', 'meses');
+      await fixture.whenStable();
+    });
+
+    it('se mueve de a un mes con las flechas horizontales', async () => {
+      // Arranca en septiembre, el mes de la fecha elegida
+      expect(opcion('sept')!.tabIndex).toBe(0);
+
+      await teclear('ArrowRight');
+      expect(opcion('oct')!.tabIndex).toBe(0);
+      expect(opcion('sept')!.tabIndex).toBe(-1);
+    });
+
+    // La cuadrícula es de tres columnas: una fila son tres meses
+    it('salta una fila entera con las flechas verticales', async () => {
+      await teclear('ArrowUp');
+      expect(opcion('jun')!.tabIndex).toBe(0);
+
+      await teclear('ArrowDown');
+      expect(opcion('sept')!.tabIndex).toBe(0);
+    });
+
+    it('va a enero y a diciembre con Home y End', async () => {
+      await teclear('Home');
+      expect(opcion('ene')!.tabIndex).toBe(0);
+
+      await teclear('End');
+      expect(opcion('dic')!.tabIndex).toBe(0);
+    });
+
+    it('cambia de año con PageUp y PageDown', async () => {
+      await teclear('PageDown');
+      expect(titulo()).toContain('2027');
+
+      await teclear('PageUp');
+      expect(titulo()).toContain('2026');
+    });
+
+    // Mismo motivo que en la grilla de días: con disabled el recorrido quedaría varado
+    it('deja atravesar con el teclado los meses sin funciones', async () => {
+      fixture.componentRef.setInput('fechasHabilitadas', ['2026-09-24']);
+      await fixture.whenStable();
+
+      expect(opcion('oct')!.getAttribute('aria-disabled')).toBe('true');
+      expect(opcion('oct')!.hasAttribute('disabled')).toBe(false);
+
+      await teclear('ArrowRight');
+      expect(opcion('oct')!.tabIndex).toBe(0);
+
+      // Pero sigue sin poder elegirse
+      opcion('oct')!.click();
+      await fixture.whenStable();
+      expect(fixture.nativeElement.querySelector('[role="grid"]')).toBeNull();
+    });
+  });
+
+  describe('teclado en la vista de años', () => {
+    beforeEach(async () => {
+      fixture.componentRef.setInput('vistaInicial', 'anios');
+      await fixture.whenStable();
+    });
+
+    it('se mueve de a un año con las flechas horizontales', async () => {
+      expect(opcion('2026')!.tabIndex).toBe(0);
+
+      await teclear('ArrowLeft');
+      expect(opcion('2025')!.tabIndex).toBe(0);
+    });
+
+    it('salta tres años con las flechas verticales', async () => {
+      await teclear('ArrowUp');
+      expect(opcion('2023')!.tabIndex).toBe(0);
+    });
+
+    // La página va de 2016 a 2027
+    it('va a los bordes de la página con Home y End', async () => {
+      await teclear('Home');
+      expect(opcion('2016')!.tabIndex).toBe(0);
+
+      await teclear('End');
+      expect(opcion('2027')!.tabIndex).toBe(0);
+    });
+
+    it('cambia de página con PageDown', async () => {
+      await teclear('PageDown');
+      expect(titulo()).toContain('2028');
+    });
+  });
+
+  // El botón de período abre y cierra otra vista: es información que el lector necesita
+  it('cuenta con aria-expanded si está en una vista de salto', async () => {
+    const periodo = () => fixture.nativeElement.querySelector('.periodo') as HTMLButtonElement;
+    expect(periodo().getAttribute('aria-expanded')).toBe('false');
+
+    periodo().click();
+    await fixture.whenStable();
+
+    expect(periodo().getAttribute('aria-expanded')).toBe('true');
   });
 });

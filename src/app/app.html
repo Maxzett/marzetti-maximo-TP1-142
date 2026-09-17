@@ -1,6 +1,24 @@
+<!--
+  Primer elemento enfocable del documento (WCAG 2.4.1): con un Tab y un Enter se saltea
+  el header entero. Está escondido hasta que recibe el foco.
+-->
+<a class="boton boton--borde salto" href="#contenido" (click)="saltarAlContenido($event)">
+  Saltar al contenido
+</a>
+
 <app-header />
-<main class="contenido">
+
+<!-- tabindex="-1" lo hace enfocable por programa sin meterlo en el orden de tabulación -->
+<main #contenido id="contenido" class="contenido" tabindex="-1">
   <!-- Acá el router renderiza el componente de la ruta activa -->
   <router-outlet />
 </main>
+
 <app-footer />
+
+<!--
+  El router cambia de pantalla sin recargar el documento, así que el cambio de página
+  hay que contarlo: un lector de pantalla no se entera solo. role="status" lo anuncia
+  con cortesía, sin interrumpir lo que esté leyendo.
+-->
+<p class="solo-lectores" role="status">{{ anuncioDeRuta() }}</p>

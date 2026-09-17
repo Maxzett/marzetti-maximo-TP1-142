@@ -21,7 +21,13 @@
 />
 
 @if (hayError()) {
-  <p class="error" [id]="idError">
+  <!--
+    role="alert" además del aria-describedby: son dos casos distintos. El describedby cubre
+    a quien llega al campo con Tab y quiere saber qué pasa; el alert cubre el error que
+    aparece al enviar el formulario, cuando el foco ya está en otro lado y si no nadie se entera.
+    Como el nodo lo crea el @if, nace con el role puesto y el lector lo lee al insertarse.
+  -->
+  <p class="error" role="alert" [id]="idError">
     <!-- El error no se comunica solo con el borde rojo: suma ícono y explicación -->
     <svg viewBox="0 0 20 20" aria-hidden="true">
       <path

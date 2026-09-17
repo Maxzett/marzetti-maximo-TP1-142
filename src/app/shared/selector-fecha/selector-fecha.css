@@ -101,10 +101,13 @@
   background: var(--superficie-alta);
 }
 
-/* Los días del mes anterior y el siguiente se ven, pero apagados */
+/*
+ * Los días del mes anterior y el siguiente se ven, pero apagados.
+ * El color tenue alcanza para distinguirlos (7,4:1 contra los 15,4:1 del mes actual):
+ * la opacity que había además los dejaba en 3,1:1 y son días clicables, no decoración.
+ */
 .dia--otro-mes {
   color: var(--texto-tenue);
-  opacity: 0.55;
 }
 
 /* Hoy se marca con un borde punteado: el elegido usa relleno, así no se confunden */
@@ -119,16 +122,15 @@
   font-weight: 600;
 }
 
-.dia--elegida.dia--otro-mes {
-  opacity: 1;
-}
-
 /*
  * Un día sin función no se distingue solo por estar más apagado: lleva una barra cruzada.
  * Es la misma regla que en el mapa de butacas (RNF-10).
+ *
+ * El texto va tenue y no en el color del borde: la celda usa aria-disabled y no disabled,
+ * así que sigue siendo enfocable y la excepción de WCAG para controles inactivos no la cubre.
  */
 .dia--sin-funcion {
-  color: var(--borde-fuerte);
+  color: var(--texto-tenue);
   cursor: not-allowed;
   background-image: linear-gradient(
     to bottom right,
@@ -157,7 +159,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.opcion:hover:not(:disabled) {
+.opcion:hover:not(.opcion--sin-funcion) {
   border-color: var(--acento);
   color: var(--acento);
 }
@@ -169,10 +171,20 @@
   font-weight: 600;
 }
 
-.opcion:disabled {
+/*
+ * Mismo criterio que .dia--sin-funcion: la opción sigue recibiendo foco con las flechas,
+ * así que su texto tiene que leerse. La barra cruzada es la señal que no depende del color.
+ */
+.opcion--sin-funcion {
   border-color: var(--borde);
-  color: var(--borde-fuerte);
+  color: var(--texto-tenue);
   cursor: not-allowed;
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    var(--borde) calc(50% - 1px) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
 }
 
 .resumen {

@@ -133,3 +133,98 @@ code {
   font-family: 'Courier New', monospace;
   font-size: 0.9em;
 }
+
+/* ---- Sección de accesibilidad ---- */
+
+/* La tabla no se achica: en celular se desplaza sola en vez de apretujar las columnas */
+.tabla-contraste {
+  overflow-x: auto;
+  margin-top: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.tabla-contraste table {
+  width: 100%;
+  min-width: 42rem;
+  border-collapse: collapse;
+  font-size: var(--t-mini);
+  text-align: left;
+}
+
+.tabla-contraste th,
+.tabla-contraste td {
+  padding: var(--e-2) var(--e-3);
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+
+.tabla-contraste tbody tr:last-child th,
+.tabla-contraste tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabla-contraste thead th {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tabla-contraste tbody th {
+  color: var(--texto);
+  font-weight: 500;
+}
+
+.tabla-contraste td {
+  color: var(--texto-tenue);
+}
+
+/* Cuadrado del color de fondo con el del frente adentro: se ve el par, no dos muestras sueltas */
+.muestra {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-chico);
+  vertical-align: middle;
+}
+
+.muestra span {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 1px;
+}
+
+/*
+ * El color acompaña al símbolo y a la palabra; nunca los reemplaza.
+ * Van con td adelante para ganarle a la regla de la celda, que las pinta tenues.
+ */
+.tabla-contraste td.cumple {
+  color: var(--texto);
+}
+
+.tabla-contraste td.falla {
+  color: var(--rojo-claro);
+  font-weight: 600;
+}
+
+.reglas {
+  max-width: 44rem;
+  margin-top: var(--e-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  line-height: 1.5;
+}
+
+.reglas strong {
+  color: var(--texto);
+}

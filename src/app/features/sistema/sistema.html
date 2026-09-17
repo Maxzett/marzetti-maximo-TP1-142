@@ -165,6 +165,105 @@
     </div>
   </section>
 
+  <section aria-labelledby="s-a11y">
+    <h2 id="s-a11y">Accesibilidad</h2>
+    <p class="bajada">
+      Las tres reglas que el sistema sostiene en todas las pantallas: foco visible, contraste AA y
+      nunca depender solo del color (RNF-10). El mapa de butacas de la compra hereda las tres.
+    </p>
+
+    <h3 class="titulo-caso">Foco y salto al contenido</h3>
+    <p class="pie">
+      El anillo ámbar se escribe una sola vez, en <code>:focus-visible</code> de
+      <code>styles.css</code>, así ningún componente puede olvidárselo. No hay un solo
+      <code>outline: none</code> en todo el proyecto. Probalo: volvé al principio de la página y
+      apretá Tab — lo primero que aparece es "Saltar al contenido", que con Enter manda el foco al
+      <code>&lt;main&gt;</code> y saltea el header entero.
+    </p>
+
+    <h3 class="titulo-caso">Contraste medido, no prometido</h3>
+    <p class="pie">
+      Esta tabla no está escrita a mano: el navegador lee los tokens ya resueltos y los pasa por la
+      misma función <code>contraste()</code> que corre en los tests. Si alguien cambia un color en
+      <code>styles.css</code> y rompe el nivel AA, la tabla se pone en rojo acá y
+      <code>pnpm test</code> falla allá.
+    </p>
+
+    <div class="tabla-contraste">
+      <table>
+        <caption class="solo-lectores">
+          Contraste de cada par de colores del sistema contra el mínimo que pide WCAG nivel AA
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Dónde</th>
+            <th scope="col">Colores</th>
+            <th scope="col">Regla</th>
+            <th scope="col">Ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (par of contrastes(); track par.que) {
+            <tr>
+              <th scope="row">{{ par.que }}</th>
+              <td>
+                <span class="muestra" aria-hidden="true" [style.background]="par.fondo">
+                  <span [style.background]="par.frente"></span>
+                </span>
+                <code>{{ par.frente }}</code> sobre <code>{{ par.fondo }}</code>
+              </td>
+              <td>{{ par.regla }} · mínimo {{ par.umbral }}:1</td>
+              <!-- El resultado no se cuenta solo con el color: lleva símbolo y palabra -->
+              <td [class.cumple]="par.cumple" [class.falla]="!par.cumple">
+                <strong>{{ par.ratio }}:1</strong>
+                {{ par.cumple ? '✓ cumple' : '✗ no cumple' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="titulo-caso">Nunca solo el color</h3>
+    <p class="pie">
+      Cada estado que hoy se pinta de ámbar o de rojo lleva además una señal que se ve sin
+      distinguir colores. Es la regla que después manda en el mapa de butacas, donde VIP, accesible,
+      ocupada y libre tienen que diferenciarse para cualquiera.
+    </p>
+    <ul class="reglas">
+      <li>
+        <strong>Chip activo:</strong> tilde adelante y tipografía más pesada, no solo relleno.
+      </li>
+      <li><strong>Día sin función:</strong> barra diagonal cruzada sobre la celda.</li>
+      <li>
+        <strong>Hoy:</strong> borde punteado, para no confundirlo con el día elegido, que va
+        relleno.
+      </li>
+      <li>
+        <strong>Mensajes:</strong> forma de ícono propia por tono —círculo, triángulo, cuadrado— y
+        la palabra "Listo", "Error" o "Atención" al frente.
+      </li>
+      <li>
+        <strong>Campo con error:</strong> ícono de advertencia, borde más grueso y la explicación
+        escrita.
+      </li>
+      <li>
+        <strong>Enlace activo del menú:</strong> subrayado ámbar y peso, además de
+        <code>aria-current="page"</code>.
+      </li>
+      <li><strong>Botón deshabilitado:</strong> pierde el borde de acento, no solo el brillo.</li>
+    </ul>
+
+    <h3 class="titulo-caso">Alto contraste del sistema operativo</h3>
+    <p class="pie">
+      Con un tema de contraste activado en Windows, el navegador reemplaza nuestra paleta y descarta
+      los degradados: el relleno ámbar y la barra diagonal desaparecerían. El bloque
+      <code>&#64;media (forced-colors: active)</code> de <code>styles.css</code> los reemplaza por
+      un contorno en el color de selección del sistema y por un tachado, para que ningún estado
+      quede sin señal.
+    </p>
+  </section>
+
   <app-dialogo titulo="Butacas VIP" [(abierto)]="dialogoAbierto">
     <p class="texto-dialogo">
       Las filas R, S y T son VIP. Tienen un recargo sobre el precio base de la función y se avisa

@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
+import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
 import { Chip } from '../../shared/chip/chip';
@@ -48,9 +49,102 @@ export class Sistema {
   /** La fecha de nacimiento no puede ser futura (RF-38) */
   protected readonly hoy = hoyIso();
 
+  /**
+   * Los pares de color que la interfaz usa de verdad, con la superficie sobre la que se apoyan.
+   * Es la misma tabla que verifica core/a11y/contraste.spec.ts en cada corrida de los tests;
+   * acá se calcula en el navegador, leyendo los tokens ya resueltos, para poder mostrarla.
+   */
+  protected readonly contrastes = computed(() =>
+    PARES_DE_COLOR.flatMap((par) => {
+      const frente = this.token(par.frente);
+      const fondo = this.token(par.fondo);
+
+      // Sin hoja de estilos aplicada los tokens vienen vacíos: pasa en los tests, con jsdom
+      if (!frente || !fondo) {
+        return [];
+      }
+
+      const ratio = contraste(frente, fondo);
+      return [{ ...par, frente, fondo, ratio, cumple: ratio >= par.umbral }];
+    }),
+  );
+
   /** Solo para ver el estado de carga del botón: no hay nada que enviar todavía */
   protected simularEnvio(): void {
     this.procesando.set(true);
     setTimeout(() => this.procesando.set(false), 1800);
   }
+
+  /** El valor ya resuelto del token, tal como lo está pintando el navegador */
+  private token(nombre: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+  }
 }
+
+interface ParDeColor {
+  que: string;
+  frente: string;
+  fondo: string;
+  umbral: number;
+  /** Qué pide WCAG para este par, en palabras, porque el número solo no se explica */
+  regla: string;
+}
+
+const PARES_DE_COLOR: readonly ParDeColor[] = [
+  {
+    que: 'Texto de cuerpo sobre el fondo',
+    frente: '--texto',
+    fondo: '--fondo',
+    umbral: NIVEL_AA.texto,
+    regla: 'Texto normal',
+  },
+  {
+    que: 'Metadato sobre una tarjeta',
+    frente: '--texto-tenue',
+    fondo: '--superficie',
+    umbral: NIVEL_AA.texto,
+    regla: 'Texto normal',
+  },
+  {
+    que: 'Texto del botón primario',
+    frente: '--texto-sobre-acento',
+    fondo: '--acento',
+    umbral: NIVEL_AA.texto,
+    regla: 'Texto normal',
+  },
+  {
+    que: 'Error de un campo',
+    frente: '--rojo-claro',
+    fondo: '--superficie',
+    umbral: NIVEL_AA.texto,
+    regla: 'Texto normal',
+  },
+  {
+    que: 'Día sin función, que sigue siendo enfocable',
+    frente: '--texto-tenue',
+    fondo: '--superficie',
+    umbral: NIVEL_AA.texto,
+    regla: 'Texto normal',
+  },
+  {
+    que: 'Anillo de foco sobre el fondo',
+    frente: '--acento',
+    fondo: '--fondo',
+    umbral: NIVEL_AA.noTexto,
+    regla: 'Indicador de foco',
+  },
+  {
+    que: 'Borde de input y botón secundario',
+    frente: '--borde-fuerte',
+    fondo: '--fondo',
+    umbral: NIVEL_AA.noTexto,
+    regla: 'Borde de control',
+  },
+  {
+    que: 'Borde punteado de "hoy"',
+    frente: '--acento-hondo',
+    fondo: '--superficie',
+    umbral: NIVEL_AA.noTexto,
+    regla: 'Borde de control',
+  },
+];
