@@ -1,4 +1,18 @@
-<button [class]="clases()" [type]="tipo()" [disabled]="inerte()" (click)="presionado.emit()">
+<!--
+  Mientras carga NO se usa el disabled nativo: un botón deshabilitado pierde el foco, que se
+  cae al <body>, y quien navega con teclado o lector de pantalla queda en la nada justo cuando
+  algo está pasando. Con aria-disabled el botón conserva el foco y aria-busy cuenta que está
+  trabajando; el clic lo frena el componente. El deshabilitado de verdad sí usa disabled:
+  ahí no hay nada en curso que seguir.
+-->
+<button
+  [class]="clases()"
+  [type]="tipo()"
+  [disabled]="deshabilitado()"
+  [attr.aria-disabled]="cargando() ? 'true' : null"
+  [attr.aria-busy]="cargando() ? 'true' : null"
+  (click)="alPresionar($event)"
+>
   @if (cargando()) {
     <app-spinner tamanio="chico" etiqueta="Procesando" />
   }

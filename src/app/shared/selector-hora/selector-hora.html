@@ -1,12 +1,25 @@
 @if (opciones(); as listaDeHorarios) {
-  <div class="grupo" role="group" [attr.aria-label]="etiqueta()">
+  <!--
+    radiogroup y no un grupo de botones: de todos los horarios se elige exactamente uno.
+    El grupo entero es una sola parada de Tab y adentro se recorre con las flechas.
+  -->
+  <div
+    class="grupo"
+    role="radiogroup"
+    [attr.aria-label]="etiqueta()"
+    (keydown)="alTeclearEnHorarios($event)"
+  >
     <div class="opciones">
-      @for (horario of listaDeHorarios; track horario) {
+      @for (horario of listaDeHorarios; track horario; let primero = $first) {
         <button
           class="opcion opcion--horario"
           type="button"
+          role="radio"
           [class.opcion--elegida]="horario === valor()"
-          [attr.aria-pressed]="horario === valor()"
+          [attr.data-grupo]="'horarios'"
+          [attr.data-valor]="horario"
+          [attr.aria-checked]="horario === valor()"
+          [tabindex]="horario === valor() || (!valor() && primero) ? 0 : -1"
           (click)="elegirOpcion(horario)"
         >
           {{ horario }}
@@ -18,16 +31,20 @@
   </div>
 } @else {
   <div class="libre">
-    <div class="grupo" role="group" aria-label="Hora">
+    <div class="grupo" role="radiogroup" aria-label="Hora" (keydown)="alTeclearEnHoras($event)">
       <p class="titulo" aria-hidden="true">Hora</p>
       <div class="cuadricula cuadricula--horas">
-        @for (hora of horas(); track hora) {
+        @for (hora of horas(); track hora; let primero = $first) {
           <button
             class="opcion"
             type="button"
+            role="radio"
             [class.opcion--elegida]="hora === horaElegida()"
+            [attr.data-grupo]="'horas'"
+            [attr.data-valor]="hora"
             [attr.aria-label]="hora + ' horas'"
-            [attr.aria-pressed]="hora === horaElegida()"
+            [attr.aria-checked]="hora === horaElegida()"
+            [tabindex]="hora === horaElegida() || (!horaElegida() && primero) ? 0 : -1"
             (click)="elegirHora(hora)"
           >
             {{ hora }}
@@ -36,16 +53,25 @@
       </div>
     </div>
 
-    <div class="grupo" role="group" aria-label="Minutos">
+    <div
+      class="grupo"
+      role="radiogroup"
+      aria-label="Minutos"
+      (keydown)="alTeclearEnMinutos($event)"
+    >
       <p class="titulo" aria-hidden="true">Minutos</p>
       <div class="cuadricula cuadricula--minutos">
-        @for (minuto of minutos(); track minuto) {
+        @for (minuto of minutos(); track minuto; let primero = $first) {
           <button
             class="opcion"
             type="button"
+            role="radio"
             [class.opcion--elegida]="minuto === minutoElegido()"
+            [attr.data-grupo]="'minutos'"
+            [attr.data-valor]="minuto"
             [attr.aria-label]="minuto + ' minutos'"
-            [attr.aria-pressed]="minuto === minutoElegido()"
+            [attr.aria-checked]="minuto === minutoElegido()"
+            [tabindex]="minuto === minutoElegido() || (!minutoElegido() && primero) ? 0 : -1"
             (click)="elegirMinuto(minuto)"
           >
             {{ minuto }}

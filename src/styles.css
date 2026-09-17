@@ -302,12 +302,23 @@ svg {
   color: var(--texto);
 }
 
-/* El deshabilitado no se comunica solo por color: también pierde el borde de acento */
-.boton:disabled {
+/*
+ * El deshabilitado no se comunica solo por color: también pierde el borde de acento.
+ * Va después de los :hover a propósito, así el botón inerte no se ilumina al pasarle el mouse.
+ * El aria-disabled entra en la misma regla porque es el botón que está cargando: se ve igual
+ * de inerte, pero conserva el foco (ver boton.html).
+ */
+.boton:disabled,
+.boton[aria-disabled='true'] {
   border-color: var(--borde);
   background: var(--superficie-alta);
   color: var(--texto-tenue);
   cursor: not-allowed;
+}
+
+/* Cargando no es lo mismo que no se puede: es que está en curso */
+.boton[aria-busy='true'] {
+  cursor: progress;
 }
 
 .boton--ancho {

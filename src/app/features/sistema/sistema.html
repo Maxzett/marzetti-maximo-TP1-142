@@ -115,8 +115,10 @@
     <h2 id="s-fechas">Selector de fecha y hora</h2>
     <p class="bajada">
       El cliente rechazó las ruedas nativas y el scroll largo (RNF-08). Estos son los tres casos del
-      sistema. Se manejan enteros con el teclado: flechas para moverse, PageUp y PageDown para
-      cambiar de mes, Shift para saltar de a un año, Enter para elegir.
+      sistema, y los dos se manejan enteros con el teclado. En el calendario las flechas mueven el
+      foco y Enter elige, con PageUp y PageDown para cambiar de mes y Shift para saltar de a un año.
+      En el de hora, cada cuadrícula es un grupo de opciones excluyentes: una sola parada de Tab y
+      adentro las flechas mueven y eligen a la vez, como en un grupo de radios.
     </p>
 
     <div class="fila fila--selectores">
@@ -137,6 +139,7 @@
         <app-selector-hora [opciones]="horariosDelDia" [(valor)]="horarioDeFuncion" />
         <p class="pie">
           En la compra no se elige una hora cualquiera: se elige una de las funciones programadas.
+          Por eso es un <code>radiogroup</code> y no una fila de botones sueltos.
         </p>
       </div>
 
@@ -159,7 +162,8 @@
         <app-selector-hora [pasoMinutos]="5" [(valor)]="horarioDeAlta" />
         <p class="pie">
           Fecha libre desde hoy y hora con paso de 5 minutos. Las 24 horas entran en una grilla de 6
-          × 4: no hay nada que scrollear.
+          × 4: no hay nada que scrollear, y con las flechas se cruza de las 00 a las 23 sin soltar
+          el teclado.
         </p>
       </div>
     </div>
