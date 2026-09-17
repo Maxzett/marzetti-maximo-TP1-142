@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  width: 20.5rem;
+  max-width: 100%;
+  padding: var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.libre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.titulo {
+  margin-bottom: var(--e-2);
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.cuadricula {
+  display: grid;
+  gap: var(--e-1);
+}
+
+/* Las 24 horas entran en 6 × 4: nada que scrollear */
+.cuadricula--horas {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.cuadricula--minutos {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.opcion {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: transparent;
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* Los horarios de una función son el dato principal de la pantalla: van más grandes */
+.opcion--horario {
+  padding-inline: var(--e-4);
+  font-size: var(--t-cuerpo);
+  letter-spacing: 0.05em;
+}
+
+.opcion:hover {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+.opcion--elegida {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-weight: 600;
+}
+
+.vacio {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.resumen {
+  margin-top: var(--e-3);
+  padding-top: var(--e-3);
+  border-top: 1px dashed var(--borde);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.resumen strong {
+  color: var(--texto);
+  font-variant-numeric: tabular-nums;
+}

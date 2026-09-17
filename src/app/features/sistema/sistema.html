@@ -111,6 +111,60 @@
     </p>
   </section>
 
+  <section aria-labelledby="s-fechas">
+    <h2 id="s-fechas">Selector de fecha y hora</h2>
+    <p class="bajada">
+      El cliente rechazó las ruedas nativas y el scroll largo (RNF-08). Estos son los tres casos del
+      sistema. Se manejan enteros con el teclado: flechas para moverse, PageUp y PageDown para
+      cambiar de mes, Shift para saltar de a un año, Enter para elegir.
+    </p>
+
+    <div class="fila fila--selectores">
+      <div class="caso">
+        <h3 class="titulo-caso">Elegir función · compra</h3>
+        <app-selector-fecha
+          etiqueta="Días con función de El último tren a Retiro"
+          [fechasHabilitadas]="diasConFuncion"
+          [(valor)]="fechaDeFuncion"
+        />
+        <p class="pie">
+          Solo los días con función se pueden elegir. Los demás van tachados, no solo apagados.
+        </p>
+      </div>
+
+      <div class="caso">
+        <h3 class="titulo-caso">Horario · compra</h3>
+        <app-selector-hora [opciones]="horariosDelDia" [(valor)]="horarioDeFuncion" />
+        <p class="pie">
+          En la compra no se elige una hora cualquiera: se elige una de las funciones programadas.
+        </p>
+      </div>
+
+      <div class="caso">
+        <h3 class="titulo-caso">Fecha de nacimiento · registro</h3>
+        <app-selector-fecha
+          etiqueta="Fecha de nacimiento"
+          vistaInicial="anios"
+          [maximo]="hoy"
+          [(valor)]="fechaDeNacimiento"
+        />
+        <p class="pie">
+          Arranca en la vista de años: 1998 sale en tres clics. No deja elegir fechas futuras.
+        </p>
+      </div>
+
+      <div class="caso">
+        <h3 class="titulo-caso">Alta de función · admin</h3>
+        <app-selector-fecha etiqueta="Fecha de la función" [minimo]="hoy" [(valor)]="fechaDeAlta" />
+        <app-selector-hora [pasoMinutos]="5" [(valor)]="horarioDeAlta" />
+        <p class="pie">
+          Fecha libre desde hoy y hora con paso de 5 minutos. Las 24 horas entran en una grilla de 6
+          × 4: no hay nada que scrollear.
+        </p>
+      </div>
+    </div>
+  </section>
+
   <app-dialogo titulo="Butacas VIP" [(abierto)]="dialogoAbierto">
     <p class="texto-dialogo">
       Las filas R, S y T son VIP. Tienen un recargo sobre el precio base de la función y se avisa

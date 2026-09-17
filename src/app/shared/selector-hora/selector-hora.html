@@ -1,0 +1,65 @@
+@if (opciones(); as listaDeHorarios) {
+  <div class="grupo" role="group" [attr.aria-label]="etiqueta()">
+    <div class="opciones">
+      @for (horario of listaDeHorarios; track horario) {
+        <button
+          class="opcion opcion--horario"
+          type="button"
+          [class.opcion--elegida]="horario === valor()"
+          [attr.aria-pressed]="horario === valor()"
+          (click)="elegirOpcion(horario)"
+        >
+          {{ horario }}
+        </button>
+      } @empty {
+        <p class="vacio">No hay funciones ese día.</p>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="libre">
+    <div class="grupo" role="group" aria-label="Hora">
+      <p class="titulo" aria-hidden="true">Hora</p>
+      <div class="cuadricula cuadricula--horas">
+        @for (hora of horas(); track hora) {
+          <button
+            class="opcion"
+            type="button"
+            [class.opcion--elegida]="hora === horaElegida()"
+            [attr.aria-label]="hora + ' horas'"
+            [attr.aria-pressed]="hora === horaElegida()"
+            (click)="elegirHora(hora)"
+          >
+            {{ hora }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="grupo" role="group" aria-label="Minutos">
+      <p class="titulo" aria-hidden="true">Minutos</p>
+      <div class="cuadricula cuadricula--minutos">
+        @for (minuto of minutos(); track minuto) {
+          <button
+            class="opcion"
+            type="button"
+            [class.opcion--elegida]="minuto === minutoElegido()"
+            [attr.aria-label]="minuto + ' minutos'"
+            [attr.aria-pressed]="minuto === minutoElegido()"
+            (click)="elegirMinuto(minuto)"
+          >
+            {{ minuto }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<p class="resumen" role="status">
+  @if (valor()) {
+    Horario elegido: <strong>{{ valor() }}</strong>
+  } @else {
+    Todavía no elegiste un horario
+  }
+</p>

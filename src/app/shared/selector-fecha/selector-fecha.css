@@ -1,0 +1,188 @@
+:host {
+  display: block;
+}
+
+.selector {
+  width: 20.5rem;
+  max-width: 100%;
+  padding: var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin-bottom: var(--e-3);
+}
+
+.paso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--toque-min);
+  height: var(--toque-min);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: transparent;
+  color: var(--texto);
+}
+
+.paso:hover {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+.paso svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.periodo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  flex-grow: 1;
+  min-height: var(--toque-min);
+  border: 1px solid transparent;
+  border-radius: var(--r-medio);
+  background: transparent;
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.periodo:hover {
+  border-color: var(--borde-fuerte);
+  color: var(--acento);
+}
+
+.periodo svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--acento);
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.inicial {
+  padding-block: var(--e-2);
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.dia {
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: var(--r-medio);
+  background: transparent;
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  font-variant-numeric: tabular-nums;
+}
+
+.dia:hover:not(.dia--sin-funcion) {
+  background: var(--superficie-alta);
+}
+
+/* Los días del mes anterior y el siguiente se ven, pero apagados */
+.dia--otro-mes {
+  color: var(--texto-tenue);
+  opacity: 0.55;
+}
+
+/* Hoy se marca con un borde punteado: el elegido usa relleno, así no se confunden */
+.dia--hoy {
+  border: 1px dashed var(--acento-hondo);
+}
+
+.dia--elegida {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-weight: 600;
+}
+
+.dia--elegida.dia--otro-mes {
+  opacity: 1;
+}
+
+/*
+ * Un día sin función no se distingue solo por estar más apagado: lleva una barra cruzada.
+ * Es la misma regla que en el mapa de butacas (RNF-10).
+ */
+.dia--sin-funcion {
+  color: var(--borde-fuerte);
+  cursor: not-allowed;
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    var(--borde) calc(50% - 1px) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+
+.cuadricula {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--e-2);
+}
+
+.opcion {
+  min-height: var(--toque-min);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: transparent;
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.opcion:hover:not(:disabled) {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+.opcion--elegida {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-weight: 600;
+}
+
+.opcion:disabled {
+  border-color: var(--borde);
+  color: var(--borde-fuerte);
+  cursor: not-allowed;
+}
+
+.resumen {
+  margin-top: var(--e-3);
+  padding-top: var(--e-3);
+  border-top: 1px dashed var(--borde);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  /* La primera letra del día viene en minúscula desde Intl */
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}

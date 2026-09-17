@@ -73,6 +73,32 @@ h2 {
   align-items: stretch;
 }
 
+.fila--selectores {
+  align-items: flex-start;
+  gap: var(--e-5);
+}
+
+.caso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  width: 20.5rem;
+  max-width: 100%;
+}
+
+.caso .pie {
+  margin-top: 0;
+}
+
+.titulo-caso {
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .titulo-tarjeta {
   margin-bottom: var(--e-2);
   font-family: var(--fuente-titulo);

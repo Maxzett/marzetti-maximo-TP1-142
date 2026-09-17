@@ -1,0 +1,135 @@
+<div class="selector">
+  <div class="barra">
+    <button
+      class="paso"
+      type="button"
+      [attr.aria-label]="'Período anterior'"
+      (click)="retroceder()"
+    >
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path
+          d="M12.5 3.5L6 10l6.5 6.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <!-- El título es el atajo para alejarse: de días salta a la vista de años -->
+    <button class="periodo" type="button" (click)="cambiarVista()">
+      {{ titulo() }}
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path
+          d="M4 7l6 6 6-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <button class="paso" type="button" [attr.aria-label]="'Período siguiente'" (click)="avanzar()">
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path
+          d="M7.5 3.5L14 10l-6.5 6.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+  </div>
+
+  @switch (vista()) {
+    @case ('dias') {
+      <div
+        #grilla
+        class="dias"
+        role="grid"
+        [attr.aria-label]="etiqueta()"
+        (keydown)="alTeclear($event)"
+      >
+        <div class="fila encabezado" role="row">
+          @for (dia of diasSemana; track dia.largo) {
+            <span class="inicial" role="columnheader" [attr.aria-label]="dia.largo">
+              {{ dia.corto }}
+            </span>
+          }
+        </div>
+
+        @for (semana of semanas(); track semana[0].iso) {
+          <div class="fila" role="row">
+            @for (celda of semana; track celda.iso) {
+              <!--
+                aria-disabled y no disabled: un botón deshabilitado no puede recibir foco, así que
+                al recorrer el mes con las flechas el foco se perdería al pasar por un día sin
+                función y el teclado quedaría varado. El clic lo bloquea elegir().
+              -->
+              <button
+                class="dia"
+                type="button"
+                role="gridcell"
+                [class.dia--otro-mes]="celda.deOtroMes"
+                [class.dia--hoy]="celda.esHoy"
+                [class.dia--elegida]="celda.seleccionada"
+                [attr.data-iso]="celda.iso"
+                [attr.aria-selected]="celda.seleccionada"
+                [attr.aria-current]="celda.esHoy ? 'date' : null"
+                [attr.aria-disabled]="!celda.habilitada"
+                [class.dia--sin-funcion]="!celda.habilitada"
+                [tabindex]="esEnfocada(celda.iso) ? 0 : -1"
+                (click)="elegir(celda.iso)"
+              >
+                {{ celda.dia }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @case ('meses') {
+      <div class="cuadricula">
+        @for (item of meses(); track item.mes) {
+          <button
+            class="opcion"
+            type="button"
+            [class.opcion--elegida]="item.seleccionado"
+            [disabled]="!item.habilitado"
+            [attr.aria-pressed]="item.seleccionado"
+            (click)="elegirMes(item.mes)"
+          >
+            {{ item.nombre }}
+          </button>
+        }
+      </div>
+    }
+
+    @default {
+      <div class="cuadricula">
+        @for (item of anios(); track item.anio) {
+          <button
+            class="opcion"
+            type="button"
+            [class.opcion--elegida]="item.seleccionado"
+            [disabled]="!item.habilitado"
+            [attr.aria-pressed]="item.seleccionado"
+            (click)="elegirAnio(item.anio)"
+          >
+            {{ item.anio }}
+          </button>
+        }
+      </div>
+    }
+  }
+
+  <!-- role="status" lo anuncia sin robar el foco de la grilla -->
+  <p class="resumen" role="status">{{ resumen() }}</p>
+</div>
