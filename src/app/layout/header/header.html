@@ -1,0 +1,14 @@
+<header class="header">
+  <a class="marca" routerLink="/">Cine</a>
+
+  <nav aria-label="Principal">
+    <!-- exact: sin esto "Inicio" quedaría activo en todas las rutas, porque todas empiezan con "/" -->
+    <a
+      routerLink="/"
+      routerLinkActive="activo"
+      [routerLinkActiveOptions]="{ exact: true }"
+      ariaCurrentWhenActive="page"
+      >Inicio</a
+    >
+  </nav>
+</header>

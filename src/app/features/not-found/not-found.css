@@ -1,0 +1,31 @@
+.no-encontrada {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: clamp(3rem, 12vh, 7rem) 1.25rem;
+  text-align: center;
+}
+
+.codigo {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+
+h1 {
+  margin: 0.25rem 0 0.75rem;
+}
+
+p {
+  color: var(--texto-suave);
+}
+
+a {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  background: var(--superficie);
+  text-decoration: none;
+}

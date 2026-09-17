@@ -1,0 +1,32 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+nav a {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--texto-suave);
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: var(--texto);
+}
+
+/* routerLinkActive agrega esta clase al link de la ruta actual */
+nav a.activo {
+  background: var(--superficie);
+  color: var(--texto);
+}

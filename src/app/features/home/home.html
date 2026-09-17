@@ -1,0 +1,21 @@
+<section class="home">
+  <h1>Cine</h1>
+  <p class="bajada">
+    Venta de entradas online. Pronto: cartelera, funciones y elección de butacas.
+  </p>
+
+  <!-- role="status" anuncia el cambio a lectores de pantalla sin mover el foco -->
+  <p class="estado" role="status" [attr.data-estado]="estadoConexion()">
+    @switch (estadoConexion()) {
+      @case ('verificando') {
+        Verificando conexión con Supabase…
+      }
+      @case ('conectado') {
+        Conectado a Supabase
+      }
+      @case ('sin-conexion') {
+        Sin conexión con Supabase
+      }
+    }
+  </p>
+</section>
