@@ -1,0 +1,37 @@
+<section class="contenedor pantalla">
+  <h1>Ingresar</h1>
+  <p class="bajada">Entrá para ver tus entradas, tus puntos y tu crédito.</p>
+
+  <!-- novalidate: la validación la hace el componente, no el globo del navegador,
+       que no se puede estilar ni lo anuncian bien los lectores de pantalla -->
+  <form class="formulario" novalidate (submit)="alEnviar($event)">
+    @if (errorGeneral()) {
+      <app-mensaje tono="error">{{ errorGeneral() }}</app-mensaje>
+    }
+
+    <app-campo
+      etiqueta="Mail"
+      tipo="email"
+      autocompletado="email"
+      [requerido]="true"
+      [error]="errorEmail()"
+      [(valor)]="email"
+    />
+
+    <app-campo
+      etiqueta="Contraseña"
+      tipo="password"
+      autocompletado="current-password"
+      [requerido]="true"
+      [error]="errorPassword()"
+      [(valor)]="password"
+    />
+
+    <app-boton tipo="submit" [cargando]="enviando()" [anchoCompleto]="true">Ingresar</app-boton>
+  </form>
+
+  <p class="pie">
+    ¿Todavía no tenés cuenta? <a routerLink="/registrarme">Registrate</a>. También podés
+    <a routerLink="/">comprar sin cuenta</a>.
+  </p>
+</section>

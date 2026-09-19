@@ -1,0 +1,29 @@
+.pantalla {
+  max-width: 26rem;
+  padding-block: var(--e-7);
+}
+
+h1 {
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  letter-spacing: 0.02em;
+}
+
+.bajada {
+  margin-top: var(--e-2);
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  margin-top: var(--e-6);
+}
+
+.pie {
+  margin-top: var(--e-5);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}

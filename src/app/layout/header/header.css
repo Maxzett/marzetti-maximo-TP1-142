@@ -150,6 +150,43 @@
   padding-inline: var(--e-4);
 }
 
+/* ---- Sesión iniciada ---- */
+.cuenta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+.cuenta__nombre {
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  line-height: 1.2;
+}
+
+.cuenta__hola {
+  display: block;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-micro);
+}
+
+/*
+ * El rol se muestra escrito y no solo con un color distinto de chip: RNF-10 vale para
+ * todo el sistema, no solamente para el mapa de butacas.
+ */
+.cuenta__rol {
+  padding: var(--e-1) var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 /* ---- Escritorio: todo en una fila ---- */
 @media (min-width: 64rem) {
   .barra {

@@ -1,0 +1,65 @@
+<section class="contenedor pantalla">
+  @if (perfil(); as datos) {
+    <p class="sobretitulo">{{ nombreDelRol() }}</p>
+    <h1>{{ datos.nombre }} {{ datos.apellido }}</h1>
+    <p class="bajada">{{ datos.email }}</p>
+
+    <div class="grilla">
+      <app-tarjeta>
+        <h2>Tus datos</h2>
+        <dl>
+          <dt>Nombre</dt>
+          <dd>{{ datos.nombre }} {{ datos.apellido }}</dd>
+          <dt>Mail</dt>
+          <dd>{{ datos.email }}</dd>
+          <dt>Fecha de nacimiento</dt>
+          <dd>{{ cumpleanios() }}</dd>
+        </dl>
+      </app-tarjeta>
+
+      <!--
+        RF-38.1 / RNF-11: el bloque que solo ve su titular. No es una promesa de la
+        interfaz: la tabla perfiles_sensibles tiene una única política RLS, la del
+        dueño de la fila, y no existe ninguna para el administrador. Si esta misma
+        consulta la hace el admin, la base le devuelve una lista vacía.
+      -->
+      <app-tarjeta [destacada]="true">
+        <h2>Solo para vos</h2>
+
+        @if (cargandoSensibles()) {
+          <app-spinner etiqueta="Cargando tus datos" />
+        } @else if (sensibles(); as privados) {
+          <dl>
+            <dt>Tipo de sangre</dt>
+            <dd>{{ privados.tipo_sangre }}</dd>
+            <dt>Color de ojos</dt>
+            <dd class="capitalizado">{{ privados.color_ojos }}</dd>
+            <dt>Días de vacaciones por año</dt>
+            <dd>{{ privados.dias_vacaciones }}</dd>
+          </dl>
+
+          <p class="nota">
+            Estos tres datos no los ve nadie más: ni los empleados ni la administración del cine.
+            Tampoco aparecen en reportes ni en exportaciones.
+          </p>
+        } @else {
+          <app-mensaje tono="aviso">No pudimos traer estos datos.</app-mensaje>
+        }
+      </app-tarjeta>
+
+      <app-tarjeta>
+        <h2>Puntos y crédito</h2>
+        <!-- RF-40: el saldo, el historial de canjes y el crédito llegan en la F7 -->
+        <p class="pendiente">Vas a ver acá tus puntos, tus canjes y tu crédito disponible.</p>
+      </app-tarjeta>
+
+      <app-tarjeta>
+        <h2>Mis Películas</h2>
+        <!-- RF-41: el historial visual con póster, fecha y calificación llega en la F10 -->
+        <p class="pendiente">Acá va a estar el historial de todo lo que viniste a ver.</p>
+      </app-tarjeta>
+    </div>
+  } @else {
+    <app-spinner etiqueta="Cargando tu perfil" />
+  }
+</section>

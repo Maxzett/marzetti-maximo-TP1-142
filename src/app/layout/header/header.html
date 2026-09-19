@@ -29,7 +29,28 @@
       <strong>Comprás sin cuenta.</strong> Te mandamos el QR por mail y entrás con eso.
     </p>
 
-    <a class="boton boton--borde ingresar" routerLink="/ingresar">Ingresar</a>
+    @if (haySesion()) {
+      <div class="cuenta">
+        <!-- El nombre es el enlace al perfil: un saludo que además lleva a algún lado -->
+        <a class="cuenta__nombre" routerLink="/perfil">
+          <span class="cuenta__hola">Hola,</span>
+          {{ perfil()?.nombre || 'tu cuenta' }}
+        </a>
+
+        @if (esPersonal()) {
+          <!--
+            El acceso al panel aparece según el rol, pero el rol de verdad lo decide la
+            base: aunque alguien fuerce este signo, las tablas del panel no le van a
+            responder (RNF-09). Las rutas llegan en la F8 y la F9.
+          -->
+          <span class="cuenta__rol">{{ esAdmin() ? 'Administración' : 'Empleado' }}</span>
+        }
+
+        <button class="boton boton--borde" type="button" (click)="salir()">Salir</button>
+      </div>
+    } @else {
+      <a class="boton boton--borde ingresar" routerLink="/ingresar">Ingresar</a>
+    }
   </div>
 
   <div class="guirnalda" aria-hidden="true"></div>
