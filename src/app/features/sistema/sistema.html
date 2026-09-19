@@ -51,6 +51,39 @@
     </p>
   </section>
 
+  <section aria-labelledby="s-selecciones">
+    <h2 id="s-selecciones">Listas de opciones</h2>
+    <div class="fila fila--campos">
+      <app-seleccion
+        etiqueta="Tipo de sangre"
+        marcador="Elegí tu tipo de sangre"
+        ayuda="Solo lo ves vos"
+        [opciones]="opcionesSangre"
+        [requerido]="true"
+        [(valor)]="tipoSangre"
+      />
+      <app-seleccion
+        etiqueta="Color de ojos"
+        marcador="Elegí tu color de ojos"
+        error="Elegí una opción de la lista"
+        [opciones]="opcionesOjos"
+        [(valor)]="colorOjos"
+      />
+      <app-seleccion
+        etiqueta="Formato"
+        marcador="No disponible"
+        [opciones]="[]"
+        [deshabilitado]="true"
+      />
+    </div>
+    <p class="pie">
+      Elegiste <strong>{{ tipoSangre() || '—' }}</strong
+      >. Se apoya en el <code>&lt;select&gt;</code> nativo, igual que el diálogo se apoya en
+      <code>&lt;dialog&gt;</code>: el desplegable del sistema ya trae teclado, búsqueda por letra y
+      el control táctil de cada plataforma.
+    </p>
+  </section>
+
   <section aria-labelledby="s-chips">
     <h2 id="s-chips">Chips de género</h2>
     <div class="fila">

@@ -1,0 +1,139 @@
+<section class="contenedor pantalla">
+  <h1>Crear cuenta</h1>
+  <p class="bajada">
+    Con cuenta sumás puntos, guardás tu historial y te llevás un cupón para tu primera compra.
+  </p>
+
+  <form class="formulario" novalidate (submit)="alEnviar($event)">
+    @if (errorGeneral() || (intentoHecho() && hayErrores())) {
+      <!-- tabindex="-1" para poder recibir el foco por código sin entrar en el orden de tabulación -->
+      <div #resumen tabindex="-1" class="resumen">
+        <app-mensaje tono="error">
+          @if (errorGeneral()) {
+            {{ errorGeneral() }}
+          } @else {
+            Revisá los campos marcados: falta completar algo.
+          }
+        </app-mensaje>
+      </div>
+    }
+
+    <fieldset>
+      <legend>Tu cuenta</legend>
+
+      <app-campo
+        etiqueta="Mail"
+        tipo="email"
+        autocompletado="email"
+        [requerido]="true"
+        [error]="errorEmail()"
+        [(valor)]="email"
+      />
+
+      <app-campo
+        etiqueta="Contraseña"
+        tipo="password"
+        autocompletado="new-password"
+        ayuda="Al menos 6 caracteres."
+        [requerido]="true"
+        [error]="errorPassword()"
+        [(valor)]="password"
+      />
+    </fieldset>
+
+    <fieldset>
+      <legend>Quién sos</legend>
+
+      <app-campo
+        etiqueta="Nombre"
+        autocompletado="given-name"
+        [requerido]="true"
+        [error]="errorNombre()"
+        [(valor)]="nombre"
+      />
+
+      <app-campo
+        etiqueta="Apellido"
+        autocompletado="family-name"
+        [requerido]="true"
+        [error]="errorApellido()"
+        [(valor)]="apellido"
+      />
+
+      <div class="fecha">
+        <!--
+          El selector ya lleva la etiqueta en el aria-label de su grilla, pero quien ve la
+          pantalla necesita leerla también: sin este rótulo, arriba del calendario no hay
+          nada que diga qué fecha se está pidiendo.
+        -->
+        <p class="etiqueta">
+          Fecha de nacimiento
+          <span class="obligatorio">obligatorio</span>
+        </p>
+
+        <!--
+          El selector propio de la F2 (RNF-08), abierto en la vista de años: para una
+          fecha de nacimiento, empezar por el año es la diferencia entre tres clics y
+          trescientos. El máximo es hoy, así que una fecha futura no se puede elegir.
+        -->
+        <app-selector-fecha
+          etiqueta="Fecha de nacimiento"
+          vistaInicial="anios"
+          minimo="1920-01-01"
+          [maximo]="hoy"
+          [(valor)]="fechaNacimiento"
+        />
+
+        @if (errorFecha()) {
+          <p class="error" role="alert">{{ errorFecha() }}</p>
+        } @else {
+          <p class="ayuda">La usamos para las funciones con restricción de edad y los cupones.</p>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Datos que nos pidió el cine</legend>
+
+      <!--
+        RF-38.1 y RNF-11: estos tres campos no los ve nadie más que su titular, ni el
+        administrador. Decirlo acá y no en la letra chica es parte del trato: se piden
+        porque el cliente los pidió, no porque el sistema los use para algo.
+      -->
+      <app-mensaje tono="aviso">
+        Estos tres datos los ves solo vos. No aparecen en reportes ni los ve el personal del cine.
+      </app-mensaje>
+
+      <app-seleccion
+        etiqueta="Tipo de sangre"
+        marcador="Elegí tu tipo de sangre"
+        [opciones]="opcionesSangre"
+        [requerido]="true"
+        [error]="errorSangre()"
+        [(valor)]="tipoSangre"
+      />
+
+      <app-seleccion
+        etiqueta="Color de ojos"
+        marcador="Elegí tu color de ojos"
+        [opciones]="opcionesOjos"
+        [requerido]="true"
+        [error]="errorOjos()"
+        [(valor)]="colorOjos"
+      />
+
+      <app-campo
+        etiqueta="Días de vacaciones por año"
+        tipo="number"
+        ayuda="Un número entre 0 y 365."
+        [requerido]="true"
+        [error]="errorVacaciones()"
+        [(valor)]="diasVacaciones"
+      />
+    </fieldset>
+
+    <app-boton tipo="submit" [cargando]="enviando()" [anchoCompleto]="true">Crear cuenta</app-boton>
+  </form>
+
+  <p class="pie">¿Ya tenés cuenta? <a routerLink="/ingresar">Ingresá</a>.</p>
+</section>

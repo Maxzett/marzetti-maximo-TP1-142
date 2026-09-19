@@ -1,0 +1,96 @@
+.pantalla {
+  max-width: 30rem;
+  padding-block: var(--e-7);
+}
+
+h1 {
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  letter-spacing: 0.02em;
+}
+
+.bajada {
+  margin-top: var(--e-2);
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+  margin-top: var(--e-6);
+}
+
+/* El fieldset agrupa de verdad: un lector de pantalla anuncia la leyenda al entrar */
+fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+legend {
+  padding-inline: var(--e-2);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/*
+ * El resumen recibe el foco por código al fallar el envío. Se deja el anillo de
+ * :focus-visible de styles.css: es el mismo criterio de la F2, donde no hay un solo
+ * outline: none en todo src/. Un foco invisible es un foco perdido.
+ */
+.resumen {
+  border-radius: var(--r-medio);
+}
+
+.fecha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.ayuda,
+.error {
+  font-size: var(--t-mini);
+  line-height: 1.4;
+}
+
+.ayuda {
+  color: var(--texto-tenue);
+}
+
+.error {
+  color: var(--rojo-claro);
+}
+
+.pie {
+  margin-top: var(--e-5);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/* Mismo rótulo que usan <app-campo> y <app-seleccion>, para que el bloque de la
+   fecha no parezca de otro formulario */
+.etiqueta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  color: var(--texto);
+  font-size: var(--t-mini);
+}
+
+.obligatorio {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

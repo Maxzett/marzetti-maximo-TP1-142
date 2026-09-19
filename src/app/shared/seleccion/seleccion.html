@@ -1,0 +1,44 @@
+<label class="etiqueta" [for]="id">
+  {{ etiqueta() }}
+  @if (requerido()) {
+    <span class="requerido">obligatorio</span>
+  }
+</label>
+
+<select
+  class="control"
+  [class.control--error]="hayError()"
+  [id]="id"
+  [disabled]="deshabilitado()"
+  [required]="requerido()"
+  [attr.aria-invalid]="hayError() ? 'true' : null"
+  [attr.aria-describedby]="descripcion()"
+  (change)="alElegir($event)"
+>
+  <!-- La opción vacía existe para que el campo no arranque con un valor que nadie eligió -->
+  <option value="" [selected]="valor() === ''">{{ marcador() }}</option>
+
+  @for (opcion of opciones(); track opcion.valor) {
+    <option [value]="opcion.valor" [selected]="valor() === opcion.valor">{{ opcion.texto }}</option>
+  }
+</select>
+
+@if (hayError()) {
+  <!-- Mismo criterio que <app-campo>: el error se anuncia aunque el foco esté en otro lado -->
+  <p class="error" role="alert" [id]="idError">
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <path
+        d="M10 2.5L19 18H1z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path d="M10 7.5v4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      <circle cx="10" cy="14.6" r="1" fill="currentColor" />
+    </svg>
+    {{ error() }}
+  </p>
+} @else if (ayuda()) {
+  <p class="ayuda" [id]="idAyuda">{{ ayuda() }}</p>
+}

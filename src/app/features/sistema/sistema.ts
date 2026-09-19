@@ -1,5 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
+import { COLORES_DE_OJOS, TIPOS_DE_SANGRE } from '../../core/models/perfil';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
 import { Chip } from '../../shared/chip/chip';
@@ -8,6 +9,7 @@ import { Mensaje } from '../../shared/mensaje/mensaje';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { SelectorHora } from '../../shared/selector-hora/selector-hora';
+import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { Spinner } from '../../shared/spinner/spinner';
 import { Tarjeta } from '../../shared/tarjeta/tarjeta';
 
@@ -16,7 +18,18 @@ import { Tarjeta } from '../../shared/tarjeta/tarjeta';
  * sirve para revisar estados y accesibilidad en un solo lugar, y para mostrarlos en la defensa.
  */
 @Component({
-  imports: [Boton, Campo, Chip, Dialogo, Mensaje, SelectorFecha, SelectorHora, Spinner, Tarjeta],
+  imports: [
+    Boton,
+    Campo,
+    Chip,
+    Dialogo,
+    Mensaje,
+    Seleccion,
+    SelectorFecha,
+    SelectorHora,
+    Spinner,
+    Tarjeta,
+  ],
   selector: 'app-sistema',
   styleUrl: './sistema.css',
   templateUrl: './sistema.html',
@@ -24,6 +37,19 @@ import { Tarjeta } from '../../shared/tarjeta/tarjeta';
 export class Sistema {
   protected readonly mail = signal('');
   protected readonly mailInvalido = signal('maxi@');
+
+  // Las listas del registro (RF-38): salen de los modelos, que son los mismos
+  // valores que acepta el CHECK de la base
+  protected readonly tipoSangre = signal('');
+  protected readonly colorOjos = signal('');
+  protected readonly opcionesSangre: readonly OpcionSeleccion[] = TIPOS_DE_SANGRE.map((valor) => ({
+    valor,
+    texto: valor,
+  }));
+  protected readonly opcionesOjos: readonly OpcionSeleccion[] = COLORES_DE_OJOS.map((valor) => ({
+    valor,
+    texto: valor.charAt(0).toUpperCase() + valor.slice(1),
+  }));
   protected readonly dialogoAbierto = signal(false);
   protected readonly procesando = signal(false);
 
