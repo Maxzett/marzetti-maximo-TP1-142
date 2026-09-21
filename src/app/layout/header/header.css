@@ -187,6 +187,18 @@
   text-transform: uppercase;
 }
 
+/* Para el administrador el rótulo es además el acceso al panel: se comporta como un enlace */
+a.cuenta__rol {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.5rem;
+  text-decoration: none;
+}
+
+a.cuenta__rol:hover {
+  background: var(--superficie-alta);
+}
+
 /* ---- Escritorio: todo en una fila ---- */
 @media (min-width: 64rem) {
   .barra {

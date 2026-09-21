@@ -1,0 +1,69 @@
+.admin {
+  padding-block: var(--e-6) var(--e-8);
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3) var(--e-6);
+  padding-block-end: var(--e-4);
+  border-block-end: 1px solid var(--borde-fuerte);
+}
+
+.sobretitulo {
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.secciones ul {
+  display: flex;
+  gap: var(--e-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.secciones a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.secciones a:hover {
+  background: var(--superficie-alta);
+}
+
+/*
+ * La sección actual se distingue por el relleno Y por el borde de ámbar Y porque la lleva
+ * aria-current: no depende de ver un color (RNF-10).
+ */
+.secciones a.activo {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+}
+
+@media (forced-colors: active) {
+  .secciones a.activo {
+    border-width: 3px;
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Canvas;
+    color: CanvasText;
+    text-decoration: underline;
+  }
+}

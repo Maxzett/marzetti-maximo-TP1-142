@@ -1,0 +1,265 @@
+.pantalla {
+  padding-block: var(--e-6) 0;
+}
+
+h1 {
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  letter-spacing: 0.02em;
+}
+
+.bajada {
+  max-width: 44rem;
+  margin-block: var(--e-2) var(--e-5);
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo-lg);
+}
+
+h2 {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+}
+
+/* Formulario a la izquierda, agenda a la derecha; en pantallas angostas, una debajo de la otra */
+.columnas {
+  display: grid;
+  gap: var(--e-6);
+  margin-top: var(--e-5);
+  align-items: start;
+  /* minmax(0, 1fr) y no auto: con auto la columna crece hasta el ancho de la tabla o del mapa */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* La tabla necesita ~45rem: por debajo de este ancho conviene apilar y darle todo el ancho */
+@media (min-width: 80rem) {
+  .columnas {
+    grid-template-columns: minmax(20rem, 24rem) minmax(0, 1fr);
+  }
+}
+
+.alta,
+.agenda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  min-inline-size: 0;
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+legend {
+  padding-inline: var(--e-2);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.fecha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.etiqueta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  color: var(--texto);
+  font-size: var(--t-mini);
+}
+
+.obligatorio {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.error {
+  color: var(--rojo-claro);
+  font-size: var(--t-mini);
+  line-height: 1.4;
+}
+
+.par {
+  display: grid;
+  gap: var(--e-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.previa {
+  padding: var(--e-3) var(--e-4);
+  border-inline-start: 3px solid var(--acento);
+  background: var(--superficie);
+  font-size: var(--t-cuerpo);
+  line-height: 1.5;
+}
+
+/*
+ * El resultado recibe el foco por código al terminar de programar. Se deja el anillo de
+ * :focus-visible de styles.css: no hay un solo outline: none en todo src/.
+ */
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  border-radius: var(--r-medio);
+}
+
+.conflictos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.conflictos li {
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  font-size: var(--t-cuerpo);
+}
+
+.sugerencias {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2);
+  margin-top: var(--e-2);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/* Un horario sugerido se toca para aplicarlo: es un botón con el tamaño mínimo de toque */
+.sugerencia {
+  min-block-size: var(--toque-min);
+  min-inline-size: var(--toque-min);
+  padding-inline: var(--e-3);
+  border: 1px solid var(--acento);
+  border-radius: var(--r-ficha);
+  background: transparent;
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.sugerencia:hover {
+  background: var(--superficie-alta);
+}
+
+/* ── Agenda ── */
+/*
+ * position: relative es lo que mantiene adentro del cuadro a los textos .solo-lectores de las celdas:
+ * son absolutos, y sin un contenedor posicionado se escapan del desplazamiento y agrandan la página.
+ */
+.tabla {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+}
+
+table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-cuerpo);
+}
+
+th,
+td {
+  padding: var(--e-3);
+  border-block-end: 1px solid var(--borde);
+  text-align: start;
+  white-space: nowrap;
+}
+
+thead th {
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* El título de la película es la cabecera de su fila: se lee como tal, sin verse como cabecera */
+tbody th {
+  font-weight: 500;
+  white-space: normal;
+}
+
+tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+.numero {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Los dos botones apilados: en fila ocuparían la mitad del ancho de la tabla */
+.acciones-fila {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  align-items: stretch;
+}
+
+.secundario {
+  display: block;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/* ── Diálogos ── */
+.dato-dialogo {
+  margin-bottom: var(--e-4);
+  color: var(--texto-tenue);
+}
+
+.formulario--dialogo {
+  gap: var(--e-4);
+}
+
+.nota {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  line-height: 1.5;
+}
+
+.acciones-dialogo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  justify-content: flex-end;
+  margin-top: var(--e-5);
+}

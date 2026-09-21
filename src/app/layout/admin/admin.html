@@ -1,0 +1,20 @@
+<div class="contenedor admin">
+  <header class="cabecera">
+    <p class="sobretitulo">Administración</p>
+
+    <nav class="secciones" aria-label="Secciones de administración">
+      <ul>
+        <li>
+          <a routerLink="funciones" routerLinkActive="activo" ariaCurrentWhenActive="page"
+            >Funciones</a
+          >
+        </li>
+        <li>
+          <a routerLink="salas" routerLinkActive="activo" ariaCurrentWhenActive="page">Salas</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <router-outlet />
+</div>

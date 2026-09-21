@@ -46,13 +46,16 @@
           {{ perfil()?.nombre || 'tu cuenta' }}
         </a>
 
-        @if (esPersonal()) {
+        @if (esAdmin()) {
           <!--
             El acceso al panel aparece según el rol, pero el rol de verdad lo decide la
-            base: aunque alguien fuerce este signo, las tablas del panel no le van a
-            responder (RNF-09). Las rutas llegan en la F8 y la F9.
+            base: aunque alguien fuerce este signo, las funciones de la base no le van a
+            responder (RNF-09).
           -->
-          <span class="cuenta__rol">{{ esAdmin() ? 'Administración' : 'Empleado' }}</span>
+          <a class="cuenta__rol" routerLink="/admin">Administración</a>
+        } @else if (esPersonal()) {
+          <!-- El panel del empleado (escaneo de QR) llega en la F8: hasta entonces es un rótulo -->
+          <span class="cuenta__rol">Empleado</span>
         }
 
         <button class="boton boton--borde" type="button" (click)="salir()">Salir</button>

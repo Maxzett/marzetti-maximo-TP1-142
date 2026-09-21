@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { sesionIniciada, soloInvitados } from './core/guards/sesion';
+import { rolRequerido, sesionIniciada, soloInvitados } from './core/guards/sesion';
 import { Home } from './features/home/home';
 import { NotFound } from './features/not-found/not-found';
 
@@ -41,6 +41,29 @@ export const routes: Routes = [
     canActivate: [sesionIniciada],
     loadComponent: () => import('./features/perfil/perfil').then((m) => m.Perfil),
     title: 'Mi perfil · Cine Emezeta',
+  },
+
+  // Panel de administración. El guard es una ayuda de interfaz (RNF-09): lo que protege los
+  // datos son las funciones de la base, que verifican el rol por su cuenta. Todo va en chunks
+  // aparte: un cliente que compra no descarga una línea del panel.
+  {
+    path: 'admin',
+    canActivate: [rolRequerido('admin')],
+    loadComponent: () => import('./layout/admin/admin').then((m) => m.Admin),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'funciones' },
+      {
+        path: 'funciones',
+        loadComponent: () =>
+          import('./features/admin-funciones/admin-funciones').then((m) => m.AdminFunciones),
+        title: 'Funciones · Administración · Cine Emezeta',
+      },
+      {
+        path: 'salas',
+        loadComponent: () => import('./features/admin-salas/admin-salas').then((m) => m.AdminSalas),
+        title: 'Salas · Administración · Cine Emezeta',
+      },
+    ],
   },
 
   // Catálogo de componentes. No va en la navegación: es una herramienta de desarrollo.

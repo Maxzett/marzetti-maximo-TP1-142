@@ -117,6 +117,23 @@ describe('Header', () => {
     ).toContain('Administración');
   });
 
+  // El acceso al panel aparece según el rol, pero es una ayuda de interfaz: lo que protege
+  // los datos son las funciones de la base (RNF-09)
+  it('lleva al panel de administración solo al administrador', async () => {
+    const admin = await montar('admin');
+    const enlace = admin.nativeElement.querySelector('a.cuenta__rol') as HTMLAnchorElement;
+
+    expect(enlace.getAttribute('href')).toBe('/admin');
+  });
+
+  it('el empleado ve su rótulo pero no un enlace al panel de administración', async () => {
+    const empleado = await montar('empleado');
+
+    expect(empleado.nativeElement.querySelector('a.cuenta__rol')).toBeNull();
+    expect(empleado.nativeElement.querySelector('.cuenta__rol')).not.toBeNull();
+    expect(empleado.nativeElement.querySelector('a[href="/admin"]')).toBeNull();
+  });
+
   it('cierra la sesión y vuelve a la portada', async () => {
     const fixture = await montar('cliente');
     const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);

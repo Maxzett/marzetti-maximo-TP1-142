@@ -1,0 +1,364 @@
+<div class="pantalla">
+  <h1>Funciones</h1>
+  <p class="bajada">
+    Elegí la película, los días y el horario. <strong>La sala la asigna el sistema</strong>: nadie
+    la elige, y dos funciones nunca se superponen en la misma sala.
+  </p>
+
+  @if (avisoGeneral()) {
+    <app-mensaje tono="exito">{{ avisoGeneral() }}</app-mensaje>
+  }
+
+  <div class="columnas">
+    <section class="alta" aria-labelledby="t-alta">
+      <h2 id="t-alta">Programar funciones</h2>
+
+      <form class="formulario" novalidate (submit)="programar($event)">
+        <app-seleccion
+          etiqueta="Película"
+          marcador="Elegí una película"
+          [opciones]="opcionesPelicula()"
+          [requerido]="true"
+          [error]="errorPelicula()"
+          [(valor)]="peliculaId"
+        />
+
+        <fieldset>
+          <legend>Período</legend>
+
+          <div class="fecha">
+            <p class="etiqueta">Desde <span class="obligatorio">obligatorio</span></p>
+            <app-selector-fecha etiqueta="Desde" [minimo]="hoy" [(valor)]="desde" />
+            @if (errorDesde()) {
+              <p class="error" role="alert">{{ errorDesde() }}</p>
+            }
+          </div>
+
+          <div class="fecha">
+            <p class="etiqueta">Hasta <span class="obligatorio">obligatorio</span></p>
+            <app-selector-fecha etiqueta="Hasta" [minimo]="desde() || hoy" [(valor)]="hasta" />
+            @if (errorHasta()) {
+              <p class="error" role="alert">{{ errorHasta() }}</p>
+            }
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Días de la semana</legend>
+
+          <!--
+            Chips de dos estados (aria-pressed): los días se combinan, se puede elegir lunes,
+            martes y viernes a la vez (RF-20). El nombre completo va para el lector de pantalla:
+            "Lun" solo no dice qué día es.
+          -->
+          <div class="dias">
+            @for (dia of diasDeLaSemana; track dia.numero) {
+              <app-chip
+                [activo]="diaElegido(dia.numero)"
+                (activoChange)="alternarDia(dia.numero, $event)"
+              >
+                <span aria-hidden="true">{{ dia.corto }}</span>
+                <span class="solo-lectores">{{ dia.largo }}</span>
+              </app-chip>
+            }
+          </div>
+
+          @if (errorDias()) {
+            <p class="error" role="alert">{{ errorDias() }}</p>
+          }
+        </fieldset>
+
+        <fieldset>
+          <legend>Horario y formato</legend>
+
+          <div class="fecha">
+            <p class="etiqueta">Comienza a las <span class="obligatorio">obligatorio</span></p>
+            <app-selector-hora etiqueta="Horario de comienzo" [(valor)]="hora" />
+            @if (errorHora()) {
+              <p class="error" role="alert">{{ errorHora() }}</p>
+            }
+          </div>
+
+          <div class="par">
+            <app-seleccion
+              etiqueta="Formato"
+              marcador="Formato"
+              [opciones]="opcionesFormato"
+              [requerido]="true"
+              [(valor)]="formato"
+            />
+            <app-seleccion
+              etiqueta="Idioma"
+              marcador="Idioma"
+              [opciones]="opcionesIdioma"
+              [requerido]="true"
+              [(valor)]="idioma"
+            />
+          </div>
+
+          <app-campo
+            etiqueta="Precio base de la entrada"
+            tipo="number"
+            ayuda="En pesos. A las butacas VIP se les suma un recargo."
+            [requerido]="true"
+            [error]="errorPrecio()"
+            [(valor)]="precio"
+          />
+        </fieldset>
+
+        <!-- Lo que se va a crear, antes de enviar: la base cuenta lo mismo y es la que decide -->
+        @if (fechas().length > 0) {
+          <p class="previa" aria-live="polite">
+            Se van a crear <strong>{{ fechas().length }}</strong>
+            {{ fechas().length === 1 ? 'función' : 'funciones' }}.
+            @if (finDeOcupacion(); as fin) {
+              Cada una ocupa la sala hasta las <strong>{{ fin.hora }}</strong
+              >{{ fin.diaSiguiente ? ' (del día siguiente)' : '' }}, contando los 30 minutos de
+              separación.
+            }
+          </p>
+        }
+
+        @if (avisoDeSugerencia()) {
+          <app-mensaje tono="aviso">{{ avisoDeSugerencia() }}</app-mensaje>
+        }
+
+        @if (resultado(); as r) {
+          <!-- tabindex="-1": recibe el foco por código al terminar, sin entrar en el orden de Tab -->
+          <div #resultadoDelAlta tabindex="-1" class="resultado">
+            @if (r.estado === 'creadas') {
+              <app-mensaje tono="exito">
+                Programamos {{ r.creadas.length }}
+                {{ r.creadas.length === 1 ? 'función' : 'funciones' }}. La sala la eligió el
+                sistema:
+                @for (grupo of creadasPorSala(); track grupo.sala; let ultimo = $last) {
+                  {{ grupo.sala }} ({{ grupo.cantidad }}){{ ultimo ? '.' : ',' }}
+                }
+              </app-mensaje>
+            } @else if (r.estado === 'sin_sala') {
+              <app-mensaje tono="error">
+                No se creó ninguna función: en
+                {{ r.conflictos.length === 1 ? 'una fecha' : r.conflictos.length + ' fechas' }} no
+                hay sala libre. La programación es todo o nada, así que nada quedó a medias.
+              </app-mensaje>
+
+              <ul class="conflictos">
+                @for (conflicto of r.conflictos; track conflicto.fecha) {
+                  <li>
+                    <p>
+                      <strong>{{ fechaLarga(conflicto.fecha) }}</strong> a las
+                      {{ horaDe(conflicto.inicio) }}: todas las salas están ocupadas.
+                    </p>
+
+                    @if (conflicto.sugerencias.length > 0) {
+                      <p class="sugerencias">
+                        <span>Horarios libres cerca:</span>
+                        @for (sugerencia of conflicto.sugerencias; track sugerencia) {
+                          <button
+                            class="sugerencia"
+                            type="button"
+                            (click)="usarSugerencia(sugerencia)"
+                          >
+                            {{ horaDe(sugerencia) }}
+                          </button>
+                        }
+                      </p>
+                    } @else {
+                      <p class="sugerencias">Tampoco hay horarios libres cerca ese día.</p>
+                    }
+                  </li>
+                }
+              </ul>
+            } @else {
+              <app-mensaje tono="error">{{ r.mensaje }}</app-mensaje>
+            }
+          </div>
+        }
+
+        <app-boton tipo="submit" [cargando]="enviando()" [anchoCompleto]="true">
+          Programar funciones
+        </app-boton>
+      </form>
+    </section>
+
+    <section class="agenda" aria-labelledby="t-agenda">
+      <h2 id="t-agenda">Próximas funciones</h2>
+
+      <app-seleccion
+        etiqueta="Filtrar por película"
+        marcador="Todas las películas"
+        [opciones]="opcionesPelicula()"
+        [(valor)]="filtroPelicula"
+      />
+
+      @if (cargando()) {
+        <app-spinner etiqueta="Cargando la programación" />
+      } @else if (programacion(); as funciones) {
+        @if (funciones.length === 0) {
+          <app-mensaje tono="aviso">
+            No hay funciones programadas{{ filtroPelicula() ? ' para esa película' : '' }}.
+          </app-mensaje>
+        } @else {
+          <!-- Región con foco: la tabla es más ancha que un celular y un teclado tiene que poder desplazarla -->
+          <div class="tabla" role="region" tabindex="0" aria-label="Tabla de próximas funciones">
+            <table>
+              <caption class="solo-lectores">
+                Próximas funciones, ordenadas por horario
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Cuándo</th>
+                  <th scope="col">Película</th>
+                  <th scope="col">Sala</th>
+                  <th scope="col">Formato e idioma</th>
+                  <th scope="col" class="numero">Precio</th>
+                  <th scope="col"><span class="solo-lectores">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (funcion of funciones; track funcion.id) {
+                  <tr>
+                    <td>{{ describir(funcion.inicio) }}</td>
+                    <th scope="row">{{ funcion.pelicula.titulo }}</th>
+                    <td>{{ funcion.sala.nombre }}</td>
+                    <td>
+                      {{ funcion.formato }}
+                      <span class="secundario">{{ idiomaDe(funcion) }}</span>
+                    </td>
+                    <td class="numero">{{ precioDe(funcion) }}</td>
+                    <td class="acciones-fila">
+                      <app-boton variante="borde" (presionado)="abrirEdicion(funcion)">
+                        Editar
+                        <span class="solo-lectores">
+                          la función de {{ funcion.pelicula.titulo }} del
+                          {{ describir(funcion.inicio) }}
+                        </span>
+                      </app-boton>
+                      <app-boton variante="fantasma" (presionado)="pedirBaja(funcion)">
+                        Dar de baja
+                        <span class="solo-lectores">
+                          la función de {{ funcion.pelicula.titulo }} del
+                          {{ describir(funcion.inicio) }}
+                        </span>
+                      </app-boton>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else {
+        <app-mensaje tono="error"
+          >No pudimos cargar la programación. Recargá la página.</app-mensaje
+        >
+      }
+    </section>
+  </div>
+
+  <app-dialogo titulo="Modificar función" [(abierto)]="edicionAbierta">
+    @if (enEdicion(); as funcion) {
+      <p class="dato-dialogo">
+        {{ funcion.pelicula.titulo }} · {{ funcion.sala.nombre }} ·
+        {{ describir(funcion.inicio) }}
+      </p>
+
+      <div class="formulario formulario--dialogo">
+        <div class="fecha">
+          <p class="etiqueta">Fecha</p>
+          <app-selector-fecha etiqueta="Fecha de la función" [minimo]="hoy" [(valor)]="edFecha" />
+        </div>
+
+        <div class="fecha">
+          <p class="etiqueta">Comienza a las</p>
+          <app-selector-hora etiqueta="Horario de comienzo" [(valor)]="edHora" />
+        </div>
+
+        <div class="par">
+          <app-seleccion
+            etiqueta="Formato"
+            marcador="Formato"
+            [opciones]="opcionesFormato"
+            [(valor)]="edFormato"
+          />
+          <app-seleccion
+            etiqueta="Idioma"
+            marcador="Idioma"
+            [opciones]="opcionesIdioma"
+            [(valor)]="edIdioma"
+          />
+        </div>
+
+        <app-campo
+          etiqueta="Precio base de la entrada"
+          tipo="number"
+          [error]="edErrorPrecio()"
+          [(valor)]="edPrecio"
+        />
+
+        <p class="nota">
+          Con entradas vendidas solo se puede cambiar el precio: cada orden conserva el que pagó. Si
+          cambia el horario, la función se queda en su sala mientras esté libre.
+        </p>
+
+        @if (edError()) {
+          <app-mensaje tono="error">{{ edError() }}</app-mensaje>
+        }
+
+        @if (edConflictos().length > 0) {
+          <app-mensaje tono="error">
+            No hay sala libre en ese horario. La función quedó como estaba.
+          </app-mensaje>
+
+          @for (conflicto of edConflictos(); track conflicto.fecha) {
+            @if (conflicto.sugerencias.length > 0) {
+              <p class="sugerencias">
+                <span>Horarios libres cerca:</span>
+                @for (sugerencia of conflicto.sugerencias; track sugerencia) {
+                  <button
+                    class="sugerencia"
+                    type="button"
+                    (click)="usarSugerenciaEnEdicion(sugerencia)"
+                  >
+                    {{ describir(sugerencia) }}
+                  </button>
+                }
+              </p>
+            }
+          }
+        }
+      </div>
+
+      <div class="acciones-dialogo">
+        <app-boton variante="fantasma" (presionado)="edicionAbierta.set(false)">
+          Cancelar
+        </app-boton>
+        <app-boton [cargando]="edGuardando()" (presionado)="guardarEdicion()">
+          Guardar cambios
+        </app-boton>
+      </div>
+    }
+  </app-dialogo>
+
+  <app-dialogo titulo="¿Dar de baja la función?" [(abierto)]="bajaAbierta">
+    @if (aDarDeBaja(); as funcion) {
+      <p>
+        <strong>{{ funcion.pelicula.titulo }}</strong> · {{ describir(funcion.inicio) }} ·
+        {{ funcion.sala.nombre }}
+      </p>
+      <p class="nota">
+        La función deja de estar a la venta y la sala queda libre en ese horario. Si ya tiene
+        entradas vendidas, la base no lo permite.
+      </p>
+
+      @if (errorDeBaja()) {
+        <app-mensaje tono="error">{{ errorDeBaja() }}</app-mensaje>
+      }
+
+      <div class="acciones-dialogo">
+        <app-boton variante="fantasma" (presionado)="bajaAbierta.set(false)"> Cancelar </app-boton>
+        <app-boton [cargando]="bajando()" (presionado)="confirmarBaja()">Dar de baja</app-boton>
+      </div>
+    }
+  </app-dialogo>
+</div>

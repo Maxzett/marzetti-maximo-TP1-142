@@ -1,0 +1,150 @@
+.pantalla {
+  padding-block: var(--e-6) 0;
+}
+
+h1 {
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  letter-spacing: 0.02em;
+}
+
+.bajada {
+  max-width: 44rem;
+  margin-block: var(--e-2) var(--e-5);
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo-lg);
+}
+
+h2 {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+}
+
+h3 {
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.columnas {
+  display: grid;
+  gap: var(--e-6);
+  margin-top: var(--e-5);
+  align-items: start;
+  /* minmax(0, 1fr) y no auto: con auto la columna crece hasta el ancho de la tabla o del mapa */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 64rem) {
+  .columnas {
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  }
+}
+
+.lateral,
+.detalle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  min-inline-size: 0;
+}
+
+.salas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  inline-size: 100%;
+  min-block-size: var(--toque-min);
+  padding: var(--e-2) var(--e-4);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.sala:hover {
+  background: var(--superficie-alta);
+}
+
+/*
+ * La sala elegida se distingue por el borde grueso, el relleno y aria-current: no depende de
+ * ver el color (RNF-10). El estado (Activa / De baja) está escrito, no solo pintado.
+ */
+.sala--elegida {
+  border: 3px solid var(--acento);
+  padding: calc(var(--e-2) - 2px) calc(var(--e-4) - 2px);
+  background: var(--superficie-alta);
+}
+
+.sala__nombre {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.sala__estado {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.alta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.gestion {
+  display: grid;
+  gap: var(--e-5);
+  align-items: end;
+}
+
+@media (min-width: 48rem) {
+  .gestion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.renombrar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  align-items: flex-start;
+}
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  align-items: flex-start;
+}
+
+.nota {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  line-height: 1.5;
+}
+
+@media (forced-colors: active) {
+  .sala--elegida {
+    border-color: Highlight;
+  }
+}

@@ -1,0 +1,109 @@
+<div class="pantalla">
+  <h1>Salas</h1>
+  <p class="bajada">
+    Todas las salas comparten la misma distribución: 20 filas, de la A a la T, con espacios para
+    silla de ruedas en J y K y butacas VIP en R, S y T. Al crear una sala, el sistema le genera el
+    mapa completo.
+  </p>
+
+  @if (aviso()) {
+    <app-mensaje tono="exito">{{ aviso() }}</app-mensaje>
+  }
+
+  @if (cargandoSalas()) {
+    <app-spinner etiqueta="Cargando las salas" />
+  } @else if (salas(); as lista) {
+    <div class="columnas">
+      <section class="lateral" aria-labelledby="t-lista">
+        <h2 id="t-lista">Salas del cine</h2>
+
+        <ul class="salas">
+          @for (sala of lista; track sala.id) {
+            <li>
+              <!--
+                Un botón por sala y no un enlace: elegir una no cambia de página, cambia lo que
+                se muestra al lado. aria-current marca la elegida; el estado, dicho con palabras.
+              -->
+              <button
+                class="sala"
+                type="button"
+                [class.sala--elegida]="sala.id === elegidaId()"
+                [attr.aria-current]="sala.id === elegidaId() ? 'true' : null"
+                (click)="elegir(sala)"
+              >
+                <span class="sala__nombre">{{ sala.nombre }}</span>
+                <span class="sala__estado">{{ sala.activa ? 'Activa' : 'De baja' }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <form class="alta" novalidate (submit)="crear($event)">
+          <h3>Nueva sala</h3>
+          <app-campo
+            etiqueta="Nombre"
+            marcador="Sala 5"
+            [error]="errorDeAlta()"
+            [(valor)]="nombreNuevo"
+          />
+          <app-boton tipo="submit" variante="borde" [cargando]="creando()" [anchoCompleto]="true">
+            Crear sala
+          </app-boton>
+        </form>
+      </section>
+
+      <section class="detalle" aria-labelledby="t-detalle">
+        @if (elegida(); as sala) {
+          <h2 id="t-detalle">{{ sala.nombre }}</h2>
+
+          @if (!sala.activa) {
+            <app-mensaje tono="aviso">
+              Esta sala está de baja: la asignación automática no le da funciones nuevas.
+            </app-mensaje>
+          }
+
+          @if (cargandoMapa()) {
+            <app-spinner etiqueta="Cargando el mapa" />
+          } @else if (butacas(); as ubicaciones) {
+            <app-mapa-sala [butacas]="ubicaciones" [etiqueta]="'la ' + sala.nombre" />
+          } @else {
+            <app-mensaje tono="error"
+              >No pudimos cargar el mapa. Elegí la sala de nuevo.</app-mensaje
+            >
+          }
+
+          <div class="gestion">
+            <form class="renombrar" novalidate (submit)="renombrar($event)">
+              <app-campo etiqueta="Nombre de la sala" [(valor)]="nombreEditado" />
+              <app-boton tipo="submit" variante="borde" [cargando]="guardando()">
+                Guardar nombre
+              </app-boton>
+            </form>
+
+            <div class="estado">
+              <app-boton
+                variante="fantasma"
+                [cargando]="guardando()"
+                (presionado)="alternarEstado()"
+              >
+                {{ sala.activa ? 'Dar de baja la sala' : 'Volver a activar la sala' }}
+              </app-boton>
+              <p class="nota">
+                Una sala con funciones por delante no se puede dar de baja: primero hay que darlas
+                de baja o esperar a que terminen.
+              </p>
+            </div>
+          </div>
+
+          @if (errorDeEdicion()) {
+            <app-mensaje tono="error">{{ errorDeEdicion() }}</app-mensaje>
+          }
+        } @else {
+          <app-mensaje tono="aviso">Todavía no hay salas cargadas.</app-mensaje>
+        }
+      </section>
+    </div>
+  } @else {
+    <app-mensaje tono="error">No pudimos cargar las salas. Recargá la página.</app-mensaje>
+  }
+</div>
