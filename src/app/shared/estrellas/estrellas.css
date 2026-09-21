@@ -1,0 +1,111 @@
+:host {
+  display: inline-block;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+/* ---- Lectura ---- */
+
+.lectura {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.pista {
+  position: relative;
+  display: inline-block;
+  /* Una sola medida para las cinco estrellas: cambiarla acá cambia el tamaño de todas */
+  --lado: 1rem;
+}
+
+.fila {
+  display: flex;
+}
+
+.fila svg {
+  flex: none;
+  width: var(--lado);
+  height: var(--lado);
+}
+
+.fila--vacia svg {
+  fill: none;
+  stroke: var(--borde-fuerte);
+}
+
+/* Encima de la vacía y recortada por el ancho que le pone el porcentaje */
+.fila--llena {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+}
+
+.fila--llena svg {
+  fill: var(--acento);
+  stroke: var(--acento);
+}
+
+.numero {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  font-variant-numeric: tabular-nums;
+}
+
+.cantidad,
+.sin-resenas {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/* ---- Edición ---- */
+
+.grupo {
+  display: inline-flex;
+}
+
+.estrella {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--toque-min);
+  height: var(--toque-min);
+  padding: var(--e-2);
+  border: 0;
+  background: transparent;
+  color: var(--borde-fuerte);
+}
+
+.estrella svg {
+  fill: none;
+  stroke: currentColor;
+}
+
+.estrella:hover {
+  color: var(--acento);
+}
+
+/* Llena de relleno y de trazo: se distingue de la vacía aunque no se vea el color */
+.estrella--llena {
+  color: var(--acento);
+}
+
+.estrella--llena svg {
+  fill: currentColor;
+}
+
+.resumen {
+  margin-top: var(--e-1);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.resumen strong {
+  color: var(--texto);
+  font-variant-numeric: tabular-nums;
+}

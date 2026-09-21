@@ -1,0 +1,26 @@
+@if (url(); as imagen) {
+  <img
+    class="imagen"
+    [src]="imagen"
+    [alt]="decorativo() ? '' : 'Póster de ' + titulo()"
+    loading="lazy"
+  />
+} @else {
+  <!--
+    role="img" con aria-label: el título está partido en líneas y con tipografía de display,
+    y un lector de pantalla lo leería a los tropezones. Así lo anuncia como una sola frase.
+  -->
+  <div
+    class="tipografico"
+    [attr.role]="decorativo() ? null : 'img'"
+    [attr.aria-label]="decorativo() ? null : 'Póster de ' + titulo()"
+    [attr.aria-hidden]="decorativo() ? 'true' : null"
+  >
+    <span class="guirnalda" aria-hidden="true"></span>
+    <span class="cuerpo" aria-hidden="true">
+      <span class="sello">Cine Emezeta</span>
+      <span class="titulo">{{ titulo() }}</span>
+    </span>
+    <span class="guirnalda" aria-hidden="true"></span>
+  </div>
+}

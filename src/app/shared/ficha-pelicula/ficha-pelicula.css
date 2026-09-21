@@ -1,0 +1,96 @@
+/* Punto de anclaje del enlace estirado: el ::after del título cubre toda la ficha */
+:host {
+  position: relative;
+  display: block;
+  border-radius: var(--r-medio);
+}
+
+/* El anillo del foco va en la ficha entera: el enlace es solo el título, y un aro alrededor
+   de una línea de texto no dice que lo enfocado es la tarjeta */
+:host:has(a:focus-visible) {
+  outline: 3px solid var(--acento);
+  outline-offset: 3px;
+}
+
+.ficha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.puesto {
+  color: var(--acento);
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.titulo {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+  line-height: 1.2;
+}
+
+.titulo a {
+  color: var(--texto);
+}
+
+.titulo a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+:host:hover .titulo a {
+  color: var(--bombilla);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.edad {
+  padding: 0 var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-chico);
+  font-family: var(--fuente-titulo);
+  letter-spacing: 0.08em;
+}
+
+/* El rojo refuerza el +18, pero el "+18" está escrito: no se depende del color (RNF-10) */
+.edad--mayores {
+  border-color: var(--rojo-claro);
+  color: var(--rojo-claro);
+}
+
+.generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-1) var(--e-3);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/* Los géneros van separados por un punto medio, dibujado y no escrito en el texto */
+.generos li + li::before {
+  content: '·';
+  margin-right: var(--e-3);
+}
+
+.ventas {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}

@@ -1,0 +1,70 @@
+:host {
+  display: block;
+  /* El tamaño del título se mide contra el ancho del póster, no de la pantalla */
+  container-type: inline-size;
+}
+
+.imagen,
+.tipografico {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--r-chico);
+}
+
+.imagen {
+  object-fit: cover;
+  background: var(--superficie-alta);
+}
+
+.tipografico {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 1px solid var(--borde-fuerte);
+  background:
+    radial-gradient(
+      120% 70% at 50% 0%,
+      color-mix(in srgb, var(--acento) 16%, transparent),
+      transparent 70%
+    ),
+    var(--superficie-alta);
+}
+
+/* La guirnalda global es un bloque: acá es un span, y necesita serlo para tener alto */
+.guirnalda {
+  display: block;
+  flex: none;
+}
+
+.cuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-3);
+  padding: var(--e-3);
+  text-align: center;
+}
+
+.sello {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.titulo {
+  color: var(--bombilla);
+  font-family: var(--fuente-display);
+  /* 14cqw: cada letra escala con el ancho del póster; el clamp evita extremos ilegibles */
+  font-size: clamp(1.25rem, 14cqw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+  text-shadow: var(--neon-marquesina);
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}

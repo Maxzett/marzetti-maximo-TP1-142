@@ -26,6 +26,10 @@ export class Campo {
   readonly requerido = input(false);
   readonly deshabilitado = input(false);
   readonly autocompletado = input('');
+  /** Con filas mayores a cero el campo es un <textarea> en vez de una sola línea (un comentario) */
+  readonly filas = input(0);
+  /** Tope de caracteres. Si se define, se muestra el contador y el navegador frena el tipeo */
+  readonly largoMaximo = input<number | null>(null);
   readonly valor = model('');
 
   protected readonly id = `campo-${++contador}`;
@@ -46,6 +50,6 @@ export class Campo {
   });
 
   protected alEscribir(evento: Event): void {
-    this.valor.set((evento.target as HTMLInputElement).value);
+    this.valor.set((evento.target as HTMLInputElement | HTMLTextAreaElement).value);
   }
 }

@@ -5,20 +5,42 @@
   }
 </label>
 
-<input
-  class="control"
-  [class.control--error]="hayError()"
-  [id]="id"
-  [type]="tipo()"
-  [value]="valor()"
-  [placeholder]="marcador()"
-  [disabled]="deshabilitado()"
-  [required]="requerido()"
-  [attr.autocomplete]="autocompletado() || null"
-  [attr.aria-invalid]="hayError() ? 'true' : null"
-  [attr.aria-describedby]="descripcion()"
-  (input)="alEscribir($event)"
-/>
+@if (filas() > 0) {
+  <textarea
+    class="control control--multilinea"
+    [class.control--error]="hayError()"
+    [id]="id"
+    [rows]="filas()"
+    [value]="valor()"
+    [placeholder]="marcador()"
+    [disabled]="deshabilitado()"
+    [required]="requerido()"
+    [attr.maxlength]="largoMaximo()"
+    [attr.aria-invalid]="hayError() ? 'true' : null"
+    [attr.aria-describedby]="descripcion()"
+    (input)="alEscribir($event)"
+  ></textarea>
+} @else {
+  <input
+    class="control"
+    [class.control--error]="hayError()"
+    [id]="id"
+    [type]="tipo()"
+    [value]="valor()"
+    [placeholder]="marcador()"
+    [disabled]="deshabilitado()"
+    [required]="requerido()"
+    [attr.autocomplete]="autocompletado() || null"
+    [attr.aria-invalid]="hayError() ? 'true' : null"
+    [attr.aria-describedby]="descripcion()"
+    (input)="alEscribir($event)"
+  />
+}
+
+@if (largoMaximo() !== null) {
+  <!-- Visual: anunciar cada tecla con un aria-live sería ruido. El tope lo frena el navegador -->
+  <p class="contador">{{ valor().length }} / {{ largoMaximo() }}</p>
+}
 
 @if (hayError()) {
   <!--

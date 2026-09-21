@@ -30,6 +30,20 @@
   color: var(--texto);
 }
 
+.control--multilinea {
+  min-height: 6rem;
+  padding-block: var(--e-2);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.contador {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 .control:disabled {
   border-color: var(--borde);
   background: var(--superficie);

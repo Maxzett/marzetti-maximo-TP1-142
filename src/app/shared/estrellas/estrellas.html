@@ -1,0 +1,59 @@
+<!-- La forma de una estrella, dibujada una sola vez y usada en las tres filas de abajo -->
+<ng-template #forma>
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 2.6l2.9 6.2 6.7.8-5 4.6 1.3 6.7L12 17.5l-5.9 3.4 1.3-6.7-5-4.6 6.7-.8z" />
+  </svg>
+</ng-template>
+
+@if (editable()) {
+  <div class="grupo" role="radiogroup" [attr.aria-label]="etiqueta()" (keydown)="alTeclear($event)">
+    @for (numero of posiciones; track numero) {
+      <button
+        class="estrella"
+        type="button"
+        role="radio"
+        [class.estrella--llena]="numero <= valor()"
+        [attr.data-valor]="numero"
+        [attr.aria-checked]="numero === valor()"
+        [attr.aria-label]="numero === 1 ? '1 estrella' : numero + ' estrellas'"
+        [tabindex]="numero === valor() || (valor() === 0 && numero === 1) ? 0 : -1"
+        (click)="elegir(numero)"
+      >
+        <ng-container *ngTemplateOutlet="forma" />
+      </button>
+    }
+  </div>
+
+  <p class="resumen" role="status">
+    @if (valor() > 0) {
+      <strong>{{ valor() }} de 5</strong>
+    } @else {
+      Todavía no elegiste estrellas
+    }
+  </p>
+} @else if (cantidad() === 0) {
+  <span class="sin-resenas">Sin reseñas</span>
+} @else {
+  <span class="lectura" role="img" [attr.aria-label]="descripcion()">
+    <!--
+      Dos filas de cinco estrellas superpuestas: abajo las de contorno, arriba las llenas
+      recortadas al porcentaje del promedio. Así 4,5 se ve como cuatro estrellas y media.
+    -->
+    <span class="pista" aria-hidden="true">
+      <span class="fila fila--vacia">
+        @for (numero of posiciones; track numero) {
+          <ng-container *ngTemplateOutlet="forma" />
+        }
+      </span>
+      <span class="fila fila--llena" [style.width.%]="porcentaje()">
+        @for (numero of posiciones; track numero) {
+          <ng-container *ngTemplateOutlet="forma" />
+        }
+      </span>
+    </span>
+    <span class="numero" aria-hidden="true">{{ valorTexto() }}</span>
+    @if (cantidad() !== null) {
+      <span class="cantidad" aria-hidden="true">({{ cantidad() }})</span>
+    }
+  </span>
+}
