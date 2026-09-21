@@ -42,23 +42,34 @@ export class Catalogo {
   private readonly supabase = inject(Supabase);
 
   /**
-   * Las películas en cartelera, por título. Null si la consulta falló, para que la pantalla
-   * distinga un error de una cartelera vacía. El filtro de estreno se hace acá y no en la
-   * consulta para que la regla viva en un solo lugar (enCartelera).
+   * Todas las películas por título, las de estreno futuro incluidas. Es lo que necesita quien
+   * programa funciones: se puede armar la cartelera de una película antes de que se estrene
+   * (la preventa arranca 7 días antes, RF-49). Null si la consulta falló.
    */
-  async cargarCartelera(): Promise<Pelicula[] | null> {
+  async cargarTodas(): Promise<Pelicula[] | null> {
     const { data, error } = await this.supabase.client
       .from('peliculas')
       .select(COLUMNAS)
       .order('titulo')
       .overrideTypes<FilaPelicula[], { merge: false }>();
 
-    if (error) {
+    return error ? null : data.map(aPelicula);
+  }
+
+  /**
+   * Las películas en cartelera, por título. Null si la consulta falló, para que la pantalla
+   * distinga un error de una cartelera vacía. El filtro de estreno se hace acá y no en la
+   * consulta para que la regla viva en un solo lugar (enCartelera).
+   */
+  async cargarCartelera(): Promise<Pelicula[] | null> {
+    const todas = await this.cargarTodas();
+
+    if (todas === null) {
       return null;
     }
 
     const hoy = hoyIso();
-    return data.map(aPelicula).filter((pelicula) => enCartelera(pelicula, hoy));
+    return todas.filter((pelicula) => enCartelera(pelicula, hoy));
   }
 
   /**

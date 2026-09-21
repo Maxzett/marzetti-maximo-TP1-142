@@ -142,6 +142,31 @@ describe('Catalogo', () => {
     });
   });
 
+  // A diferencia de la cartelera, quien programa funciones tiene que ver también las que
+  // todavía no se estrenaron: la preventa arranca 7 días antes (RF-49)
+  describe('cargarTodas', () => {
+    it('incluye las películas con estreno futuro', async () => {
+      const servicio = crearServicio(
+        crearSupabaseFalso({
+          filas: [
+            fila('Ya estrenada', { fecha_estreno: '2000-01-01' }),
+            fila('Futura', { fecha_estreno: '2999-01-01' }),
+          ],
+        }),
+      );
+
+      const todas = await servicio.cargarTodas();
+
+      expect(todas?.map((p) => p.titulo)).toEqual(['Ya estrenada', 'Futura']);
+    });
+
+    it('devuelve null si la base falla', async () => {
+      const servicio = crearServicio(crearSupabaseFalso({ error: true }));
+
+      expect(await servicio.cargarTodas()).toBeNull();
+    });
+  });
+
   describe('cargarPelicula', () => {
     it('devuelve la película con sus géneros', async () => {
       const servicio = crearServicio(
