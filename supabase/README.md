@@ -27,9 +27,11 @@ que recrear el proyecto desde cero.
 | `migrations/0016_permisos_api.sql` | Privilegios de tabla para `authenticated` |
 | `migrations/0017_rls_catalogo.sql` | Catálogo público de solo lectura, `peliculas_mas_vendidas()` y `puntajes_peliculas()` |
 | `migrations/0018_resenas.sql` | Reseñas: escritura propia y `resenas_de_pelicula()` como única lectura pública |
-| `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo |
+| `migrations/0019_salas_funciones.sql` | Salas, butacas y funciones: lectura pública, escritura solo por RPC (`crear_funciones`, `modificar_funcion`, `dar_de_baja_funcion`, `crear_sala`, `actualizar_sala`), asignación automática de sala y `generar_butacas_sala()` |
+| `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo. **Requiere 0019**: llama a `generar_butacas_sala()` |
 | `seed/002_catalogo_base.sql` | Géneros, categorías, cupones y recompensa inicial |
 | `seed/003_peliculas_demo.sql` | 12 películas inventadas (10 en cartelera, 2 próximas), con aserciones |
+| `seed/004_funciones_demo.sql` | Funciones de los próximos 14 días (6 películas × 3 horarios), programadas con el mismo algoritmo que usa la app. Requiere 0019 y los seeds 001 y 003 |
 
 Si una tabla recién creada devuelve `PGRST205 Could not find the table in the
 schema cache`, es el caché de PostgREST. Se refresca con:
@@ -64,9 +66,32 @@ reglas que corren son las políticas RLS.
   archivo —y por lo tanto en la misma transacción— que la crea: ninguna existe
   abierta ni por un instante. Tienen políticas escritas `perfiles`,
   `perfiles_sensibles` (F3), `generos`, `peliculas`, `peliculas_generos` y
-  `resenas` (F4); las otras 18 no devuelven ni una fila hasta que su fase abra la
-  suya. El linter va a reportarlas con `rls_enabled_no_policy`: es informativo y
-  es intencional.
+  `resenas` (F4), `salas`, `butacas` y `funciones` (F5); las otras 15 no devuelven
+  ni una fila hasta que su fase abra la suya. El linter va a reportarlas con
+  `rls_enabled_no_policy`: es informativo y es intencional.
+- **Escribir solo por RPC.** `salas`, `butacas` y `funciones` se leen con una
+  política pública, pero ningún rol de la API tiene `INSERT`, `UPDATE` ni `DELETE`
+  sobre ellas: se escribe llamando a una función que verifica el rol adentro
+  (`es_admin()`, error `42501`). Con una política de `INSERT` sobre `funciones`, el
+  administrador podría mandar `sala_id` desde las DevTools y saltearse la asignación
+  automática (RF-21); con la RPC, el único camino a una función pasa por el algoritmo.
+- **Cinco funciones `SECURITY DEFINER` con `EXECUTE` para `authenticated`.**
+  `crear_funciones`, `modificar_funcion`, `dar_de_baja_funcion`, `crear_sala` y
+  `actualizar_sala` son las únicas puertas de escritura de la F5, y el linter de
+  Supabase las va a marcar como advertencia (`authenticated_security_definer_function_executable`).
+  Es intencional: cada una verifica `es_admin()` como primer paso y lanza `42501` si
+  quien llama no lo es, y ninguna hace nada que el rol no pueda hacer ya desde la
+  interfaz de administración. Las cinco internas (`programar_funciones`,
+  `buscar_sala_libre`, `horarios_libres_cercanos`, `registrar_actividad` y
+  `generar_butacas_sala`) no tienen `EXECUTE` para ningún rol de la API.
+- **La asignación de sala tiene tres capas.** La función `programar_funciones()`
+  elige la sala determinísticamente (la libre de menor nombre) y toma un advisory
+  lock para que dos altas simultáneas se ejecuten una detrás de otra; la constraint
+  `EXCLUDE` de `0006` es la red final que garantiza la invariante aunque alguien
+  escriba por otro camino (`23P01`); y el alta es **todo o nada**: si una sola fecha
+  del lote no tiene sala no se crea ninguna y se devuelven horarios cercanos libres
+  (D-05). El algoritmo no tiene `GRANT` para la API: la puerta de entrada es
+  `crear_funciones()`, y el seed 004 usa el algoritmo directo porque corre sin sesión.
 - **Lo público se declara, no se hereda.** El catálogo se abre con una política
   `using (true)` explícita y un `GRANT SELECT` a `anon`. Las escrituras no tienen
   ni una ni otro, así que el catálogo es de solo lectura desde la API hasta que la
@@ -118,3 +143,10 @@ La prueba que cierra RF-38.1: como administrador,
 el anónimo lee el catálogo pero no lo escribe, no lee `resenas` directo pero sí por
 la función, un cliente no puede reseñar en nombre de otro y no puede editar ni
 borrar la reseña ajena. Necesita dos cuentas de cliente.
+
+`pruebas/salas_funciones.sql` cubre la F5, con una cuenta admin y una cliente: ni el
+admin inserta una función a mano (RF-21), la **quinta** función simultánea es rechazada
+y no crea ninguna del lote (todo o nada), el borde de RN-01 (entra a `fin + 30 min`, no
+a `fin + 29`), la baja libera la sala, una función con entradas vendidas no se da de
+baja ni se mueve pero sí cambia de precio, y el log recibe una fila por operación sin
+que nadie pueda leerlo ni editarlo.
