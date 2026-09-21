@@ -1,0 +1,151 @@
+:host {
+  display: block;
+
+  /* Tamaño de una butaca. El espacio para silla de ruedas vale el doble más un hueco */
+  --celda: 1.375rem;
+  --hueco: 0.1875rem;
+  --pasillo: 1.5rem;
+
+  /*
+   * Las tres siluetas, como máscaras. Cada ubicación es un solo <span> cuyo color se recorta con
+   * la forma: 532 elementos y no 532 <svg>. Se dibujan sobre una grilla de 24 × 24.
+   */
+
+  /* Butaca: respaldo redondeado, dos apoyabrazos y el asiento, separado del respaldo */
+  --silueta-estandar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='2' width='14' height='12' rx='3'/%3E%3Crect x='1.5' y='9' width='4' height='11' rx='1.5'/%3E%3Crect x='18.5' y='9' width='4' height='11' rx='1.5'/%3E%3Crect x='5' y='15.5' width='14' height='5.5' rx='2'/%3E%3C/svg%3E");
+
+  /* VIP: la misma butaca con una estrella calada en el respaldo, que además es más alto */
+  --silueta-vip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M8 0.5h8A3.5 3.5 0 0 1 19.5 4v10h-15V4A3.5 3.5 0 0 1 8 0.5zM12 3l1.5 3.1 3.4.5-2.5 2.4.6 3.4L12 10.7 8.9 12.4l.6-3.4L7 6.6l3.4-.5z'/%3E%3Crect x='1.5' y='8' width='4' height='12' rx='1.5'/%3E%3Crect x='18.5' y='8' width='4' height='12' rx='1.5'/%3E%3Crect x='5' y='15.5' width='14' height='5.5' rx='2'/%3E%3C/svg%3E");
+
+  /* Silla de ruedas: la figura sentada sobre una rueda. No es una butaca de otro color (D-01) */
+  --silueta-silla-ruedas: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='10' cy='3.6' r='2.2'/%3E%3Cpath d='M8.4 7.4h3.2l.3 4.6h4.6l3.2 6.8-2 .9-2.6-5.3H9.4z'/%3E%3Cpath d='M7.9 13.4a5.6 5.6 0 1 0 7.6 7.2' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.mapa {
+  margin: 0;
+}
+
+/*
+ * Fondo más hondo que el de la página: es el hueco de la sala. Un mapa más ancho que la
+ * pantalla se desplaza dentro de este cuadro y no agranda toda la página.
+ */
+.desplazable {
+  overflow-x: auto;
+  padding: var(--e-5) var(--e-4);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--fondo-hondo);
+}
+
+.plano {
+  display: grid;
+  gap: var(--hueco);
+  /* max-content y no 100%: el plano tiene el ancho de la fila más larga, y se centra si sobra */
+  inline-size: max-content;
+  margin-inline: auto;
+}
+
+.pantalla {
+  display: grid;
+  place-items: center;
+  block-size: 1.75rem;
+  margin-block-end: var(--e-4);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: linear-gradient(to bottom, var(--bombilla), var(--acento-hondo));
+  color: var(--texto-sobre-acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 1.25rem repeat(3, auto) 1.25rem;
+  align-items: center;
+  column-gap: var(--pasillo);
+}
+
+.letra {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  text-align: center;
+}
+
+.bloque {
+  display: flex;
+  gap: var(--hueco);
+}
+
+/* Cada ubicación es un cuadro del color de su tipo, recortado con la forma de su silueta */
+.ubicacion {
+  flex: none;
+  inline-size: var(--celda);
+  block-size: var(--celda);
+  mask: var(--silueta-estandar) center / contain no-repeat;
+}
+
+.ubicacion[data-tipo='estandar'] {
+  background: var(--texto-tenue);
+}
+
+.ubicacion[data-tipo='vip'] {
+  background: var(--acento);
+  mask-image: var(--silueta-vip);
+}
+
+/*
+ * Ancho de dos butacas más el hueco que hay entre ellas. Así 14 espacios miden lo mismo que
+ * 28 butacas (14 × (2c + h) + 13h = 28c + 27h) y los tres bloques de J y K quedan alineados
+ * con los de todas las demás filas.
+ */
+.ubicacion[data-tipo='silla_ruedas'] {
+  inline-size: calc(var(--celda) * 2 + var(--hueco));
+  background: var(--bombilla);
+  mask-image: var(--silueta-silla-ruedas);
+}
+
+/* El alto contraste del sistema descarta los fondos: se pinta con el color del texto */
+@media (forced-colors: active) {
+  .ubicacion {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}
+
+.leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2) var(--e-5);
+  margin-top: var(--e-4);
+  padding: 0;
+  list-style: none;
+}
+
+.leyenda li {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+/* En la leyenda el espacio de silla de ruedas no necesita ocupar el doble */
+.ubicacion--leyenda,
+.ubicacion--leyenda[data-tipo='silla_ruedas'] {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+}
+
+.nombre {
+  font-size: var(--t-cuerpo);
+}
+
+.cantidad {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+}
+
+.vacio {
+  color: var(--texto-tenue);
+}

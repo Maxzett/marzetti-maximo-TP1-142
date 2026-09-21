@@ -268,6 +268,24 @@
     </div>
   </section>
 
+  <section aria-labelledby="s-mapa">
+    <h2 id="s-mapa">Mapa de sala</h2>
+    <p class="bajada">
+      Los tres tipos de ubicación se reconocen por su silueta, no solo por el color (RF-16, RNF-10).
+      Los espacios para silla de ruedas de las filas J y K no son butacas pintadas de otro tono
+      (D-01): tienen su propio dibujo y ocupan el doble de ancho, así los 14 espacios de la fila
+      miden lo mismo que las 28 butacas de las demás.
+    </p>
+
+    <app-mapa-sala [butacas]="salaDeMuestra" etiqueta="la Sala 1" />
+
+    <p class="pie">
+      El plano se lee como una sola imagen con su descripción, y la leyenda repite los números en
+      texto. Con el alto contraste del sistema las siluetas se pintan con el color del texto. Es de
+      solo lectura: la compra (F6) le suma la selección y el tiempo real.
+    </p>
+  </section>
+
   <section aria-labelledby="s-a11y">
     <h2 id="s-a11y">Accesibilidad</h2>
     <p class="bajada">

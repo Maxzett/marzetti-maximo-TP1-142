@@ -2,12 +2,14 @@ import { Component, computed, signal } from '@angular/core';
 import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
 import { Pelicula } from '../../core/models/pelicula';
 import { COLORES_DE_OJOS, TIPOS_DE_SANGRE } from '../../core/models/perfil';
+import { salaDeMuestra } from '../../core/salas/muestra';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
 import { Chip } from '../../shared/chip/chip';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Estrellas } from '../../shared/estrellas/estrellas';
 import { FichaPelicula } from '../../shared/ficha-pelicula/ficha-pelicula';
+import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
@@ -29,6 +31,7 @@ import { Tarjeta } from '../../shared/tarjeta/tarjeta';
     Dialogo,
     Estrellas,
     FichaPelicula,
+    MapaSala,
     Mensaje,
     Poster,
     Seleccion,
@@ -57,6 +60,8 @@ export class Sistema {
     valor,
     texto: valor.charAt(0).toUpperCase() + valor.slice(1),
   }));
+  // Mapa de sala (F5): la distribución real de la base, armada en memoria
+  protected readonly salaDeMuestra = salaDeMuestra();
   protected readonly dialogoAbierto = signal(false);
   protected readonly procesando = signal(false);
 

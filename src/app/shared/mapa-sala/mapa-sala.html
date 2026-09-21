@@ -1,0 +1,47 @@
+@if (filas().length === 0) {
+  <p class="vacio">Esta sala todavía no tiene butacas cargadas.</p>
+} @else {
+  <figure class="mapa">
+    <!--
+      Dos capas a propósito. El contenedor es una región con foco: el mapa es más ancho que
+      un celular y sin foco un teclado no podría desplazarlo. Adentro, el plano es UNA imagen
+      con su descripción: 532 butacas leídas una por una no le sirven a nadie.
+    -->
+    <div class="desplazable" role="region" tabindex="0" [attr.aria-label]="'Mapa de ' + etiqueta()">
+      <div class="plano" role="img" [attr.aria-label]="resumen()">
+        <div class="pantalla" aria-hidden="true"><span>Pantalla</span></div>
+
+        @for (fila of filas(); track fila.fila) {
+          <div class="fila">
+            <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
+            @for (bloque of fila.bloques; track $index) {
+              <div class="bloque">
+                @for (butaca of bloque; track butaca.id) {
+                  <span class="ubicacion" [attr.data-tipo]="butaca.tipo"></span>
+                }
+              </div>
+            }
+            <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- La leyenda es texto de verdad: dice lo mismo que el dibujo, sin depender de verlo -->
+    <figcaption>
+      <ul class="leyenda">
+        @for (tipo of tipos; track tipo) {
+          <li>
+            <span
+              class="ubicacion ubicacion--leyenda"
+              aria-hidden="true"
+              [attr.data-tipo]="tipo"
+            ></span>
+            <span class="nombre">{{ nombres[tipo] }}</span>
+            <span class="cantidad">{{ conteo()[tipo] }}</span>
+          </li>
+        }
+      </ul>
+    </figcaption>
+  </figure>
+}
