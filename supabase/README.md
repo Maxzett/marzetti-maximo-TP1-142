@@ -25,8 +25,11 @@ que recrear el proyecto desde cero.
 | `migrations/0014_rls_perfiles.sql` | Políticas de perfiles y datos sensibles |
 | `migrations/0015_alta_de_perfil.sql` | Trigger de alta de perfil sobre `auth.users` |
 | `migrations/0016_permisos_api.sql` | Privilegios de tabla para `authenticated` |
+| `migrations/0017_rls_catalogo.sql` | Catálogo público de solo lectura, `peliculas_mas_vendidas()` y `puntajes_peliculas()` |
+| `migrations/0018_resenas.sql` | Reseñas: escritura propia y `resenas_de_pelicula()` como única lectura pública |
 | `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo |
 | `seed/002_catalogo_base.sql` | Géneros, categorías, cupones y recompensa inicial |
+| `seed/003_peliculas_demo.sql` | 12 películas inventadas (10 en cartelera, 2 próximas), con aserciones |
 
 Si una tabla recién creada devuelve `PGRST205 Could not find the table in the
 schema cache`, es el caché de PostgREST. Se refresca con:
@@ -59,10 +62,20 @@ reglas que corren son las políticas RLS.
   que la F3 necesita, y cada fase otorga lo suyo junto con sus políticas.
 - **Deny by default.** Las 24 tablas tienen RLS habilitada, cada una en el mismo
   archivo —y por lo tanto en la misma transacción— que la crea: ninguna existe
-  abierta ni por un instante. Solo `perfiles` y `perfiles_sensibles` tienen
-  políticas escritas; las otras 22 no devuelven ni una fila hasta que su fase abra
-  la suya. El linter va a reportarlas con `rls_enabled_no_policy`: es informativo y
+  abierta ni por un instante. Tienen políticas escritas `perfiles`,
+  `perfiles_sensibles` (F3), `generos`, `peliculas`, `peliculas_generos` y
+  `resenas` (F4); las otras 18 no devuelven ni una fila hasta que su fase abra la
+  suya. El linter va a reportarlas con `rls_enabled_no_policy`: es informativo y
   es intencional.
+- **Lo público se declara, no se hereda.** El catálogo se abre con una política
+  `using (true)` explícita y un `GRANT SELECT` a `anon`. Las escrituras no tienen
+  ni una ni otro, así que el catálogo es de solo lectura desde la API hasta que la
+  F9 abra el alta para el administrador.
+- **Un agregado no necesita abrir la tabla.** El top de ventas y el promedio de
+  estrellas salen de funciones `SECURITY DEFINER` con `search_path` fijado y
+  `EXECUTE` otorgado a mano: devuelven la cifra, y `ordenes` y `resenas` siguen
+  sin política de lectura pública. Se prefirió a una *view* porque el advisor de
+  Supabase marca `security_definer_view` como error.
 - **Los datos sensibles están en otra tabla.** RLS filtra filas, no columnas. Como
   el admin necesita leer nombre y apellido (RF-61) pero no puede ver tipo de
   sangre, color de ojos ni días de vacaciones (RF-38.1, RNF-11), los tres campos
@@ -100,3 +113,8 @@ sujeto a RLS, y da la falsa impresión de que no hay seguridad.
 
 La prueba que cierra RF-38.1: como administrador,
 `select count(*) from public.perfiles_sensibles` devuelve **0**.
+
+`pruebas/rls_catalogo.sql` sigue el mismo formato para el catálogo y las reseñas:
+el anónimo lee el catálogo pero no lo escribe, no lee `resenas` directo pero sí por
+la función, un cliente no puede reseñar en nombre de otro y no puede editar ni
+borrar la reseña ajena. Necesita dos cuentas de cliente.
