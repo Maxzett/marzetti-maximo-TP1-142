@@ -1,0 +1,68 @@
+<section class="contenedor pantalla">
+  <p class="sobretitulo">Catálogo completo</p>
+  <h1>Películas</h1>
+  <p class="bajada">Buscá por nombre y combiná géneros para llegar a lo que querés ver.</p>
+
+  <!-- novalidate y sin submit: la búsqueda es instantánea, Enter no tiene nada que enviar -->
+  <form class="filtros" role="search" novalidate (submit)="$event.preventDefault()">
+    <app-campo
+      etiqueta="Buscar por nombre"
+      tipo="search"
+      marcador="Ej.: Mar de cenizas"
+      autocompletado="off"
+      [valor]="busqueda()"
+      (valorChange)="alBuscar($event)"
+    />
+
+    @if (generosDisponibles().length > 0) {
+      <fieldset class="generos">
+        <legend>Géneros</legend>
+        <div class="chips">
+          @for (genero of generosDisponibles(); track genero.slug) {
+            <app-chip
+              [activo]="seleccionados().includes(genero.slug)"
+              (activoChange)="alternarGenero(genero.slug, $event)"
+            >
+              {{ genero.nombre }}
+            </app-chip>
+          }
+        </div>
+        @if (seleccionados().length > 1) {
+          <p class="nota">Se muestran las películas que tienen todos los géneros elegidos.</p>
+        }
+      </fieldset>
+    }
+  </form>
+
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando el catálogo" />
+  } @else if (fallo()) {
+    <app-mensaje tono="error">
+      No pudimos cargar las películas.
+      <button class="boton boton--fantasma" type="button" (click)="cargar()">Reintentar</button>
+    </app-mensaje>
+  } @else {
+    <!-- role="status" es una región viva educada: anuncia el resultado sin cortar lo que se lee -->
+    <p class="resumen" role="status">{{ resumen() }}</p>
+
+    @if (resultados().length > 0) {
+      <ul class="grilla">
+        @for (pelicula of resultados(); track pelicula.id) {
+          <li>
+            <app-ficha-pelicula
+              [pelicula]="pelicula"
+              [puntaje]="puntajes().get(pelicula.id) ?? null"
+            />
+          </li>
+        }
+      </ul>
+    } @else if (hayFiltros()) {
+      <app-mensaje tono="aviso">
+        Ninguna película coincide con lo que buscás.
+        <button class="boton boton--fantasma" type="button" (click)="limpiar()">
+          Limpiar filtros
+        </button>
+      </app-mensaje>
+    }
+  }
+</section>

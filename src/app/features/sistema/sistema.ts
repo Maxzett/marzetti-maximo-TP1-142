@@ -1,11 +1,15 @@
 import { Component, computed, signal } from '@angular/core';
 import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
+import { Pelicula } from '../../core/models/pelicula';
 import { COLORES_DE_OJOS, TIPOS_DE_SANGRE } from '../../core/models/perfil';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
 import { Chip } from '../../shared/chip/chip';
 import { Dialogo } from '../../shared/dialogo/dialogo';
+import { Estrellas } from '../../shared/estrellas/estrellas';
+import { FichaPelicula } from '../../shared/ficha-pelicula/ficha-pelicula';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { Poster } from '../../shared/poster/poster';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { SelectorHora } from '../../shared/selector-hora/selector-hora';
@@ -23,7 +27,10 @@ import { Tarjeta } from '../../shared/tarjeta/tarjeta';
     Campo,
     Chip,
     Dialogo,
+    Estrellas,
+    FichaPelicula,
     Mensaje,
+    Poster,
     Seleccion,
     SelectorFecha,
     SelectorHora,
@@ -52,6 +59,39 @@ export class Sistema {
   }));
   protected readonly dialogoAbierto = signal(false);
   protected readonly procesando = signal(false);
+
+  // Catálogo (F4): datos de muestra para ver el póster, las estrellas y la ficha en sus estados
+  protected readonly calificacion = signal(0);
+  protected readonly comentarioDeMuestra = signal('');
+  protected readonly peliculasDeMuestra: readonly Pelicula[] = [
+    {
+      id: 'muestra-1',
+      titulo: 'Mar de cenizas',
+      sinopsis: '',
+      poster_url: null,
+      duracion_minutos: 131,
+      restriccion_edad: 13,
+      fecha_estreno: null,
+      destacada: true,
+      precio_preventa: null,
+      generos: [
+        { id: 'a', nombre: 'Acción', slug: 'accion' },
+        { id: 'b', nombre: 'Ciencia ficción', slug: 'ciencia-ficcion' },
+      ],
+    },
+    {
+      id: 'muestra-2',
+      titulo: 'La casa del lago seco',
+      sinopsis: '',
+      poster_url: null,
+      duracion_minutos: 109,
+      restriccion_edad: 18,
+      fecha_estreno: null,
+      destacada: false,
+      precio_preventa: null,
+      generos: [{ id: 'c', nombre: 'Terror', slug: 'terror' }],
+    },
+  ];
 
   // Los tres casos del RNF-08, con datos de ejemplo
   protected readonly fechaDeFuncion = signal('');

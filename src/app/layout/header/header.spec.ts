@@ -50,6 +50,27 @@ describe('Header', () => {
     salir.mockClear();
   });
 
+  describe('navegación principal', () => {
+    const enlaces = (fixture: ComponentFixture<Header>) =>
+      Array.from(fixture.nativeElement.querySelectorAll('nav a') as NodeListOf<HTMLAnchorElement>);
+
+    it('lleva a la cartelera y al catálogo completo', async () => {
+      const fixture = await montar(null);
+
+      const destinos = enlaces(fixture).map((a) => [a.textContent?.trim(), a.getAttribute('href')]);
+      expect(destinos).toEqual([
+        ['Cartelera', '/'],
+        ['Películas', '/peliculas'],
+      ]);
+    });
+
+    it('funciona igual con la sesión abierta', async () => {
+      const fixture = await montar('cliente');
+
+      expect(enlaces(fixture).map((a) => a.getAttribute('href'))).toContain('/peliculas');
+    });
+  });
+
   it('ofrece Ingresar cuando no hay sesión', async () => {
     const fixture = await montar(null);
     const enlace = fixture.nativeElement.querySelector('.ingresar') as HTMLAnchorElement;

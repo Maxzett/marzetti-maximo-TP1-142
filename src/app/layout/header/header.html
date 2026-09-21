@@ -20,6 +20,15 @@
             >Cartelera</a
           >
         </li>
+        <!--
+          Sin exact: la ficha de una película (/peliculas/:id) también es "Películas".
+          El enlace vuelve a /peliculas a secas, que es lo que reinicia los filtros del buscador.
+        -->
+        <li>
+          <a routerLink="/peliculas" routerLinkActive="activo" ariaCurrentWhenActive="page"
+            >Películas</a
+          >
+        </li>
         <!-- Próximamente, Candy y Mi entrada se suman cuando exista su ruta -->
       </ul>
     </nav>

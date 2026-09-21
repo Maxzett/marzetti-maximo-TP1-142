@@ -1,0 +1,215 @@
+.pantalla {
+  padding-block: var(--e-7);
+}
+
+.volver,
+.volver-solo {
+  display: inline-block;
+  margin-bottom: var(--e-5);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.volver-solo {
+  margin-top: var(--e-4);
+}
+
+.ficha {
+  display: grid;
+  gap: var(--e-5);
+  margin-bottom: var(--e-6);
+}
+
+.poster {
+  width: min(100%, 15rem);
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e-3);
+}
+
+.generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-1) var(--e-3);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.generos li + li::before {
+  content: '·';
+  margin-right: var(--e-3);
+}
+
+h1 {
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  line-height: 0.98;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo);
+}
+
+.edad {
+  padding: 0 var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-chico);
+  font-family: var(--fuente-titulo);
+  letter-spacing: 0.08em;
+}
+
+/* El rojo refuerza el +18, pero el "+18" está escrito: no se depende del color (RNF-10) */
+.edad--mayores {
+  border-color: var(--rojo-claro);
+  color: var(--rojo-claro);
+}
+
+.sinopsis {
+  max-width: 42rem;
+  font-size: var(--t-cuerpo-lg);
+  line-height: 1.65;
+}
+
+h2 {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+}
+
+.pendiente {
+  margin-top: var(--e-2);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/* ── Reseñas ── */
+
+.resenas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  margin-top: var(--e-7);
+}
+
+.resenas h2 {
+  padding-bottom: var(--e-2);
+  border-bottom: 1px dashed var(--borde-fuerte);
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.invitacion,
+.vacio {
+  color: var(--texto-tenue);
+}
+
+.formulario,
+.propia {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e-4);
+  max-width: 40rem;
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.formulario app-campo {
+  align-self: stretch;
+}
+
+h3 {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+.acciones--dialogo {
+  margin-top: var(--e-5);
+  justify-content: flex-end;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.resena {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+/* La propia se distingue por el borde y por la marca escrita, no solo por el color */
+.resena--propia {
+  border-color: var(--borde-fuerte);
+}
+
+.resena__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-1) var(--e-4);
+}
+
+.autor {
+  font-family: var(--fuente-titulo);
+}
+
+.marca-propia {
+  margin-left: var(--e-2);
+  padding: 0 var(--e-2);
+  border: 1px solid var(--acento-hondo);
+  border-radius: var(--r-chico);
+  color: var(--acento);
+  font-size: var(--t-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.fecha {
+  margin-left: auto;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.comentario {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+@media (min-width: 48rem) {
+  .ficha {
+    grid-template-columns: 15rem 1fr;
+    gap: var(--e-6);
+  }
+}

@@ -67,6 +67,33 @@ h2 {
   max-width: 22rem;
 }
 
+/* Los subtítulos de esta sección van uno atrás del otro: sin aire quedan pegados al pie de arriba */
+#s-catalogo .titulo-caso {
+  margin-top: var(--e-5);
+}
+
+.fila--posters {
+  align-items: flex-start;
+  gap: var(--e-5);
+}
+
+.fila--posters app-poster {
+  width: 11rem;
+}
+
+.fila--estrellas {
+  gap: var(--e-6);
+}
+
+.fila--fichas {
+  align-items: flex-start;
+  gap: var(--e-5);
+}
+
+.fila--fichas li {
+  width: 14rem;
+}
+
 .fila--tarjetas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));

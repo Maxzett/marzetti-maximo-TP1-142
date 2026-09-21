@@ -6,6 +6,21 @@ import { NotFound } from './features/not-found/not-found';
 export const routes: Routes = [
   { path: '', component: Home, title: 'Cine Emezeta' },
 
+  // El catálogo y la ficha se cargan aparte de la portada, con el mismo criterio que las
+  // pantallas de cuenta. Son públicos: la compra anónima (RF-26) también los recorre.
+  // El id llega al componente como input() por withComponentInputBinding.
+  {
+    path: 'peliculas',
+    loadComponent: () => import('./features/peliculas/peliculas').then((m) => m.Peliculas),
+    title: 'Películas · Cine Emezeta',
+  },
+  {
+    path: 'peliculas/:id',
+    loadComponent: () =>
+      import('./features/pelicula-detalle/pelicula-detalle').then((m) => m.PeliculaDetalle),
+    title: 'Película · Cine Emezeta',
+  },
+
   // Las pantallas de cuenta van en su propio chunk: quien entra a comprar de forma
   // anónima (RF-26) no tiene por qué descargarse el formulario de registro.
   // Los guards son ayudas de interfaz, no seguridad: eso lo hace RLS (RNF-09).

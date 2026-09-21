@@ -144,6 +144,72 @@
     </p>
   </section>
 
+  <section aria-labelledby="s-catalogo">
+    <h2 id="s-catalogo">Catálogo: póster, estrellas y ficha</h2>
+
+    <h3 class="titulo-caso">Póster</h3>
+    <div class="fila fila--posters">
+      <app-poster titulo="Mar de cenizas" />
+      <app-poster titulo="Un domingo cualquiera en Boedo" />
+    </div>
+    <p class="pie">
+      Sin imagen dibuja un póster tipográfico con el título sobre un marco de bombillas, siempre en
+      proporción 2:3. Con <code>poster_url</code> muestra la imagen. El tamaño del título sigue el
+      ancho del póster con una <code>container query</code>, no el de la pantalla.
+    </p>
+
+    <h3 class="titulo-caso">Estrellas: lectura</h3>
+    <div class="fila fila--estrellas">
+      <app-estrellas [valor]="4.5" [cantidad]="12" />
+      <app-estrellas [valor]="3" [cantidad]="1" />
+      <app-estrellas [valor]="0" [cantidad]="0" />
+    </div>
+    <p class="pie">
+      Cada una se anuncia como una imagen con el número dicho en palabras, y el promedio va escrito
+      al lado: no depende del dibujo (RNF-10). Sin reseñas no dibuja cinco estrellas vacías.
+    </p>
+
+    <h3 class="titulo-caso">Estrellas: edición</h3>
+    <app-estrellas etiqueta="Tu calificación" [editable]="true" [(valor)]="calificacion" />
+    <p class="pie">
+      Es un <code>radiogroup</code>: el grupo entero es una sola parada de Tab y adentro las flechas
+      mueven y eligen a la vez, igual que el selector de hora. Elegiste
+      <strong>{{ calificacion() || '—' }}</strong
+      >.
+    </p>
+
+    <h3 class="titulo-caso">Campo multilínea</h3>
+    <div class="fila fila--campos">
+      <app-campo
+        etiqueta="Comentario"
+        ayuda="Opcional. Contá en pocas palabras qué te pareció."
+        [filas]="4"
+        [largoMaximo]="500"
+        [(valor)]="comentarioDeMuestra"
+      />
+    </div>
+
+    <h3 class="titulo-caso">Ficha de película</h3>
+    <ul class="fila fila--fichas">
+      <li>
+        <app-ficha-pelicula
+          [pelicula]="peliculasDeMuestra[0]"
+          [puntaje]="{ pelicula_id: 'muestra-1', promedio: 4.5, cantidad: 12 }"
+          [puesto]="1"
+          [entradas]="240"
+        />
+      </li>
+      <li>
+        <app-ficha-pelicula [pelicula]="peliculasDeMuestra[1]" />
+      </li>
+    </ul>
+    <p class="pie">
+      Un solo enlace, en el título, estirado sobre toda la tarjeta con <code>::after</code>: un
+      enlace que envolviera el póster y las estrellas haría que el lector de pantalla los leyera
+      como nombre del enlace. La edad va escrita (+13, +18, ATP), no solo pintada.
+    </p>
+  </section>
+
   <section aria-labelledby="s-fechas">
     <h2 id="s-fechas">Selector de fecha y hora</h2>
     <p class="bajada">

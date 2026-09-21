@@ -1,0 +1,147 @@
+<section class="contenedor pantalla">
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando la película" />
+  } @else if (pelicula(); as datos) {
+    <a class="volver" routerLink="/peliculas">← Todas las películas</a>
+
+    <article class="ficha">
+      <app-poster class="poster" [titulo]="datos.titulo" [url]="datos.poster_url" />
+
+      <div class="datos">
+        @if (datos.generos.length > 0) {
+          <ul class="generos" aria-label="Géneros">
+            @for (genero of datos.generos; track genero.id) {
+              <li>{{ genero.nombre }}</li>
+            }
+          </ul>
+        }
+
+        <h1>{{ datos.titulo }}</h1>
+
+        <p class="meta">
+          @if (edad(); as etiqueta) {
+            <span class="edad" [class.edad--mayores]="datos.restriccion_edad === 18">
+              <span aria-hidden="true">{{ etiqueta.corto }}</span>
+              <span class="solo-lectores">{{ etiqueta.largo }}</span>
+            </span>
+          }
+          <span>{{ datos.duracion_minutos }} min</span>
+        </p>
+
+        <!-- RF-11: el promedio va junto al título, antes de decidir si comprar -->
+        <app-estrellas [valor]="puntaje()?.promedio ?? 0" [cantidad]="puntaje()?.cantidad ?? 0" />
+
+        @if (datos.sinopsis) {
+          <p class="sinopsis">{{ datos.sinopsis }}</p>
+        }
+
+        <!-- RF-28 y RF-29: se avisa acá, antes de llegar a la compra, no en el checkout -->
+        @if (datos.restriccion_edad > 0) {
+          <app-mensaje tono="aviso">
+            Apta para mayores de {{ datos.restriccion_edad }} años. No se venden entradas a menores
+            de esa edad, y toda entrada de esta película indica que el espectador debe ir acompañado
+            por un adulto.
+          </app-mensaje>
+        }
+      </div>
+    </article>
+
+    <app-tarjeta>
+      <h2>Funciones y entradas</h2>
+      <!-- Las funciones llegan en la F5 y la compra en la F6 -->
+      <p class="pendiente">Acá vas a elegir el día y el horario para comprar tus entradas.</p>
+    </app-tarjeta>
+
+    <section class="resenas" aria-labelledby="titulo-resenas">
+      <h2 id="titulo-resenas">Reseñas</h2>
+
+      @if (avisoDeExito()) {
+        <app-mensaje tono="exito">{{ avisoDeExito() }}</app-mensaje>
+      }
+      @if (errorDelFormulario()) {
+        <app-mensaje tono="error">{{ errorDelFormulario() }}</app-mensaje>
+      }
+
+      @if (!haySesion()) {
+        <p class="invitacion">
+          Para dejar tu reseña <a routerLink="/ingresar">ingresá</a> o
+          <a routerLink="/registrarme">creá tu cuenta</a>.
+        </p>
+      } @else if (mostrarFormulario()) {
+        <form class="formulario" novalidate (submit)="guardar($event)">
+          <h3>{{ miResena() ? 'Corregí tu reseña' : 'Dejá tu reseña' }}</h3>
+
+          <app-estrellas etiqueta="Tu calificación" [editable]="true" [(valor)]="estrellas" />
+
+          <app-campo
+            etiqueta="Comentario"
+            ayuda="Opcional. Contá en pocas palabras qué te pareció."
+            [filas]="4"
+            [largoMaximo]="largoMaximo"
+            [(valor)]="comentario"
+          />
+
+          <div class="acciones">
+            <app-boton tipo="submit" [cargando]="guardando()">Guardar reseña</app-boton>
+            @if (editando()) {
+              <app-boton variante="fantasma" (presionado)="cancelarEdicion()">Cancelar</app-boton>
+            }
+          </div>
+        </form>
+      } @else {
+        <div class="propia">
+          <p>Ya dejaste tu reseña de esta película.</p>
+          <div class="acciones">
+            <app-boton variante="borde" (presionado)="editar()">Editar mi reseña</app-boton>
+            <app-boton variante="fantasma" (presionado)="confirmandoBorrado.set(true)">
+              Borrar
+            </app-boton>
+          </div>
+        </div>
+      }
+
+      @if (resenas(); as lista) {
+        @if (lista.length === 0) {
+          <p class="vacio">Todavía nadie dejó su reseña.</p>
+        } @else {
+          <ul class="lista">
+            @for (resena of lista; track resena.id) {
+              <li class="resena" [class.resena--propia]="resena.es_propia">
+                <div class="resena__cabecera">
+                  <app-estrellas [valor]="resena.estrellas" />
+                  <p class="autor">
+                    {{ resena.autor }}
+                    @if (resena.es_propia) {
+                      <span class="marca-propia">Tu reseña</span>
+                    }
+                  </p>
+                  <time class="fecha" [attr.datetime]="resena.creado_at">
+                    {{ fechaDe(resena.creado_at) }}
+                  </time>
+                </div>
+                @if (resena.comentario) {
+                  <p class="comentario">{{ resena.comentario }}</p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      } @else {
+        <app-mensaje tono="aviso">No pudimos cargar las reseñas.</app-mensaje>
+      }
+    </section>
+
+    <app-dialogo titulo="¿Borrar tu reseña?" [(abierto)]="confirmandoBorrado">
+      <p>Vas a borrar tu calificación y tu comentario. Esto no se puede deshacer.</p>
+      <div class="acciones acciones--dialogo">
+        <app-boton variante="fantasma" (presionado)="confirmandoBorrado.set(false)">
+          Cancelar
+        </app-boton>
+        <app-boton [cargando]="guardando()" (presionado)="borrar()">Borrar reseña</app-boton>
+      </div>
+    </app-dialogo>
+  } @else {
+    <app-mensaje tono="aviso">No pudimos encontrar esta película.</app-mensaje>
+    <p class="volver-solo"><a routerLink="/peliculas">Volver a las películas</a></p>
+  }
+</section>
