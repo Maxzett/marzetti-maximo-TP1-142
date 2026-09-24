@@ -26,6 +26,9 @@ function entrada(cambios: Partial<EntradaComprada> = {}): EntradaComprada {
   };
 }
 
+/** Intl escribe un espacio de no separación entre el $ y el número: se compara con espacio común */
+const sinNbsp = (texto: string) => texto.replace(/ /g, ' ');
+
 describe('leyenda de adulto acompañante (RF-29)', () => {
   it('una película con restricción la lleva, con la edad', () => {
     expect(leyendaDeAcompanante({ restriccion_edad: 13 })).toBe(
@@ -54,7 +57,7 @@ describe('datos de la entrada', () => {
   });
 
   it('muestra la sala, la función en hora del cine y el total', () => {
-    const datos = new Map(datosDeLaEntrada(entrada()).map((d) => [d.rotulo, d.valor]));
+    const datos = new Map(datosDeLaEntrada(entrada()).map((d) => [d.rotulo, sinNbsp(d.valor)]));
 
     expect(datos.get('Sala')).toBe('Sala 2');
     expect(datos.get('Función')).toContain('18:00');
@@ -62,7 +65,7 @@ describe('datos de la entrada', () => {
   });
 
   it('detalla el tipo y el precio de las butacas que no son estándar', () => {
-    const datos = new Map(datosDeLaEntrada(entrada()).map((d) => [d.rotulo, d.valor]));
+    const datos = new Map(datosDeLaEntrada(entrada()).map((d) => [d.rotulo, sinNbsp(d.valor)]));
 
     expect(datos.get('R5')).toBe('VIP · $ 8.500');
     expect(datos.has('A1')).toBe(false);
