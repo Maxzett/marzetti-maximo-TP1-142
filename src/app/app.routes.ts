@@ -29,6 +29,14 @@ export const routes: Routes = [
     title: 'Comprar entradas · Cine Emezeta',
   },
 
+  // La entrada comprada (RF-27). Sin guard: se llega con el código de la orden, que no se puede
+  // adivinar, y la compra es anónima (RF-26). QR y PDF se importan recién cuando hacen falta.
+  {
+    path: 'entrada/:codigo',
+    loadComponent: () => import('./features/entrada/entrada').then((m) => m.Entrada),
+    title: 'Tu entrada · Cine Emezeta',
+  },
+
   // Las pantallas de cuenta van en su propio chunk: quien entra a comprar de forma
   // anónima (RF-26) no tiene por qué descargarse el formulario de registro.
   // Los guards son ayudas de interfaz, no seguridad: eso lo hace RLS (RNF-09).

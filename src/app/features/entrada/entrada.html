@@ -1,0 +1,91 @@
+<section class="contenedor pantalla">
+  @if (cargando()) {
+    <app-spinner etiqueta="Buscando tu entrada" />
+  } @else if (entrada(); as e) {
+    @switch (e.estado) {
+      @case ('pagada') {
+        <header class="cabecera">
+          <p class="sobretitulo">Compra confirmada</p>
+          <h1>Tu entrada</h1>
+          <p class="aviso-mail">
+            Guardá esta pantalla o descargá el PDF. La entrada corresponde a
+            <strong>{{ e.email }}</strong
+            >.
+          </p>
+        </header>
+
+        @if (e.entrada_validada_at) {
+          <app-mensaje tono="aviso">Esta entrada ya se usó para ingresar a la sala.</app-mensaje>
+        }
+
+        @if (leyenda()) {
+          <app-mensaje tono="aviso">{{ leyenda() }}</app-mensaje>
+        }
+
+        <app-tarjeta [destacada]="true">
+          <div class="ticket">
+            <dl class="datos">
+              @for (dato of datos(); track $index) {
+                <div class="dato">
+                  <dt>{{ dato.rotulo }}</dt>
+                  <dd>{{ dato.valor }}</dd>
+                </div>
+              }
+            </dl>
+
+            <div class="codigo">
+              @if (qr()) {
+                <img
+                  class="qr"
+                  [src]="qr()"
+                  width="200"
+                  height="200"
+                  [alt]="'Código QR de la entrada. Código: ' + e.codigo"
+                />
+              }
+              <!-- El código escrito es la alternativa al QR: el empleado lo puede ingresar a mano -->
+              <p class="texto-codigo">
+                <span class="rotulo">Código</span>
+                <span class="valor">{{ e.codigo }}</span>
+              </p>
+            </div>
+          </div>
+
+          @if (errorDeDescarga()) {
+            <app-mensaje tono="error">{{ errorDeDescarga() }}</app-mensaje>
+          }
+
+          <div class="acciones">
+            <a class="boton boton--borde" routerLink="/peliculas">Ver más películas</a>
+            <app-boton
+              [cargando]="descargando()"
+              [deshabilitado]="!qr()"
+              (presionado)="descargar()"
+            >
+              Descargar PDF
+            </app-boton>
+          </div>
+        </app-tarjeta>
+      }
+      @case ('pendiente') {
+        <app-mensaje tono="aviso">
+          Esta compra todavía no fue pagada, así que no hay entrada para mostrar.
+        </app-mensaje>
+        <p><a routerLink="/peliculas">Volver a las películas</a></p>
+      }
+      @default {
+        <app-mensaje tono="error">
+          Esta compra ya no está vigente ({{
+            e.estado === 'cancelada' ? 'fue cancelada' : 'la reserva venció'
+          }}).
+        </app-mensaje>
+        <p><a routerLink="/peliculas">Volver a las películas</a></p>
+      }
+    }
+  } @else {
+    <app-mensaje tono="error">
+      No encontramos esa entrada. Revisá que el código esté completo.
+    </app-mensaje>
+    <p><a routerLink="/peliculas">Ver las películas</a></p>
+  }
+</section>

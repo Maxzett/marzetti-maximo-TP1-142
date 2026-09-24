@@ -1,0 +1,104 @@
+.pantalla {
+  display: grid;
+  /* minmax(0, 1fr): una columna con auto crece hasta el ancho de su contenido y desborda el celular */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e-5);
+  padding-block: var(--e-6);
+}
+
+.cabecera {
+  display: grid;
+  gap: var(--e-2);
+}
+
+.sobretitulo {
+  margin: 0;
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: var(--t-display);
+}
+
+.aviso-mail {
+  margin: 0;
+  color: var(--texto-tenue);
+}
+
+.ticket {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--e-6);
+  align-items: start;
+}
+
+.datos {
+  display: grid;
+  gap: var(--e-3);
+  margin: 0;
+}
+
+.dato dt {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dato dd {
+  margin: 0;
+  font-size: var(--t-cuerpo-lg);
+}
+
+.codigo {
+  display: grid;
+  justify-items: center;
+  gap: var(--e-3);
+}
+
+/* Fondo blanco fijo: un QR sobre fondo oscuro no lo lee ningún lector */
+.qr {
+  display: block;
+  inline-size: 12.5rem;
+  block-size: 12.5rem;
+  border-radius: var(--r-chico);
+  background: #fff;
+}
+
+.texto-codigo {
+  display: grid;
+  justify-items: center;
+  gap: var(--e-1);
+  margin: 0;
+}
+
+.rotulo {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.valor {
+  font-family: 'Courier New', monospace;
+  font-size: var(--t-rotulo);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  /* Un código de 20 caracteres no entra en un celular chico: se parte antes que desbordar */
+  overflow-wrap: anywhere;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--e-3);
+  margin-block-start: var(--e-5);
+}
