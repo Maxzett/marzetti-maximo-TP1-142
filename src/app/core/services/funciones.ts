@@ -19,6 +19,8 @@ import { Supabase } from './supabase';
 const COLUMNAS =
   'id, pelicula_id, sala_id, inicio, formato, idioma, precio_base, activa, pelicula:peliculas(titulo, duracion_minutos), sala:salas(nombre)';
 
+const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** PostgREST corta en 1000 filas. La programación de un mes son cientos: se pide con tope explícito */
 const MAXIMO_DE_FUNCIONES = 500;
 
@@ -45,6 +47,26 @@ type RespuestaDeModificacion =
 @Service()
 export class Funciones {
   private readonly supabase = inject(Supabase);
+
+  /**
+   * Una función por id, para la pantalla de compra. Null si no existe, fue dada de baja (la
+   * política pública no la deja ver) o la lectura falló. Un id que no es uuid haría fallar a
+   * Postgres con 22P02: es la misma "no encontrada", y no se va a la red por una URL escrita a mano.
+   */
+  async cargarUna(id: string): Promise<Funcion | null> {
+    if (!ES_UUID.test(id)) {
+      return null;
+    }
+
+    const { data, error } = await this.supabase.client
+      .from('funciones')
+      .select(COLUMNAS)
+      .eq('id', id)
+      .eq('activa', true)
+      .maybeSingle<Funcion>();
+
+    return error ? null : data;
+  }
 
   /**
    * Las funciones vigentes que todavía no empezaron, por horario. Null si la lectura falló.

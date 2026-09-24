@@ -1,0 +1,7 @@
+<p class="cuenta" [class.cuenta--urgente]="urgente()">
+  <span class="rotulo">Tu reserva vence en</span>
+  <!-- role="timer" no anuncia solo: el aviso útil está en la región viva de abajo -->
+  <span class="tiempo" role="timer">{{ texto() }}</span>
+</p>
+
+<span class="solo-lectores" role="status" aria-live="polite">{{ anuncio() }}</span>

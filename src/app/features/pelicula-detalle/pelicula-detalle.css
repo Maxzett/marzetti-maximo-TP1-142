@@ -91,12 +91,6 @@ h2 {
   font-size: var(--t-rotulo);
 }
 
-.pendiente {
-  margin-top: var(--e-2);
-  color: var(--texto-tenue);
-  font-size: var(--t-mini);
-}
-
 /* ── Reseñas ── */
 
 .resenas {

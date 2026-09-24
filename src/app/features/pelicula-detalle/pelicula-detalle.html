@@ -48,8 +48,7 @@
 
     <app-tarjeta>
       <h2>Funciones y entradas</h2>
-      <!-- Las funciones llegan en la F5 y la compra en la F6 -->
-      <p class="pendiente">Acá vas a elegir el día y el horario para comprar tus entradas.</p>
+      <app-elegir-funcion [peliculaId]="datos.id" />
     </app-tarjeta>
 
     <section class="resenas" aria-labelledby="titulo-resenas">

@@ -1,0 +1,37 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+.cuenta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  margin: 0;
+  padding: var(--e-1) var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.rotulo {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.tiempo {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+  font-variant-numeric: tabular-nums;
+}
+
+/* El último minuto se distingue por el borde y el peso, además del color (RNF-10) */
+.cuenta--urgente {
+  border-color: var(--rojo-claro);
+  border-width: 2px;
+}
+
+.cuenta--urgente .tiempo {
+  color: var(--rojo-claro);
+  font-weight: 700;
+}

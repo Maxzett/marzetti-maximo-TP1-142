@@ -1,0 +1,44 @@
+@if (cargando()) {
+  <app-spinner etiqueta="Buscando funciones" />
+} @else if (funciones() === null) {
+  <app-mensaje tono="error"
+    >No pudimos cargar las funciones. Probá de nuevo en un momento.</app-mensaje
+  >
+} @else if (dias().length === 0) {
+  <p class="vacio">Esta película todavía no tiene funciones programadas.</p>
+} @else {
+  <div class="selectores">
+    <app-selector-fecha
+      etiqueta="Día de la función"
+      [fechasHabilitadas]="dias()"
+      [valor]="fecha()"
+      (valorChange)="elegirFecha($event)"
+    />
+
+    <app-selector-hora
+      etiqueta="Horario"
+      [opciones]="horas()"
+      [valor]="hora()"
+      (valorChange)="elegirHora($event)"
+    />
+  </div>
+
+  @if (opcionesDeVersion().length > 1) {
+    <app-seleccion
+      etiqueta="Formato e idioma"
+      marcador="Elegí una versión"
+      [opciones]="opcionesDeVersion()"
+      [valor]="elegida()?.id ?? ''"
+      (valorChange)="elegirVersion($event)"
+    />
+  }
+
+  <div class="accion">
+    @if (elegida(); as funcion) {
+      <p class="eleccion">{{ descripcion() }}</p>
+      <a class="boton boton--primario" [routerLink]="['/comprar', funcion.id]">Elegir butacas</a>
+    } @else {
+      <p class="ayuda">Elegí un día y un horario para seguir con la compra.</p>
+    }
+  </div>
+}

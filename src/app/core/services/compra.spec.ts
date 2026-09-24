@@ -46,7 +46,7 @@ describe('Compra', () => {
     const servicio = crearServicio(
       crearSupabaseFalso({ data: [{ butaca_id: 'a', estado: 'retenida' }] }),
     );
-    expect((await servicio.cargarEstados('f1'))?.get('a')).toBe('retenida');
+    expect((await servicio.cargarEstados('f1'))?.estados.get('a')).toBe('retenida');
   });
 
   it('con una butaca tomada muestra el mensaje de la base', async () => {
@@ -58,9 +58,10 @@ describe('Compra', () => {
         },
       }),
     );
-    expect(await servicio.retener('f1', 'b1')).toBe(
-      'Otra persona está eligiendo esa butaca en este momento.',
-    );
+    expect(await servicio.retener('f1', 'b1')).toEqual({
+      estado: 'error',
+      mensaje: 'Otra persona está eligiendo esa butaca en este momento.',
+    });
   });
 
   it('una reserva vencida al pagar es un resultado, no un error', async () => {

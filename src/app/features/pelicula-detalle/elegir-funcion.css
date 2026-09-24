@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.selectores {
+  display: grid;
+  /* minmax(0, 1fr): una columna con auto crece hasta el ancho de su contenido y desborda el celular */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--e-5);
+  margin-block-end: var(--e-4);
+}
+
+.accion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-4);
+  margin-block-start: var(--e-4);
+}
+
+.eleccion {
+  margin: 0;
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.ayuda,
+.vacio {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}

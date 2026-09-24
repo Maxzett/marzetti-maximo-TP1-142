@@ -21,6 +21,14 @@ export const routes: Routes = [
     title: 'Película · Cine Emezeta',
   },
 
+  // Compra (RF-24 a RF-29). Sin guard: se puede comprar sin cuenta (RF-26), y la seguridad de
+  // cada paso la ponen las funciones de la base, no el router. El id llega como input().
+  {
+    path: 'comprar/:funcionId',
+    loadComponent: () => import('./features/compra/compra').then((m) => m.Compra),
+    title: 'Comprar entradas · Cine Emezeta',
+  },
+
   // Las pantallas de cuenta van en su propio chunk: quien entra a comprar de forma
   // anónima (RF-26) no tiene por qué descargarse el formulario de registro.
   // Los guards son ayudas de interfaz, no seguridad: eso lo hace RLS (RNF-09).

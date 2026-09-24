@@ -1,0 +1,216 @@
+<section class="contenedor pantalla">
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando la función" />
+  } @else if (funcion(); as f) {
+    <a class="volver" [routerLink]="['/peliculas', f.pelicula_id]">← Volver a la película</a>
+
+    <header class="cabecera">
+      <h1>{{ f.pelicula.titulo }}</h1>
+      <p class="meta">
+        {{ cuando() }} · {{ f.sala.nombre }}
+        @if (restriccion() > 0) {
+          · <span class="edad">{{ etiquetaDeEdad().corto }}</span>
+        }
+      </p>
+
+      @if (vencimiento(); as expira) {
+        <app-temporizador [expiraAt]="expira" (vencido)="alVencer()" />
+      }
+    </header>
+
+    <!--
+      Los pasos son una lista ordenada y el actual se marca con aria-current: se entiende sin
+      ver el color, y el lector de pantalla anuncia "paso actual".
+    -->
+    <ol class="pasos" aria-label="Pasos de la compra">
+      <li [attr.aria-current]="paso() === 'butacas' ? 'step' : null">1 · Butacas</li>
+      <li [attr.aria-current]="paso() === 'datos' ? 'step' : null">2 · Tus datos</li>
+      <li [attr.aria-current]="paso() === 'pago' ? 'step' : null">3 · Pago</li>
+    </ol>
+
+    @if (avisoDeVencimiento()) {
+      <app-mensaje tono="aviso">{{ avisoDeVencimiento() }}</app-mensaje>
+    }
+
+    @if (restriccion() > 0) {
+      <app-mensaje tono="aviso">
+        Película {{ etiquetaDeEdad().corto }}: {{ etiquetaDeEdad().largo }}. El espectador debe ir
+        acompañado por un adulto y la entrada lo indica.
+      </app-mensaje>
+    }
+
+    @switch (paso()) {
+      @case ('butacas') {
+        <app-tarjeta>
+          <h2>Elegí tus butacas</h2>
+          <p class="ayuda">
+            Cada butaca que elegís queda reservada 10 minutos para vos. Se actualiza en vivo: si
+            otra persona toma una, la ves al instante.
+          </p>
+
+          <app-mapa-sala
+            [butacas]="butacas()"
+            [seleccionable]="true"
+            [estados]="estados()"
+            [etiqueta]="f.sala.nombre"
+            (elegida)="alElegir($event)"
+          />
+
+          @if (avisoDelMapa()) {
+            <app-mensaje tono="error">{{ avisoDelMapa() }}</app-mensaje>
+          }
+
+          <div class="seleccion" aria-live="polite">
+            @if (elegidas().length === 0) {
+              <p class="ayuda">Todavía no elegiste ninguna butaca.</p>
+            } @else {
+              <p class="cantidad">
+                {{ elegidas().length }}
+                {{ elegidas().length === 1 ? 'butaca elegida' : 'butacas elegidas' }}:
+              </p>
+              <ul class="lista">
+                @for (b of elegidas(); track b.id) {
+                  <li>
+                    {{ b.fila }}{{ b.numero }}
+                    @if (b.tipo !== 'estandar') {
+                      <span class="tipo">· {{ nombres[b.tipo] }}</span>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          @if (hayVip()) {
+            <app-mensaje tono="aviso">
+              Elegiste butacas VIP: tienen un precio mayor al de una butaca estándar. Vas a ver el
+              valor exacto antes de pagar.
+            </app-mensaje>
+          }
+
+          <div class="acciones">
+            <app-boton [deshabilitado]="elegidas().length === 0" (presionado)="continuar()">
+              Continuar
+            </app-boton>
+          </div>
+        </app-tarjeta>
+      }
+
+      @case ('datos') {
+        <app-tarjeta>
+          <h2>Tus datos</h2>
+          <form (submit)="enviarDatos($event)" novalidate>
+            <app-campo
+              etiqueta="Email"
+              tipo="email"
+              autocompletado="email"
+              ayuda="Ahí te mandamos la entrada con su código QR."
+              [requerido]="true"
+              [(valor)]="email"
+            />
+
+            @if (debeDeclararEdad()) {
+              <!--
+                D-02: sin cuenta no hay fecha de nacimiento registrada, y esta película tiene
+                restricción. La declaración queda guardada con la orden.
+              -->
+              <app-selector-fecha
+                etiqueta="Tu fecha de nacimiento"
+                vistaInicial="anios"
+                minimo="1920-01-01"
+                [maximo]="hoy"
+                [(valor)]="nacimiento"
+              />
+              <p class="ayuda">
+                Es para verificar que cumplís la edad de la película. Queda registrada con tu
+                compra.
+              </p>
+            }
+
+            @if (errorDeDatos()) {
+              <app-mensaje tono="error">{{ errorDeDatos() }}</app-mensaje>
+            }
+
+            <div class="acciones">
+              <app-boton variante="borde" (presionado)="volverALasButacas()">
+                Cambiar butacas
+              </app-boton>
+              <app-boton tipo="submit" [cargando]="enviando()">Ver resumen</app-boton>
+            </div>
+          </form>
+        </app-tarjeta>
+      }
+
+      @case ('pago') {
+        @if (resumen(); as r) {
+          <app-tarjeta>
+            <h2>Resumen y pago</h2>
+
+            @if (r.tiene_vip) {
+              <!-- RF-17: el aviso de VIP va antes de pagar, con texto y no solo con un color -->
+              <app-mensaje tono="aviso">
+                Tu compra incluye butacas VIP, que tienen un precio mayor. El valor de cada una
+                figura en el detalle.
+              </app-mensaje>
+            }
+
+            <table class="detalle">
+              <caption class="solo-lectores">
+                Detalle de las entradas
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Butaca</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col" class="importe">Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of r.items; track item.butaca_id) {
+                  <tr>
+                    <td>{{ item.fila }}{{ item.numero }}</td>
+                    <td>{{ nombres[item.tipo] }}</td>
+                    <td class="importe">{{ formatearPrecio(item.precio) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" colspan="2">Total</th>
+                  <td class="importe total">{{ formatearPrecio(r.total) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <app-seleccion
+              etiqueta="Medio de pago"
+              marcador="Elegí un medio de pago"
+              ayuda="Pago simulado: no se hace ningún cobro real."
+              [opciones]="mediosDePago"
+              [requerido]="true"
+              [(valor)]="medio"
+            />
+
+            @if (errorDePago()) {
+              <app-mensaje tono="error">{{ errorDePago() }}</app-mensaje>
+            }
+
+            <div class="acciones">
+              <app-boton variante="borde" (presionado)="volverALasButacas()">
+                Cambiar butacas
+              </app-boton>
+              <app-boton [cargando]="pagando()" (presionado)="pagar()">
+                Pagar {{ formatearPrecio(r.total) }}
+              </app-boton>
+            </div>
+          </app-tarjeta>
+        }
+      }
+    }
+  } @else {
+    <app-mensaje tono="error">
+      No encontramos esa función. Puede haber sido dada de baja o el enlace es incorrecto.
+    </app-mensaje>
+    <p><a routerLink="/peliculas">Ver las películas</a></p>
+  }
+</section>

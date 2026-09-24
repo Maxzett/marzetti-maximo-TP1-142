@@ -1,4 +1,4 @@
-import { aplicarEvento, estadosDesdeFilas } from './estado-butacas';
+import { aplicarEvento, estadosDesdeFilas, primerVencimiento } from './estado-butacas';
 import {
   describirVersion,
   diasConFunciones,
@@ -55,7 +55,24 @@ describe('estado de las butacas', () => {
       { butaca_id: 'a', estado: 'ocupada' },
       { butaca_id: 'b', estado: 'rara' },
     ]);
-    expect([...estados.keys()]).toEqual(['a']);
+    expect([...estados.estados.keys()]).toEqual(['a']);
+  });
+});
+
+describe('vencimiento de las reservas propias', () => {
+  it('guarda el vencimiento solo de las propias', () => {
+    const { vencimientos } = estadosDesdeFilas([
+      { butaca_id: 'a', estado: 'propia', expira_at: '2026-10-05T18:10:00Z' },
+      { butaca_id: 'b', estado: 'retenida', expira_at: '2026-10-05T18:05:00Z' },
+    ]);
+    expect([...vencimientos.keys()]).toEqual(['a']);
+  });
+
+  it('el primero en vencer manda', () => {
+    expect(primerVencimiento(['2026-10-05T18:10:00Z', '2026-10-05T18:03:00Z'])).toBe(
+      '2026-10-05T18:03:00Z',
+    );
+    expect(primerVencimiento([])).toBeNull();
   });
 });
 

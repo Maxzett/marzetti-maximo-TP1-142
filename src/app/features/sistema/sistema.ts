@@ -1,6 +1,8 @@
 import { Component, computed, signal } from '@angular/core';
 import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
+import { EstadoDeButaca } from '../../core/models/orden';
 import { Pelicula } from '../../core/models/pelicula';
+import { Butaca } from '../../core/models/sala';
 import { COLORES_DE_OJOS, TIPOS_DE_SANGRE } from '../../core/models/perfil';
 import { salaDeMuestra } from '../../core/salas/muestra';
 import { Boton } from '../../shared/boton/boton';
@@ -18,6 +20,7 @@ import { SelectorHora } from '../../shared/selector-hora/selector-hora';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { Spinner } from '../../shared/spinner/spinner';
 import { Tarjeta } from '../../shared/tarjeta/tarjeta';
+import { Temporizador } from '../../shared/temporizador/temporizador';
 
 /**
  * Catálogo vivo de los componentes de shared/. No es una pantalla del producto:
@@ -39,6 +42,7 @@ import { Tarjeta } from '../../shared/tarjeta/tarjeta';
     SelectorHora,
     Spinner,
     Tarjeta,
+    Temporizador,
   ],
   selector: 'app-sistema',
   styleUrl: './sistema.css',
@@ -62,6 +66,27 @@ export class Sistema {
   }));
   // Mapa de sala (F5): la distribución real de la base, armada en memoria
   protected readonly salaDeMuestra = salaDeMuestra();
+  // Mapa seleccionable (F6): la primera butaca vendida, la segunda reservada por otra persona
+  protected readonly estadosDeMuestra = signal<ReadonlyMap<string, EstadoDeButaca>>(
+    new Map<string, EstadoDeButaca>([
+      [this.salaDeMuestra[0].id, 'ocupada'],
+      [this.salaDeMuestra[1].id, 'retenida'],
+    ]),
+  );
+  protected readonly vencimientoDeMuestra = new Date(Date.now() + 10 * 60_000).toISOString();
+
+  protected alternarDeMuestra(butaca: Butaca): void {
+    const siguiente = new Map(this.estadosDeMuestra());
+
+    if (siguiente.get(butaca.id) === 'propia') {
+      siguiente.delete(butaca.id);
+    } else {
+      siguiente.set(butaca.id, 'propia');
+    }
+
+    this.estadosDeMuestra.set(siguiente);
+  }
+
   protected readonly dialogoAbierto = signal(false);
   protected readonly procesando = signal(false);
 

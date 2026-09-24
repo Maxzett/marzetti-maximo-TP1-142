@@ -281,9 +281,28 @@
 
     <p class="pie">
       El plano se lee como una sola imagen con su descripción, y la leyenda repite los números en
-      texto. Con el alto contraste del sistema las siluetas se pintan con el color del texto. Es de
-      solo lectura: la compra (F6) le suma la selección y el tiempo real.
+      texto. Con el alto contraste del sistema las siluetas se pintan con el color del texto.
     </p>
+  </section>
+
+  <section aria-labelledby="s-seleccion">
+    <h2 id="s-seleccion">Mapa para elegir butacas</h2>
+    <p class="bajada">
+      En la compra cada ubicación es un botón. El estado se dice con un símbolo además del color
+      (RNF-10): ✓ es tuya, ✕ está vendida, • la tiene reservada otra persona. Como son 532 botones
+      solo uno entra en el orden de Tab; las flechas, Inicio y Fin mueven el foco. Acá las butacas
+      A1 y A2 están de muestra como vendida y reservada por otra persona.
+    </p>
+
+    <app-temporizador [expiraAt]="vencimientoDeMuestra" />
+
+    <app-mapa-sala
+      [butacas]="salaDeMuestra"
+      [seleccionable]="true"
+      [estados]="estadosDeMuestra()"
+      (elegida)="alternarDeMuestra($event)"
+      etiqueta="la Sala 1"
+    />
   </section>
 
   <section aria-labelledby="s-a11y">

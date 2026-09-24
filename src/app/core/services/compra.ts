@@ -1,14 +1,14 @@
 import { inject, Service } from '@angular/core';
 import { mensajeDeError } from '../admin/mensaje-de-error';
-import { estadosDesdeFilas } from '../compra/estado-butacas';
+import { estadosDesdeFilas, MapaDeEstados } from '../compra/estado-butacas';
 import { sesionDeCompra } from '../compra/sesion';
 import {
   EntradaComprada,
-  EstadoDeButaca,
   EventoDeButaca,
   MedioDePago,
   ResultadoDeOrden,
   ResultadoDePago,
+  ResultadoDeReserva,
   ResumenDeOrden,
 } from '../models/orden';
 import { Supabase } from './supabase';
@@ -34,24 +34,36 @@ export class Compra {
   readonly sesionId = sesionDeCompra();
 
   /** Butacas que no están libres en una función. Null si la lectura falló */
-  async cargarEstados(funcionId: string): Promise<Map<string, EstadoDeButaca> | null> {
+  async cargarEstados(funcionId: string): Promise<MapaDeEstados | null> {
     const { data, error } = await this.supabase.client.rpc('estado_butacas', {
       p_funcion: funcionId,
       p_sesion: this.sesionId,
     });
 
-    return error ? null : estadosDesdeFilas(data as { butaca_id: string; estado: string }[]);
+    return error
+      ? null
+      : estadosDesdeFilas(
+          data as { butaca_id: string; estado: string; expira_at: string | null }[],
+        );
   }
 
-  /** Reserva una butaca por 10 minutos (D-08). Devuelve el mensaje de error, o null si salió bien */
-  async retener(funcionId: string, butacaId: string): Promise<string | null> {
-    const { error } = await this.supabase.client.rpc('retener_butaca', {
+  /** Reserva una butaca por 10 minutos (D-08) y dice cuándo vence, o por qué no se pudo */
+  async retener(funcionId: string, butacaId: string): Promise<ResultadoDeReserva> {
+    const { data, error } = await this.supabase.client.rpc('retener_butaca', {
       p_funcion: funcionId,
       p_butaca: butacaId,
       p_sesion: this.sesionId,
     });
 
-    return error ? mensajeDeError(error) : null;
+    if (error) {
+      return { estado: 'error', mensaje: mensajeDeError(error) };
+    }
+
+    // Volver a reservar una butaca que ya era propia no trae vencimiento: el que ya se conoce sigue valiendo
+    return {
+      estado: 'reservada',
+      expiraAt: (data as { expira_at?: string } | null)?.expira_at ?? null,
+    };
   }
 
   async liberar(funcionId: string, butacaId: string): Promise<string | null> {

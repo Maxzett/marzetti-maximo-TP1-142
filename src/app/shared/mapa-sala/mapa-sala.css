@@ -149,3 +149,118 @@
 .vacio {
   color: var(--texto-tenue);
 }
+
+/*
+ * Modo de selección (F6). El botón es la caja que se toca y donde se dibujan el foco, el aro y
+ * el símbolo; la silueta va en el <span> de adentro, porque una máscara recortaría también
+ * todo lo que se dibuje en el propio botón.
+ */
+.celda {
+  position: relative;
+  flex: none;
+  display: block;
+  inline-size: var(--celda);
+  block-size: var(--celda);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-chico);
+  background: none;
+  cursor: pointer;
+}
+
+.celda[data-tipo='silla_ruedas'] {
+  inline-size: calc(var(--celda) * 2 + var(--hueco));
+}
+
+/*
+ * Un <span> es en línea y ignora ancho y alto. En el modo de lectura es hijo de un contenedor
+ * flex, que lo vuelve bloque; acá su padre es un botón, así que hay que pedirlo explícito.
+ */
+.celda .ubicacion {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.celda[data-tipo='silla_ruedas'] .ubicacion {
+  inline-size: 100%;
+}
+
+/* Cada estado se dice con un símbolo y con la forma, no solo con el color (RNF-10) */
+.celda::after {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--fuente-titulo);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.celda[data-estado='propia'] {
+  box-shadow: 0 0 0 2px var(--acento);
+}
+
+.celda[data-estado='propia'] .ubicacion {
+  background: var(--acento);
+}
+
+.celda[data-estado='propia']::after {
+  content: '✓';
+  color: var(--texto-sobre-acento);
+}
+
+.celda[data-estado='ocupada'] .ubicacion,
+.celda[data-estado='retenida'] .ubicacion {
+  opacity: 0.35;
+}
+
+.celda[data-estado='ocupada'] {
+  cursor: not-allowed;
+}
+
+.celda[data-estado='ocupada']::after {
+  content: '✕';
+  color: var(--texto);
+}
+
+.celda[data-estado='retenida'] {
+  cursor: wait;
+}
+
+.celda[data-estado='retenida']::after {
+  content: '•';
+  color: var(--texto);
+  font-size: 1.125rem;
+}
+
+.celda[data-estado='libre']:hover .ubicacion {
+  background: var(--texto);
+}
+
+/* Leyenda de estados */
+.leyenda--estados {
+  margin-top: var(--e-2);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.marca {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-chico);
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+}
+
+@media (forced-colors: active) {
+  .celda[data-estado='propia'] {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

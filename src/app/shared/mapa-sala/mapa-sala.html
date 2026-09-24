@@ -4,27 +4,68 @@
   <figure class="mapa">
     <!--
       Dos capas a propósito. El contenedor es una región con foco: el mapa es más ancho que
-      un celular y sin foco un teclado no podría desplazarlo. Adentro, el plano es UNA imagen
-      con su descripción: 532 butacas leídas una por una no le sirven a nadie.
+      un celular y sin foco un teclado no podría desplazarlo. Adentro, en el modo de lectura el
+      plano es UNA imagen con su descripción: 532 butacas leídas una por una no le sirven a nadie.
+      En el modo de selección cada butaca es un botón y el plano pasa a ser un grupo.
     -->
     <div class="desplazable" role="region" tabindex="0" [attr.aria-label]="'Mapa de ' + etiqueta()">
-      <div class="plano" role="img" [attr.aria-label]="resumen()">
-        <div class="pantalla" aria-hidden="true"><span>Pantalla</span></div>
+      @if (seleccionable()) {
+        <div class="plano" role="group" [attr.aria-label]="'Butacas de ' + etiqueta()">
+          <div class="pantalla" aria-hidden="true"><span>Pantalla</span></div>
 
-        @for (fila of filas(); track fila.fila) {
-          <div class="fila">
-            <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
-            @for (bloque of fila.bloques; track $index) {
-              <div class="bloque">
-                @for (butaca of bloque; track butaca.id) {
-                  <span class="ubicacion" [attr.data-tipo]="butaca.tipo"></span>
-                }
-              </div>
-            }
-            <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
-          </div>
-        }
-      </div>
+          @for (fila of filas(); track fila.fila) {
+            <div class="fila">
+              <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
+              @for (bloque of fila.bloques; track $index) {
+                <div class="bloque">
+                  @for (butaca of bloque; track butaca.id) {
+                    <button
+                      type="button"
+                      class="celda"
+                      [attr.data-tipo]="butaca.tipo"
+                      [attr.data-estado]="estadoDe(butaca)"
+                      [attr.data-id]="butaca.id"
+                      [attr.aria-label]="nombreAccesible(butaca)"
+                      [attr.aria-pressed]="estadoDe(butaca) === 'propia'"
+                      [attr.aria-disabled]="
+                        estadoDe(butaca) === 'ocupada' || estadoDe(butaca) === 'retenida'
+                      "
+                      [attr.tabindex]="butaca.id === idActivo() ? 0 : -1"
+                      (click)="alPresionar(butaca)"
+                      (keydown)="alTeclear($event, butaca)"
+                    >
+                      <span
+                        class="ubicacion"
+                        aria-hidden="true"
+                        [attr.data-tipo]="butaca.tipo"
+                      ></span>
+                    </button>
+                  }
+                </div>
+              }
+              <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="plano" role="img" [attr.aria-label]="resumen()">
+          <div class="pantalla" aria-hidden="true"><span>Pantalla</span></div>
+
+          @for (fila of filas(); track fila.fila) {
+            <div class="fila">
+              <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
+              @for (bloque of fila.bloques; track $index) {
+                <div class="bloque">
+                  @for (butaca of bloque; track butaca.id) {
+                    <span class="ubicacion" [attr.data-tipo]="butaca.tipo"></span>
+                  }
+                </div>
+              }
+              <span class="letra" aria-hidden="true">{{ fila.fila }}</span>
+            </div>
+          }
+        </div>
+      }
     </div>
 
     <!-- La leyenda es texto de verdad: dice lo mismo que el dibujo, sin depender de verlo -->
@@ -42,6 +83,14 @@
           </li>
         }
       </ul>
+
+      @if (seleccionable()) {
+        <ul class="leyenda leyenda--estados">
+          <li><span class="marca" aria-hidden="true">✓</span> Elegida por vos</li>
+          <li><span class="marca" aria-hidden="true">•</span> La está eligiendo otra persona</li>
+          <li><span class="marca" aria-hidden="true">✕</span> Vendida</li>
+        </ul>
+      }
     </figcaption>
   </figure>
 }

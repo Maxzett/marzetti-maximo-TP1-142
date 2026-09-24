@@ -27,17 +27,45 @@ export function aplicarEvento(
   return siguiente;
 }
 
-/** Arma el mapa a partir de la lista de butacas no libres que devuelve estado_butacas() */
+/**
+ * Arma el mapa a partir de la lista de butacas no libres que devuelve estado_butacas(). Además
+ * del estado de cada una, junta cuándo vence cada reserva PROPIA: la base solo lo dice de las
+ * de esta sesión, y con eso el temporizador sobrevive a recargar la página.
+ */
 export function estadosDesdeFilas(
-  filas: readonly { butaca_id: string; estado: string }[],
-): Map<string, EstadoDeButaca> {
+  filas: readonly { butaca_id: string; estado: string; expira_at?: string | null }[],
+): MapaDeEstados {
   const estados = new Map<string, EstadoDeButaca>();
+  const vencimientos = new Map<string, string>();
 
   for (const fila of filas) {
     if (fila.estado === 'ocupada' || fila.estado === 'retenida' || fila.estado === 'propia') {
       estados.set(fila.butaca_id, fila.estado);
+
+      if (fila.estado === 'propia' && fila.expira_at) {
+        vencimientos.set(fila.butaca_id, fila.expira_at);
+      }
     }
   }
 
-  return estados;
+  return { estados, vencimientos };
+}
+
+/** El estado de las butacas no libres y el vencimiento de las reservas propias */
+export interface MapaDeEstados {
+  estados: Map<string, EstadoDeButaca>;
+  vencimientos: Map<string, string>;
+}
+
+/** El primer vencimiento de una lista: es el que manda, porque en cuanto vence una la orden se cae */
+export function primerVencimiento(vencimientos: Iterable<string>): string | null {
+  let primero: string | null = null;
+
+  for (const iso of vencimientos) {
+    if (primero === null || Date.parse(iso) < Date.parse(primero)) {
+      primero = iso;
+    }
+  }
+
+  return primero;
 }

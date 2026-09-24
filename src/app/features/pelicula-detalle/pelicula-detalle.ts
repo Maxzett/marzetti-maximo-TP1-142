@@ -14,6 +14,7 @@ import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
 import { Spinner } from '../../shared/spinner/spinner';
 import { Tarjeta } from '../../shared/tarjeta/tarjeta';
+import { ElegirFuncion } from './elegir-funcion';
 
 /**
  * Ficha de una película: datos, puntaje promedio (RF-11) y reseñas (RF-09). Las reseñas se
@@ -22,7 +23,18 @@ import { Tarjeta } from '../../shared/tarjeta/tarjeta';
  * El id llega como input() desde la ruta gracias a withComponentInputBinding.
  */
 @Component({
-  imports: [Boton, Campo, Dialogo, Estrellas, Mensaje, Poster, RouterLink, Spinner, Tarjeta],
+  imports: [
+    Boton,
+    Campo,
+    Dialogo,
+    ElegirFuncion,
+    Estrellas,
+    Mensaje,
+    Poster,
+    RouterLink,
+    Spinner,
+    Tarjeta,
+  ],
   selector: 'app-pelicula-detalle',
   styleUrl: './pelicula-detalle.css',
   templateUrl: './pelicula-detalle.html',

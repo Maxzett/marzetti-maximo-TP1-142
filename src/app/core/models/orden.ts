@@ -60,6 +60,9 @@ export interface EntradaComprada {
   butacas: ButacaDeOrden[];
 }
 
+export type ResultadoDeReserva =
+  { estado: 'reservada'; expiraAt: string | null } | { estado: 'error'; mensaje: string };
+
 export type ResultadoDeOrden =
   { estado: 'creada'; resumen: ResumenDeOrden } | { estado: 'error'; mensaje: string };
 
