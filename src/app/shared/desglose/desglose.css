@@ -1,0 +1,42 @@
+.detalle {
+  /* Contenedor de los textos .solo-lectores (position: absolute): sin él se escapan del scroll */
+  position: relative;
+  inline-size: 100%;
+  margin-block: var(--e-4);
+  border-collapse: collapse;
+}
+
+.detalle th,
+.detalle td {
+  padding: var(--e-2) var(--e-3);
+  border-block-end: 1px solid var(--borde-fuerte);
+  text-align: start;
+}
+
+.detalle thead th {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  font-weight: 400;
+}
+
+.importe {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.nota {
+  color: var(--texto-tenue);
+}
+
+.total th,
+.total td {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+}
+
+.puntos {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}

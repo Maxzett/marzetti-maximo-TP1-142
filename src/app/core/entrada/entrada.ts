@@ -23,6 +23,19 @@ export function listarButacas(butacas: EntradaComprada['butacas']): string {
 }
 
 /**
+ * "1 × Pochoclo grande, 1 × Combo Pareja (2 × Gaseosa 500 ml)": lo que se retira con el mismo QR
+ * (RF-35), como lo lee quien atiende el candy bar.
+ */
+export function describirCandy(candy: EntradaComprada['candy']): string {
+  return candy
+    .map((item) => {
+      const incluye = item.incluye.map((i) => `${i.cantidad} × ${i.nombre}`).join(', ');
+      return `${item.cantidad} × ${item.nombre}${incluye ? ` (${incluye})` : ''}`;
+    })
+    .join(', ');
+}
+
+/**
  * Los datos de la entrada como pares rótulo/valor, en el orden en que se leen. La pantalla los
  * muestra en una lista y el PDF los imprime línea por línea: una sola fuente para las dos.
  */
@@ -41,6 +54,7 @@ export function datosDeLaEntrada(entrada: EntradaComprada): { rotulo: string; va
         rotulo: `${b.fila}${b.numero}`,
         valor: `${NOMBRE_DE_TIPO[b.tipo]} · ${formatearPrecio(b.precio)}`,
       })),
+    ...(entrada.tiene_candy ? [{ rotulo: 'Candy bar', valor: describirCandy(entrada.candy) }] : []),
     { rotulo: 'Total', valor: formatearPrecio(entrada.total) },
   ];
 }

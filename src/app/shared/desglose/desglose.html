@@ -1,0 +1,73 @@
+@let d = desglose();
+
+<table class="detalle">
+  <caption class="solo-lectores">
+    Detalle de la compra
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Concepto</th>
+      <th scope="col" class="importe">Importe</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (e of d.entradas; track e.butaca_id) {
+      <tr>
+        <td>
+          Entrada {{ e.fila }}{{ e.numero }}
+          @if (e.tipo !== 'estandar') {
+            <span class="nota">· {{ nombres[e.tipo] }}</span>
+          }
+        </td>
+        <td class="importe">{{ formatearPrecio(e.precio) }}</td>
+      </tr>
+    }
+    @for (c of d.combos; track c.combo_id) {
+      <tr>
+        <td>{{ c.cantidad }} × {{ c.nombre }}</td>
+        <td class="importe">{{ formatearPrecio(c.precio_unitario * c.cantidad) }}</td>
+      </tr>
+    }
+    @for (p of d.productos; track $index) {
+      <tr>
+        <td>
+          {{ p.cantidad }} × {{ p.nombre }}
+          @if (p.por_canje) {
+            <span class="nota">· canjeado con puntos</span>
+          }
+        </td>
+        <td class="importe">
+          {{ p.por_canje ? 'Gratis' : formatearPrecio(p.precio_unitario * p.cantidad) }}
+        </td>
+      </tr>
+    }
+  </tbody>
+  <tfoot>
+    @if (d.descuento_cupon > 0 || d.credito_aplicado > 0) {
+      <tr>
+        <th scope="row">Subtotal</th>
+        <td class="importe">{{ formatearPrecio(d.subtotal) }}</td>
+      </tr>
+    }
+    @if (d.descuento_cupon > 0) {
+      <tr>
+        <th scope="row">Cupón {{ cupon() }}</th>
+        <td class="importe">− {{ formatearPrecio(d.descuento_cupon) }}</td>
+      </tr>
+    }
+    @if (d.credito_aplicado > 0) {
+      <tr>
+        <th scope="row">Crédito de tu cuenta</th>
+        <td class="importe">− {{ formatearPrecio(d.credito_aplicado) }}</td>
+      </tr>
+    }
+    <tr class="total">
+      <th scope="row">Total a pagar</th>
+      <td class="importe">{{ formatearPrecio(d.total) }}</td>
+    </tr>
+  </tfoot>
+</table>
+
+@if (mostrarPuntos() && d.puntos_a_ganar > 0) {
+  <p class="puntos">Con esta compra sumás {{ formatearPuntos(d.puntos_a_ganar) }} puntos.</p>
+}

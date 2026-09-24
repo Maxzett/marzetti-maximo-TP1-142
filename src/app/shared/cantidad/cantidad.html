@@ -1,0 +1,22 @@
+<div class="cantidad" role="group" [attr.aria-label]="etiqueta()">
+  <button
+    type="button"
+    class="paso"
+    [attr.aria-disabled]="enElMinimo() ? 'true' : null"
+    [attr.aria-label]="'Quitar una unidad de ' + etiqueta()"
+    (click)="restar()"
+  >
+    <span aria-hidden="true">−</span>
+  </button>
+  <!-- role=status: el lector anuncia el nuevo número al tocar + o − sin mover el foco -->
+  <output class="valor" role="status">{{ valor() }}</output>
+  <button
+    type="button"
+    class="paso"
+    [attr.aria-disabled]="enElMaximo() ? 'true' : null"
+    [attr.aria-label]="'Agregar una unidad de ' + etiqueta()"
+    (click)="sumar()"
+  >
+    <span aria-hidden="true">+</span>
+  </button>
+</div>

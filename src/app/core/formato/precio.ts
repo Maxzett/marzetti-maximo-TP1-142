@@ -17,3 +17,15 @@ const CON_CENTAVOS = new Intl.NumberFormat('es-AR', {
 export function formatearPrecio(importe: number): string {
   return (Number.isInteger(importe) ? ENTERO : CON_CENTAVOS).format(importe);
 }
+
+/**
+ * Puntos con punto de miles: "65.000". Con 1 punto por peso los saldos y los costos de canje son
+ * cifras de cinco dígitos, y sin separador se leen mal. Se agrupa a mano y no con Intl porque el
+ * español, por defecto, no agrupa los números de cuatro dígitos ("4500"), y la opción para forzarlo
+ * todavía no está en los tipos de TypeScript.
+ */
+export function formatearPuntos(puntos: number): string {
+  return Math.round(puntos)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}

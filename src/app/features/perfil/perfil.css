@@ -61,3 +61,96 @@ dd {
   font-size: var(--t-mini);
   line-height: 1.5;
 }
+
+h3 {
+  margin-top: var(--e-5);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.ancha {
+  grid-column: 1 / -1;
+}
+
+.cifra {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-titulo);
+  font-variant-numeric: tabular-nums;
+}
+
+.saldos {
+  align-items: baseline;
+}
+
+.historial,
+.compras {
+  display: grid;
+  gap: var(--e-2);
+  margin: var(--e-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.historial li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  padding-block: var(--e-2);
+  border-block-end: 1px solid var(--borde);
+}
+
+.detalle {
+  margin: var(--e-1) 0 0;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.compra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  padding: var(--e-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+}
+
+.compra-datos {
+  flex: 1 1 16rem;
+  min-inline-size: 0;
+}
+
+.compra-datos p {
+  margin: 0;
+}
+
+.compra-titulo {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.estado {
+  margin-inline-start: var(--e-2);
+  padding: 0 var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+  font-size: var(--t-mini);
+}
+
+.estado--cancelada {
+  border-color: var(--rojo-claro);
+  color: var(--rojo-claro);
+}
+
+.compra-acciones,
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.acciones {
+  justify-content: flex-end;
+  margin-block-start: var(--e-4);
+}

@@ -3,13 +3,16 @@ import { mensajeDeError } from '../admin/mensaje-de-error';
 import { estadosDesdeFilas, MapaDeEstados } from '../compra/estado-butacas';
 import { sesionDeCompra } from '../compra/sesion';
 import {
+  DesgloseDeOrden,
   EntradaComprada,
   EventoDeButaca,
   MedioDePago,
+  ResultadoDeConfiguracion,
   ResultadoDeOrden,
   ResultadoDePago,
   ResultadoDeReserva,
   ResumenDeOrden,
+  SeleccionDeOrden,
 } from '../models/orden';
 import { Supabase } from './supabase';
 
@@ -100,10 +103,42 @@ export class Compra {
   }
 
   /**
+   * Manda lo elegido del candy, el cupón, el crédito y el canje, y recibe el desglose que
+   * calculó la base. Reemplaza la selección entera cada vez, así que se puede llamar con cada
+   * cambio. Una selección inválida (cupón que no corresponde, más combos que butacas) vuelve
+   * como error con el mensaje de la base, y la orden queda como estaba.
+   */
+  async configurarOrden(
+    ordenId: string,
+    seleccion: SeleccionDeOrden,
+  ): Promise<ResultadoDeConfiguracion> {
+    const { data, error } = await this.supabase.client.rpc('configurar_orden', {
+      p_orden: ordenId,
+      p_sesion: this.sesionId,
+      p_productos: seleccion.productos,
+      p_combos: seleccion.combos,
+      p_cupon: seleccion.cupon.trim() || null,
+      p_usar_credito: seleccion.usarCredito,
+      p_recompensa: seleccion.recompensaId,
+    });
+
+    if (error) {
+      return { estado: 'error', mensaje: mensajeDeError(error) };
+    }
+
+    const respuesta = data as
+      ({ ok: true } & DesgloseDeOrden) | { ok: false; motivo: string; mensaje: string };
+
+    return respuesta.ok
+      ? { estado: 'configurada', desglose: respuesta }
+      : { estado: 'vencida', mensaje: respuesta.mensaje };
+  }
+
+  /**
    * Pago simulado (D-07). Que la reserva haya vencido no es un error de la base sino un
    * resultado previsto, y por eso tiene su propio estado.
    */
-  async confirmarPago(ordenId: string, medio: MedioDePago): Promise<ResultadoDePago> {
+  async confirmarPago(ordenId: string, medio: MedioDePago | null): Promise<ResultadoDePago> {
     const { data, error } = await this.supabase.client.rpc('confirmar_pago', {
       p_orden: ordenId,
       p_sesion: this.sesionId,

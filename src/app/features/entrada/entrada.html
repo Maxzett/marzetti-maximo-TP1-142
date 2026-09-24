@@ -18,6 +18,11 @@
           <app-mensaje tono="aviso">Esta entrada ya se usó para ingresar a la sala.</app-mensaje>
         }
 
+        @if (e.candy_entregado_at) {
+          <!-- RN-05: el candy tiene su propio tramo, independiente del de la entrada -->
+          <app-mensaje tono="aviso">Los productos del candy bar ya se retiraron.</app-mensaje>
+        }
+
         @if (leyenda()) {
           <app-mensaje tono="aviso">{{ leyenda() }}</app-mensaje>
         }

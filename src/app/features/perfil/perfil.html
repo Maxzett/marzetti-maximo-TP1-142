@@ -47,18 +47,154 @@
         }
       </app-tarjeta>
 
+      <!-- RF-40: puntos, crédito y el historial de canjes -->
       <app-tarjeta>
         <h2>Puntos y crédito</h2>
-        <!-- RF-40: el saldo, el historial de canjes y el crédito llegan en la F7 -->
-        <p class="pendiente">Vas a ver acá tus puntos, tus canjes y tu crédito disponible.</p>
+
+        @if (cargandoCuenta()) {
+          <app-spinner etiqueta="Cargando tus puntos y tu crédito" />
+        } @else if (saldos(); as s) {
+          <dl class="saldos">
+            <dt>Puntos</dt>
+            <dd class="cifra">{{ formatearPuntos(s.puntos) }}</dd>
+            <dt>Crédito</dt>
+            <dd class="cifra">{{ formatearPrecio(s.credito) }}</dd>
+          </dl>
+
+          @if (s.bienvenida; as b) {
+            <!-- RF-39: el cupón de la primera compra, mientras no se haya usado -->
+            <app-mensaje tono="exito">
+              Tenés un cupón de bienvenida de {{ describirCupon(b) }} para tu primera compra. Lo
+              podés usar en el último paso del pago.
+            </app-mensaje>
+          }
+
+          <p class="nota">
+            Ganás 1 punto por cada peso que pagás. El crédito sale de compras canceladas y se usa
+            junto con otros medios de pago.
+          </p>
+
+          <h3>Tus canjes</h3>
+          @if (canjes(); as historial) {
+            @if (historial.length === 0) {
+              <p class="pendiente">Todavía no canjeaste puntos.</p>
+            } @else {
+              <ul class="historial">
+                @for (canje of historial; track canje.id) {
+                  <li>
+                    <span>{{ canje.recompensas?.nombre ?? 'Recompensa' }}</span>
+                    <span class="detalle">{{ formatearPuntos(canje.costo_puntos) }} puntos</span>
+                  </li>
+                }
+              </ul>
+            }
+          } @else {
+            <app-mensaje tono="aviso">No pudimos traer tus canjes.</app-mensaje>
+          }
+        } @else {
+          <app-mensaje tono="aviso">No pudimos traer tus puntos y tu crédito.</app-mensaje>
+        }
       </app-tarjeta>
 
+      <!-- RF-30, RF-31: cancelar hasta 2 horas antes, con crédito y no con dinero -->
+      <app-tarjeta class="ancha">
+        <h2>Mis compras</h2>
+
+        @if (avisoDeCancelacion()) {
+          <app-mensaje tono="exito">{{ avisoDeCancelacion() }}</app-mensaje>
+        }
+
+        @if (cargandoCuenta()) {
+          <app-spinner etiqueta="Cargando tus compras" />
+        } @else if (ordenes(); as compras) {
+          @if (compras.length === 0) {
+            <p class="pendiente">
+              Todavía no compraste entradas. <a routerLink="/peliculas">Ver las películas</a>
+            </p>
+          } @else {
+            <ul class="compras">
+              @for (compra of compras; track compra.orden_id) {
+                <li class="compra">
+                  <div class="compra-datos">
+                    <p class="compra-titulo">
+                      {{ compra.pelicula }}
+                      <!-- El estado va escrito: nunca solo un color (RNF-10) -->
+                      <span
+                        class="estado"
+                        [class.estado--cancelada]="compra.estado === 'cancelada'"
+                      >
+                        {{ compra.estado === 'cancelada' ? 'Cancelada' : 'Pagada' }}
+                      </span>
+                    </p>
+                    <p class="detalle">
+                      {{ describirInicio(compra.inicio) }} · {{ compra.sala }} ·
+                      {{ compra.entradas }}
+                      {{ compra.entradas === 1 ? 'entrada' : 'entradas' }}
+                      @if (compra.tiene_candy) {
+                        · con candy bar
+                      }
+                      · {{ formatearPrecio(compra.total) }}
+                    </p>
+                    @if (compra.estado === 'pagada' && !compra.cancelable) {
+                      <p class="detalle">No se puede cancelar: {{ compra.motivo_no_cancelable }}</p>
+                    }
+                  </div>
+
+                  @if (compra.estado === 'pagada') {
+                    <div class="compra-acciones">
+                      <a class="boton boton--borde" [routerLink]="['/entrada', compra.codigo]">
+                        Ver entrada
+                      </a>
+                      @if (compra.cancelable) {
+                        <app-boton variante="fantasma" (presionado)="pedirCancelacion(compra)">
+                          Cancelar compra
+                        </app-boton>
+                      }
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <app-mensaje tono="aviso">No pudimos traer tus compras.</app-mensaje>
+        }
+      </app-tarjeta>
       <app-tarjeta>
         <h2>Mis Películas</h2>
         <!-- RF-41: el historial visual con póster, fecha y calificación llega en la F10 -->
         <p class="pendiente">Acá va a estar el historial de todo lo que viniste a ver.</p>
       </app-tarjeta>
     </div>
+
+    <app-dialogo
+      titulo="¿Cancelar esta compra?"
+      [abierto]="confirmando()"
+      (cerrado)="alCerrarDialogo()"
+    >
+      @if (aCancelar(); as orden) {
+        <p>
+          Vas a cancelar la compra de <strong>{{ orden.pelicula }}</strong> del
+          {{ describirInicio(orden.inicio) }}. Las butacas se liberan y el código QR deja de servir.
+        </p>
+        <p>
+          <strong>No se devuelve dinero:</strong> se acreditan
+          {{ formatearPrecio(creditoDeLaCancelacion(orden)) }} como crédito en tu cuenta, para usar
+          en otra compra.
+        </p>
+
+        @if (errorDeCancelacion()) {
+          <app-mensaje tono="error">{{ errorDeCancelacion() }}</app-mensaje>
+        }
+
+        <div class="acciones">
+          <app-boton variante="borde" (presionado)="alCerrarDialogo()">Volver</app-boton>
+          <app-boton [cargando]="cancelando()" (presionado)="confirmarCancelacion()">
+            Sí, cancelar la compra
+          </app-boton>
+        </div>
+      }
+    </app-dialogo>
   } @else {
     <app-spinner etiqueta="Cargando tu perfil" />
   }

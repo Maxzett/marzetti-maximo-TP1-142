@@ -8,9 +8,16 @@ function entrada(cambios: Partial<EntradaComprada> = {}): EntradaComprada {
     codigo: 'AB12CD34EF56GH78IJ90',
     estado: 'pagada',
     email: 'a@b.com',
+    subtotal: 15000,
+    descuento_cupon: 0,
+    credito_aplicado: 0,
     total: 15000,
     pagada_at: '2026-10-05T15:00:00Z',
+    cancelada_at: null,
     entrada_validada_at: null,
+    candy_entregado_at: null,
+    tiene_candy: false,
+    candy: [],
     pelicula: 'Mar de cenizas',
     restriccion_edad: 0,
     requiere_acompanante: false,
@@ -69,6 +76,33 @@ describe('datos de la entrada', () => {
 
     expect(datos.get('R5')).toBe('VIP · $ 8.500');
     expect(datos.has('A1')).toBe(false);
+  });
+
+  it('sin candy no imprime esa línea', () => {
+    expect(datosDeLaEntrada(entrada()).some((d) => d.rotulo === 'Candy bar')).toBe(false);
+  });
+
+  it('con candy lista lo que se retira, con lo que trae cada combo (RF-35)', () => {
+    const datos = new Map(
+      datosDeLaEntrada(
+        entrada({
+          tiene_candy: true,
+          candy: [
+            { nombre: 'Pochoclo grande', cantidad: 1, por_canje: false, incluye: [] },
+            {
+              nombre: 'Combo Pareja',
+              cantidad: 2,
+              por_canje: false,
+              incluye: [{ nombre: 'Gaseosa 500 ml', cantidad: 4 }],
+            },
+          ],
+        }),
+      ).map((d) => [d.rotulo, d.valor]),
+    );
+
+    expect(datos.get('Candy bar')).toBe(
+      '1 × Pochoclo grande, 2 × Combo Pareja (4 × Gaseosa 500 ml)',
+    );
   });
 
   it('el nombre del archivo lleva el código en minúsculas', () => {

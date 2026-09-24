@@ -64,6 +64,71 @@ describe('Compra', () => {
     });
   });
 
+  describe('configurarOrden', () => {
+    const seleccion = {
+      productos: [{ id: 'p1', cantidad: 2 }],
+      combos: [],
+      cupon: '  bienvenida ',
+      usarCredito: true,
+      recompensaId: null,
+    };
+
+    it('manda la selección con la sesión y el cupón sin espacios', async () => {
+      const falso = crearSupabaseFalso({ data: { ok: true, total: 100 } });
+      const servicio = crearServicio(falso);
+      await servicio.configurarOrden('o1', seleccion);
+
+      expect(falso.client.rpc).toHaveBeenCalledWith('configurar_orden', {
+        p_orden: 'o1',
+        p_sesion: servicio.sesionId,
+        p_productos: [{ id: 'p1', cantidad: 2 }],
+        p_combos: [],
+        p_cupon: 'bienvenida',
+        p_usar_credito: true,
+        p_recompensa: null,
+      });
+    });
+
+    it('sin cupón manda null y no una cadena vacía', async () => {
+      const falso = crearSupabaseFalso({ data: { ok: true } });
+      await crearServicio(falso).configurarOrden('o1', { ...seleccion, cupon: '   ' });
+
+      expect(falso.client.rpc.mock.calls[0][1]).toMatchObject({ p_cupon: null });
+    });
+
+    it('devuelve el desglose que calculó la base', async () => {
+      const servicio = crearServicio(crearSupabaseFalso({ data: { ok: true, total: 8000 } }));
+      const resultado = await servicio.configurarOrden('o1', seleccion);
+
+      expect(resultado.estado).toBe('configurada');
+      expect(resultado.estado === 'configurada' && resultado.desglose.total).toBe(8000);
+    });
+
+    it('una reserva vencida es un resultado, no un error', async () => {
+      const servicio = crearServicio(
+        crearSupabaseFalso({ data: { ok: false, motivo: 'vencida', mensaje: 'Venció.' } }),
+      );
+
+      expect(await servicio.configurarOrden('o1', seleccion)).toEqual({
+        estado: 'vencida',
+        mensaje: 'Venció.',
+      });
+    });
+
+    it('un cupón que no corresponde vuelve como error con el texto de la base', async () => {
+      const servicio = crearServicio(
+        crearSupabaseFalso({
+          error: { code: '55000', message: 'El cupón de bienvenida es para tu primera compra.' },
+        }),
+      );
+
+      expect(await servicio.configurarOrden('o1', seleccion)).toEqual({
+        estado: 'error',
+        mensaje: 'El cupón de bienvenida es para tu primera compra.',
+      });
+    });
+  });
+
   it('una reserva vencida al pagar es un resultado, no un error', async () => {
     const servicio = crearServicio(
       crearSupabaseFalso({ data: { ok: false, motivo: 'vencida', mensaje: 'La reserva venció.' } }),

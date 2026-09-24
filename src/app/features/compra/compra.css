@@ -102,28 +102,52 @@ form {
   margin-block-start: var(--e-4);
 }
 
-.detalle {
-  /* Contenedor de los textos .solo-lectores (position: absolute): sin él se escapan del scroll */
-  position: relative;
-  inline-size: 100%;
-  margin-block: var(--e-4);
-  border-collapse: collapse;
-}
-
-.detalle th,
-.detalle td {
-  padding: var(--e-2) var(--e-3);
-  border-block-end: 1px solid var(--borde-fuerte);
-  text-align: start;
-}
-
-.detalle .importe {
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-
-.detalle tfoot th,
-.detalle .total {
-  font-family: var(--fuente-titulo);
+h3 {
+  margin-block: 0 var(--e-2);
   font-size: var(--t-rotulo);
+}
+
+.candy,
+.promos {
+  display: grid;
+  gap: var(--e-3);
+  padding-block-start: var(--e-4);
+  border-block-start: 1px solid var(--borde);
+}
+
+.candy .ayuda,
+.promos .ayuda {
+  margin: 0;
+}
+
+.cupon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--e-3);
+}
+
+.cupon app-campo {
+  flex: 1 1 14rem;
+}
+
+.cupon-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  /* Baja los botones hasta el campo, no hasta su etiqueta */
+  padding-block-start: var(--e-5);
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  min-block-size: var(--toque-min);
+}
+
+.opcion input {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  accent-color: var(--acento);
 }

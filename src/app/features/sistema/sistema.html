@@ -305,6 +305,31 @@
     />
   </section>
 
+  <section aria-labelledby="s-candy">
+    <h2 id="s-candy">Candy y desglose de la compra</h2>
+    <p class="bajada">
+      El candy se elige con un contador de botones, no con un campo numérico: sin flechas diminutas,
+      sin poder tipear un negativo y con cada botón nombrando lo que cuenta. El tope se marca con
+      <code>aria-disabled</code> para que el foco no se caiga justo al llegar al límite. Los combos
+      con entrada consumen una de las butacas reservadas (acá hay dos): el segundo combo con entrada
+      ya no entra. El desglose de abajo solo muestra lo que calculó la base, en el orden de D-06.
+    </p>
+
+    <h3 class="titulo-caso">Contador</h3>
+    <app-cantidad etiqueta="Pochoclo grande" [maximo]="5" [(valor)]="unidades" />
+
+    <h3 class="titulo-caso">Selector de candy</h3>
+    <app-selector-candy
+      [catalogo]="candyDeMuestra"
+      [butacas]="2"
+      [(productos)]="productosDeMuestra"
+      [(combos)]="combosDeMuestra"
+    />
+
+    <h3 class="titulo-caso">Desglose con cupón, crédito y canje</h3>
+    <app-desglose [desglose]="desgloseDeMuestra" [mostrarPuntos]="true" />
+  </section>
+
   <section aria-labelledby="s-a11y">
     <h2 id="s-a11y">Accesibilidad</h2>
     <p class="bajada">

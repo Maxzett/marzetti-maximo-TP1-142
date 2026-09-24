@@ -127,6 +127,22 @@
               </p>
             }
 
+            @if (candyBar(); as tienda) {
+              <!-- RF-34: el candy se compra junto con la entrada y se retira con el mismo QR -->
+              <section class="candy" aria-labelledby="titulo-candy">
+                <h3 id="titulo-candy">¿Sumás algo del candy bar?</h3>
+                <p class="ayuda">
+                  Es opcional. Lo retirás con el mismo QR de tu entrada, en el candy bar del cine.
+                </p>
+                <app-selector-candy
+                  [catalogo]="tienda"
+                  [butacas]="elegidas().length"
+                  [(productos)]="productos"
+                  [(combos)]="combos"
+                />
+              </section>
+            }
+
             @if (errorDeDatos()) {
               <app-mensaje tono="error">{{ errorDeDatos() }}</app-mensaje>
             }
@@ -154,42 +170,106 @@
               </app-mensaje>
             }
 
-            <table class="detalle">
-              <caption class="solo-lectores">
-                Detalle de las entradas
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Butaca</th>
-                  <th scope="col">Tipo</th>
-                  <th scope="col" class="importe">Precio</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (item of r.items; track item.butaca_id) {
-                  <tr>
-                    <td>{{ item.fila }}{{ item.numero }}</td>
-                    <td>{{ nombres[item.tipo] }}</td>
-                    <td class="importe">{{ formatearPrecio(item.precio) }}</td>
-                  </tr>
-                }
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th scope="row" colspan="2">Total</th>
-                  <td class="importe total">{{ formatearPrecio(r.total) }}</td>
-                </tr>
-              </tfoot>
-            </table>
+            @if (desglose(); as d) {
+              <app-desglose [desglose]="d" [mostrarPuntos]="haySesion()" />
+            }
 
-            <app-seleccion
-              etiqueta="Medio de pago"
-              marcador="Elegí un medio de pago"
-              ayuda="Pago simulado: no se hace ningún cobro real."
-              [opciones]="mediosDePago"
-              [requerido]="true"
-              [(valor)]="medio"
-            />
+            <!--
+              Promociones (RF-32, RF-39, RF-46). Cada cambio se manda a la base, que devuelve el
+              desglose recalculado: nada de esto se calcula en la pantalla.
+            -->
+            <section class="promos" aria-labelledby="titulo-promos">
+              <h3 id="titulo-promos">Cupón, crédito y puntos</h3>
+
+              @if (bienvenidaSugerida(); as bienvenida) {
+                <app-mensaje tono="exito">
+                  Tenés un cupón de bienvenida de {{ describirCupon(bienvenida) }} para tu primera
+                  compra.
+                  <app-boton
+                    variante="borde"
+                    [cargando]="ajustando()"
+                    (presionado)="usarBienvenida(bienvenida.codigo)"
+                  >
+                    Usar mi cupón
+                  </app-boton>
+                </app-mensaje>
+              }
+
+              <div class="cupon">
+                <app-campo
+                  etiqueta="Código de cupón"
+                  marcador="Ej.: BIENVENIDA"
+                  ayuda="Si tenés un código de descuento, ingresalo y tocá Aplicar."
+                  [(valor)]="cupon"
+                />
+                <div class="cupon-acciones">
+                  <app-boton
+                    variante="borde"
+                    [cargando]="ajustando()"
+                    (presionado)="aplicarCupon()"
+                  >
+                    Aplicar
+                  </app-boton>
+                  @if (desglose()?.cupon) {
+                    <app-boton variante="fantasma" (presionado)="quitarCupon()">
+                      Quitar cupón
+                    </app-boton>
+                  }
+                </div>
+              </div>
+
+              @if (haySesion() && saldos(); as s) {
+                @if (s.credito > 0) {
+                  <label class="opcion">
+                    <input
+                      type="checkbox"
+                      [checked]="usarCredito()"
+                      [disabled]="ajustando()"
+                      (change)="alternarCredito($any($event.target).checked)"
+                    />
+                    Usar mi crédito ({{ formatearPrecio(s.credito) }} disponibles)
+                  </label>
+                }
+
+                @if (recompensasPosibles().length > 0) {
+                  <app-seleccion
+                    etiqueta="Canjear puntos"
+                    marcador="No canjear"
+                    [ayuda]="
+                      'Tenés ' +
+                      formatearPuntos(s.puntos) +
+                      ' puntos. El canje se descuenta al pagar.'
+                    "
+                    [opciones]="recompensasPosibles()"
+                    [valor]="recompensaId()"
+                    (valorChange)="elegirRecompensa($event)"
+                  />
+                }
+              } @else {
+                <p class="ayuda">
+                  Con una cuenta acumulás 1 punto por peso, canjeás recompensas y usás tu crédito.
+                </p>
+              }
+
+              @if (errorDeAjuste()) {
+                <app-mensaje tono="error">{{ errorDeAjuste() }}</app-mensaje>
+              }
+            </section>
+
+            @if (total() > 0) {
+              <app-seleccion
+                etiqueta="Medio de pago"
+                marcador="Elegí un medio de pago"
+                ayuda="Pago simulado: no se hace ningún cobro real."
+                [opciones]="mediosDePago"
+                [requerido]="true"
+                [(valor)]="medio"
+              />
+            } @else {
+              <app-mensaje tono="exito">
+                Tu crédito o tus puntos cubren toda la compra: no hay nada que pagar.
+              </app-mensaje>
+            }
 
             @if (errorDePago()) {
               <app-mensaje tono="error">{{ errorDePago() }}</app-mensaje>
@@ -200,7 +280,7 @@
                 Cambiar butacas
               </app-boton>
               <app-boton [cargando]="pagando()" (presionado)="pagar()">
-                Pagar {{ formatearPrecio(r.total) }}
+                {{ total() > 0 ? 'Pagar ' + formatearPrecio(total()) : 'Confirmar compra' }}
               </app-boton>
             </div>
           </app-tarjeta>

@@ -1,0 +1,67 @@
+@if (!hayAlgo()) {
+  <p class="vacio">Por ahora el candy bar no tiene productos cargados.</p>
+} @else {
+  @if (combosOrdenados().length > 0) {
+    <section aria-labelledby="titulo-combos">
+      <h3 id="titulo-combos">Combos</h3>
+      <ul class="lista">
+        @for (combo of combosOrdenados(); track combo.id) {
+          <li class="item" [class.item--destacado]="combo.destacado">
+            <div class="texto">
+              <p class="nombre">
+                {{ combo.nombre }}
+                @if (combo.destacado) {
+                  <!-- RF-37: se destaca con texto, no solo con el borde de color -->
+                  <span class="marca">Destacado</span>
+                }
+              </p>
+              <p class="detalle">{{ contenidoDelCombo(combo) }}</p>
+              @if (entradasDelCombo(combo) > 0) {
+                <p class="detalle">
+                  Usa
+                  {{
+                    entradasDelCombo(combo) === 1
+                      ? 'una de tus butacas'
+                      : entradasDelCombo(combo) + ' de tus butacas'
+                  }}: el precio de esa entrada se reemplaza por el del combo.
+                </p>
+              }
+              <p class="precio">{{ formatearPrecio(combo.precio) }}</p>
+            </div>
+            <app-cantidad
+              [etiqueta]="combo.nombre"
+              [maximo]="maximoDelCombo(combo)"
+              [valor]="cantidadDeCombo(combo.id)"
+              (valorChange)="ponerCombo(combo.id, $event)"
+            />
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @for (grupo of grupos(); track grupo.categoria.id) {
+    <section [attr.aria-labelledby]="'categoria-' + grupo.categoria.id">
+      <h3 [id]="'categoria-' + grupo.categoria.id">{{ grupo.categoria.nombre }}</h3>
+      <ul class="lista">
+        @for (producto of grupo.productos; track producto.id) {
+          <li class="item">
+            <div class="texto">
+              <p class="nombre">{{ producto.nombre }}</p>
+              @if (producto.descripcion) {
+                <p class="detalle">{{ producto.descripcion }}</p>
+              }
+              <p class="precio">{{ formatearPrecio(producto.precio) }}</p>
+            </div>
+            <app-cantidad
+              [etiqueta]="producto.nombre"
+              [maximo]="maximoPorLinea"
+              [valor]="cantidadDeProducto(producto.id)"
+              (valorChange)="ponerProducto(producto.id, $event)"
+            />
+          </li>
+        }
+      </ul>
+    </section>
+  }
+}

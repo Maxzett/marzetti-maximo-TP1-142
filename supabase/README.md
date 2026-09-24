@@ -30,10 +30,12 @@ que recrear el proyecto desde cero.
 | `migrations/0019_salas_funciones.sql` | Salas, butacas y funciones: lectura pública, escritura solo por RPC (`crear_funciones`, `modificar_funcion`, `dar_de_baja_funcion`, `crear_sala`, `actualizar_sala`), asignación automática de sala y `generar_butacas_sala()` |
 | `migrations/0020_compra.sql` | Compra: reservas de 10 minutos, orden pendiente y pago simulado. Tabla `configuracion` (recargo VIP, tope de butacas) y seis RPC públicas (`estado_butacas`, `retener_butaca`, `liberar_butaca`, `crear_orden`, `confirmar_pago`, `obtener_orden`) más tres internas |
 | `migrations/0021_estado_butacas_con_vencimiento.sql` | `estado_butacas()` devuelve cuándo vence cada reserva propia, para que el temporizador sobreviva a recargar la página |
+| `migrations/0022_candy_y_promociones.sql` | Candy, combos, cupones, puntos, crédito y cancelación. Lectura pública del candy y de las recompensas, y del libro mayor solo propio. `calcular_orden()` (el único lugar que decide un monto, en el orden de D-06), `configurar_orden`, `cancelar_orden`, `mis_saldos`, `mis_ordenes`, y `confirmar_pago` / `obtener_orden` reescritas |
 | `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo. **Requiere 0019**: llama a `generar_butacas_sala()` |
 | `seed/002_catalogo_base.sql` | Géneros, categorías, cupones y recompensa inicial |
 | `seed/003_peliculas_demo.sql` | 12 películas inventadas (10 en cartelera, 2 próximas), con aserciones |
 | `seed/004_funciones_demo.sql` | Funciones de los próximos 14 días (6 películas × 3 horarios), programadas con el mismo algoritmo que usa la app. Requiere 0019 y los seeds 001 y 003 |
+| `seed/005_candy_y_promociones.sql` | 10 productos, 3 combos (uno con entrada para dos), 3 recompensas con costo de ~10 % de retorno (entrada 65.000 puntos, con 1 punto por peso), y corrige las de versiones anteriores del seed. Idempotente. Requiere 0022 |
 
 Si una tabla recién creada devuelve `PGRST205 Could not find the table in the
 schema cache`, es el caché de PostgREST. Se refresca con:
@@ -185,3 +187,21 @@ y no crea ninguna del lote (todo o nada), el borde de RN-01 (entra a `fin + 30 m
 a `fin + 29`), la baja libera la sala, una función con entradas vendidas no se da de
 baja ni se mueve pero sí cambia de precio, y el log recibe una fila por operación sin
 que nadie pueda leerlo ni editarlo.
+
+`pruebas/promociones.sql` cubre la F7 con dos cuentas de cliente y una función lejana (el encabezado
+explica cómo buscar los ids): el anónimo no lee cupones, órdenes ni el libro mayor; un combo con
+entrada de más que butacas se rechaza; el cupón de bienvenida no es para anónimos ni para la
+segunda compra; el libro mayor de otra cuenta devuelve 0 filas; no se canjea sin puntos; el anónimo no
+ejecuta `cancelar_orden` y la orden ajena responde como si no existiera. La misma batería se
+corrió más completa (91 comprobaciones, con el cupón por edad en el borde de los 50, el crédito
+aplicado después del cupón, el total cero, la ventana de 2 horas, los tramos del QR consumidos y la
+reversión de puntos al cancelar) contra Postgres en WASM; **no cubre concurrencia real**: dos pagos de
+la misma cuenta se serializan con `FOR UPDATE` sobre la orden y el perfil, que se razona, no se midió.
+
+Para cambiar lo que "configura el administrador" hasta que la F9 construya el panel:
+
+```sql
+update public.cupones set valor = 25 where codigo = 'BIENVENIDA';   -- RF-43
+update public.recompensas set costo_puntos = 70000 where nombre = 'Entrada gratis';   -- RF-47
+update public.productos set precio = 7000 where nombre = 'Pochoclo grande';
+```

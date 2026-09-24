@@ -1,13 +1,17 @@
 import { Component, computed, signal } from '@angular/core';
 import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
-import { EstadoDeButaca } from '../../core/models/orden';
+import { Cantidades } from '../../core/compra/candy';
+import { CatalogoDeCandy } from '../../core/models/candy';
+import { DesgloseDeOrden, EstadoDeButaca } from '../../core/models/orden';
 import { Pelicula } from '../../core/models/pelicula';
 import { Butaca } from '../../core/models/sala';
 import { COLORES_DE_OJOS, TIPOS_DE_SANGRE } from '../../core/models/perfil';
 import { salaDeMuestra } from '../../core/salas/muestra';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
+import { Cantidad } from '../../shared/cantidad/cantidad';
 import { Chip } from '../../shared/chip/chip';
+import { Desglose } from '../../shared/desglose/desglose';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Estrellas } from '../../shared/estrellas/estrellas';
 import { FichaPelicula } from '../../shared/ficha-pelicula/ficha-pelicula';
@@ -15,6 +19,7 @@ import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
+import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
 import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { SelectorHora } from '../../shared/selector-hora/selector-hora';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
@@ -30,7 +35,9 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
   imports: [
     Boton,
     Campo,
+    Cantidad,
     Chip,
+    Desglose,
     Dialogo,
     Estrellas,
     FichaPelicula,
@@ -38,6 +45,7 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     Mensaje,
     Poster,
     Seleccion,
+    SelectorCandy,
     SelectorFecha,
     SelectorHora,
     Spinner,
@@ -170,6 +178,94 @@ export class Sistema {
     this.procesando.set(true);
     setTimeout(() => this.procesando.set(false), 1800);
   }
+
+  // Candy y desglose (F7): datos de muestra para ver el selector y el detalle de una compra
+  protected readonly candyDeMuestra: CatalogoDeCandy = {
+    categorias: [
+      { id: 'c1', nombre: 'Pochoclos', orden: 1 },
+      { id: 'c2', nombre: 'Bebidas', orden: 2 },
+    ],
+    productos: [
+      {
+        id: 'p1',
+        categoria_id: 'c1',
+        nombre: 'Pochoclo grande',
+        descripcion: 'Salado o dulce, balde grande',
+        imagen_url: null,
+        precio: 6500,
+      },
+      {
+        id: 'p2',
+        categoria_id: 'c2',
+        nombre: 'Gaseosa 500 ml',
+        descripcion: 'Cola, lima-limón o naranja',
+        imagen_url: null,
+        precio: 2800,
+      },
+    ],
+    combos: [
+      {
+        id: 'k1',
+        nombre: 'Combo Entrada + Pochoclo + Gaseosa',
+        descripcion: '',
+        imagen_url: null,
+        precio: 9800,
+        destacado: true,
+        combo_items: [
+          { incluye_entrada: true, cantidad: 1, productos: null },
+          { incluye_entrada: false, cantidad: 1, productos: { nombre: 'Pochoclo mediano' } },
+          { incluye_entrada: false, cantidad: 1, productos: { nombre: 'Gaseosa 500 ml' } },
+        ],
+      },
+      {
+        id: 'k2',
+        nombre: 'Combo Candy',
+        descripcion: '',
+        imagen_url: null,
+        precio: 6900,
+        destacado: false,
+        combo_items: [
+          { incluye_entrada: false, cantidad: 1, productos: { nombre: 'Pochoclo mediano' } },
+          { incluye_entrada: false, cantidad: 1, productos: { nombre: 'Gaseosa 500 ml' } },
+        ],
+      },
+    ],
+    recompensas: [],
+  };
+  protected readonly productosDeMuestra = signal<Cantidades>(new Map());
+  protected readonly combosDeMuestra = signal<Cantidades>(new Map());
+  protected readonly unidades = signal(1);
+  protected readonly desgloseDeMuestra: DesgloseDeOrden = {
+    subtotal: 27800,
+    descuento_cupon: 5560,
+    credito_aplicado: 3000,
+    total: 19240,
+    puntos_a_ganar: 19240,
+    puntos_canje: 0,
+    cupon: { codigo: 'BIENVENIDA', tipo_descuento: 'porcentaje', valor: 20 },
+    tiene_vip: true,
+    entradas: [
+      { butaca_id: 'a', fila: 'F', numero: 12, tipo: 'estandar', precio: 6500 },
+      { butaca_id: 'b', fila: 'R', numero: 5, tipo: 'vip', precio: 8500 },
+    ],
+    productos: [
+      {
+        producto_id: 'p1',
+        nombre: 'Pochoclo grande',
+        cantidad: 1,
+        precio_unitario: 6500,
+        por_canje: false,
+      },
+      {
+        producto_id: 'p2',
+        nombre: 'Gaseosa 500 ml',
+        cantidad: 1,
+        precio_unitario: 0,
+        por_canje: true,
+      },
+    ],
+    combos: [],
+  };
 
   /** El valor ya resuelto del token, tal como lo está pintando el navegador */
   private token(nombre: string): string {

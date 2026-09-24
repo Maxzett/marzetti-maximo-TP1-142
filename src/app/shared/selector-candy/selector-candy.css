@@ -1,0 +1,71 @@
+:host {
+  display: grid;
+  gap: var(--e-5);
+}
+
+h3 {
+  margin-block: 0 var(--e-2);
+  font-size: var(--t-rotulo);
+}
+
+.lista {
+  display: grid;
+  gap: var(--e-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  padding: var(--e-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.item--destacado {
+  border-color: var(--borde-fuerte);
+}
+
+.texto {
+  flex: 1 1 14rem;
+  min-inline-size: 0;
+}
+
+.texto p {
+  margin: 0;
+}
+
+.nombre {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.marca {
+  margin-inline-start: var(--e-2);
+  padding: 0 var(--e-2);
+  border: 1px solid var(--acento);
+  border-radius: var(--r-ficha);
+  color: var(--acento);
+  font-size: var(--t-mini);
+}
+
+.detalle {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.precio {
+  margin-block-start: var(--e-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.vacio {
+  margin: 0;
+  color: var(--texto-tenue);
+}

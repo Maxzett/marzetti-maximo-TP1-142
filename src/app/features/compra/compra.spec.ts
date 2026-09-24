@@ -4,11 +4,20 @@ import { provideRouter, Router } from '@angular/router';
 import { MapaDeEstados } from '../../core/compra/estado-butacas';
 import { Pelicula } from '../../core/models/pelicula';
 import { Funcion } from '../../core/models/sala';
-import { ResultadoDeOrden, ResultadoDePago } from '../../core/models/orden';
+import { CatalogoDeCandy } from '../../core/models/candy';
+import {
+  DesgloseDeOrden,
+  ResultadoDeConfiguracion,
+  ResultadoDeOrden,
+  ResultadoDePago,
+  Saldos,
+} from '../../core/models/orden';
 import { salaDeMuestra } from '../../core/salas/muestra';
 import { Auth } from '../../core/services/auth';
+import { Candy } from '../../core/services/candy';
 import { Catalogo } from '../../core/services/catalogo';
 import { Compra as ServicioDeCompra } from '../../core/services/compra';
+import { Cuenta } from '../../core/services/cuenta';
 import { Funciones } from '../../core/services/funciones';
 import { Salas } from '../../core/services/salas';
 import { Compra } from './compra';
@@ -45,7 +54,55 @@ function peliculaDeMuestra(restriccion: 0 | 13 | 18): Pelicula {
   };
 }
 
+function desgloseDeMuestra(cambios: Partial<DesgloseDeOrden> = {}): DesgloseDeOrden {
+  return {
+    subtotal: 15000,
+    descuento_cupon: 0,
+    credito_aplicado: 0,
+    total: 15000,
+    puntos_a_ganar: 15000,
+    puntos_canje: 0,
+    cupon: null,
+    tiene_vip: true,
+    entradas: [
+      { butaca_id: 'b1', fila: 'A', numero: 1, tipo: 'estandar', precio: 6500 },
+      { butaca_id: 'b2', fila: 'R', numero: 5, tipo: 'vip', precio: 8500 },
+    ],
+    productos: [],
+    combos: [],
+    ...cambios,
+  };
+}
+
+const CANDY: CatalogoDeCandy = {
+  categorias: [{ id: 'c1', nombre: 'Pochoclos', orden: 1 }],
+  productos: [
+    {
+      id: 'p1',
+      categoria_id: 'c1',
+      nombre: 'Pochoclo grande',
+      descripcion: '',
+      imagen_url: null,
+      precio: 6500,
+    },
+  ],
+  combos: [],
+  recompensas: [
+    {
+      id: 'r1',
+      nombre: 'Pochoclo grande gratis',
+      tipo: 'producto',
+      producto_id: 'p1',
+      costo_puntos: 150,
+    },
+    { id: 'r2', nombre: 'Entrada gratis', tipo: 'entrada', producto_id: null, costo_puntos: 500 },
+  ],
+};
+
 interface Opciones {
+  candy?: CatalogoDeCandy | null;
+  saldos?: Saldos | null;
+  configurar?: ResultadoDeConfiguracion | ((seleccion: unknown) => ResultadoDeConfiguracion);
   funcion?: Funcion | null;
   restriccion?: 0 | 13 | 18;
   haySesion?: boolean;
@@ -65,6 +122,13 @@ async function montar(opciones: Opciones = {}) {
     retener: opciones.retener ?? vi.fn(async () => ({ estado: 'reservada', expiraAt: null })),
     liberar: vi.fn(async () => null),
     crearOrden: vi.fn(async () => opciones.crearOrden),
+    configurarOrden: vi.fn(async (_orden: string, seleccion: unknown) => {
+      const respuesta = opciones.configurar ?? {
+        estado: 'configurada' as const,
+        desglose: desgloseDeMuestra(),
+      };
+      return typeof respuesta === 'function' ? respuesta(seleccion) : respuesta;
+    }),
     confirmarPago: vi.fn(async () => opciones.pago),
     escuchar: vi.fn(() => cerrarCanal),
   };
@@ -88,6 +152,8 @@ async function montar(opciones: Opciones = {}) {
         },
       },
       { provide: Salas, useValue: { cargarButacas: vi.fn(async () => butacas) } },
+      { provide: Candy, useValue: { cargar: vi.fn(async () => opciones.candy ?? null) } },
+      { provide: Cuenta, useValue: { saldos: vi.fn(async () => opciones.saldos ?? null) } },
       {
         provide: Auth,
         useValue: { haySesion: signal(opciones.haySesion ?? false), perfil: signal(null) },
@@ -294,6 +360,138 @@ describe('Compra', () => {
       await refrescar(fixture);
 
       expect(navegar).toHaveBeenCalledWith(['/entrada', 'ABC123']);
+    });
+
+    it('el candy elegido viaja a la base junto con la orden nueva', async () => {
+      const { fixture, servicio } = await montar({
+        candy: CANDY,
+        crearOrden: { estado: 'creada', resumen: { ...resumen, items: [...resumen.items] } },
+      });
+      (el(fixture).querySelector('button.celda') as HTMLButtonElement).click();
+      await refrescar(fixture);
+      botonDeTexto(fixture, 'Continuar').click();
+      await refrescar(fixture);
+
+      expect(texto(fixture)).toContain('¿Sumás algo del candy bar?');
+      (
+        el(fixture).querySelector(
+          'button[aria-label="Agregar una unidad de Pochoclo grande"]',
+        ) as HTMLButtonElement
+      ).click();
+      fixture.componentInstance['email'].set('a@b.com');
+      el(fixture).querySelector('form')!.dispatchEvent(new Event('submit'));
+      await refrescar(fixture);
+
+      expect(servicio.configurarOrden).toHaveBeenCalledWith(
+        'o1',
+        expect.objectContaining({ productos: [{ id: 'p1', cantidad: 1 }], cupon: '' }),
+      );
+    });
+
+    it('si la base rechaza el candy elegido se queda en los datos con el motivo', async () => {
+      const { fixture } = await hastaElPago({
+        configurar: { estado: 'error', mensaje: 'Alguno de los productos ya no está disponible.' },
+      });
+
+      expect(texto(fixture)).toContain('Alguno de los productos ya no está disponible.');
+      expect(texto(fixture)).not.toContain('Resumen y pago');
+    });
+
+    it('aplicar un cupón manda el código y muestra el desglose que devuelve la base', async () => {
+      const cupon = { codigo: 'BIENVENIDA', tipo_descuento: 'porcentaje' as const, valor: 20 };
+      const { fixture, servicio } = await hastaElPago({
+        configurar: (seleccion) =>
+          (seleccion as { cupon: string }).cupon
+            ? {
+                estado: 'configurada',
+                desglose: desgloseDeMuestra({ descuento_cupon: 3000, total: 12000, cupon }),
+              }
+            : { estado: 'configurada', desglose: desgloseDeMuestra() },
+      });
+
+      fixture.componentInstance['cupon'].set('bienvenida');
+      botonDeTexto(fixture, 'Aplicar').click();
+      await refrescar(fixture);
+
+      expect(servicio.configurarOrden).toHaveBeenLastCalledWith(
+        'o1',
+        expect.objectContaining({ cupon: 'bienvenida' }),
+      );
+      expect(texto(fixture)).toContain('Cupón BIENVENIDA (20 %)');
+      expect(botonDeTexto(fixture, 'Pagar').textContent).toMatch(/12\.000/);
+    });
+
+    it('un cupón rechazado muestra el motivo y vuelve a lo que estaba aplicado', async () => {
+      const { fixture, servicio } = await hastaElPago({});
+      // A partir de ahora la base rechaza: la orden quedó como estaba
+      servicio.configurarOrden.mockResolvedValue({
+        estado: 'error',
+        mensaje: 'El cupón de bienvenida es para tu primera compra.',
+      });
+
+      fixture.componentInstance['cupon'].set('BIENVENIDA');
+      botonDeTexto(fixture, 'Aplicar').click();
+      await refrescar(fixture);
+
+      expect(texto(fixture)).toContain('El cupón de bienvenida es para tu primera compra.');
+      expect(fixture.componentInstance['cupon']()).toBe('');
+    });
+
+    it('con cuenta y cupón de bienvenida disponible lo ofrece', async () => {
+      const { fixture } = await hastaElPago({
+        haySesion: true,
+        saldos: {
+          puntos: 0,
+          credito: 0,
+          bienvenida: { codigo: 'BIENVENIDA', tipo_descuento: 'porcentaje', valor: 20 },
+        },
+      });
+
+      expect(texto(fixture)).toContain('cupón de bienvenida de 20 %');
+      expect(botonDeTexto(fixture, 'Usar mi cupón')).toBeDefined();
+    });
+
+    it('el crédito solo se ofrece si hay saldo, y las recompensas solo si alcanzan los puntos', async () => {
+      const sinNada = await hastaElPago({
+        haySesion: true,
+        candy: CANDY,
+        saldos: { puntos: 100, credito: 0, bienvenida: null },
+      });
+      expect(el(sinNada.fixture).querySelector('input[type="checkbox"]')).toBeNull();
+      expect(el(sinNada.fixture).querySelector('option[value="r1"]')).toBeNull();
+      TestBed.resetTestingModule();
+
+      const conSaldo = await hastaElPago({
+        haySesion: true,
+        candy: CANDY,
+        saldos: { puntos: 200, credito: 3000, bienvenida: null },
+      });
+      expect(el(conSaldo.fixture).querySelector('input[type="checkbox"]')).not.toBeNull();
+      expect(el(conSaldo.fixture).querySelector('option[value="r1"]')).not.toBeNull();
+      expect(el(conSaldo.fixture).querySelector('option[value="r2"]')).toBeNull();
+    });
+
+    it('sin cuenta explica qué se gana registrándose y no ofrece crédito ni canje', async () => {
+      const { fixture } = await hastaElPago({ candy: CANDY });
+
+      expect(texto(fixture)).toContain('Con una cuenta acumulás 1 punto por peso');
+      expect(el(fixture).querySelector('input[type="checkbox"]')).toBeNull();
+    });
+
+    it('si el crédito o los puntos cubren todo no pide medio de pago y confirma sin él', async () => {
+      const { fixture, servicio } = await hastaElPago({
+        configurar: {
+          estado: 'configurada',
+          desglose: desgloseDeMuestra({ credito_aplicado: 15000, total: 0 }),
+        },
+        pago: { estado: 'pagada', codigo: 'ABC123' },
+      });
+
+      expect(el(fixture).querySelector('app-seleccion')).toBeNull();
+      botonDeTexto(fixture, 'Confirmar compra').click();
+      await refrescar(fixture);
+
+      expect(servicio.confirmarPago).toHaveBeenCalledWith('o1', null);
     });
 
     it('si la reserva venció vuelve al mapa con el aviso, sin tratarlo como una falla', async () => {

@@ -72,17 +72,26 @@ where not exists (
 -- Los cupones BIENVENIDA (RF-39, RF-43, 20 % inicial) y PLATINO50 (RF-44, mayores de 50)
 -- ya los siembra el seed 002. Se editan con UPDATE cupones SET valor = ... WHERE codigo = ...
 
--- RF-46, RF-47: cuántos puntos cuesta cada recompensa. El seed 002 dejó "Entrada gratis" a
--- 5000 puntos; el ejemplo del pliego es 500, y con 1 punto por peso 5000 sería inalcanzable.
-update public.recompensas set costo_puntos = 500
- where nombre = 'Entrada gratis' and costo_puntos = 5000;
+-- RF-46, RF-47: cuántos puntos cuesta cada recompensa. Con 1 punto por peso (RF-45), el costo
+-- fija cuánto le devuelve el cine al cliente: se dimensiona para devolver cerca del 10 % de lo
+-- gastado (entrada de $6.500 → 65.000 puntos). El 500 del ejemplo del pliego devolvería más de
+-- 1000 %, y el cine perdería plata en cada canje. Es configuración (RF-47), no una regla fija.
+--
+-- Las tres corrigen los valores de versiones anteriores de este seed (y el 5000 del seed 002)
+-- sin pisar un costo que el administrador ya hubiera cambiado a mano.
+update public.recompensas set costo_puntos = 65000
+ where nombre = 'Entrada gratis' and costo_puntos in (500, 5000);
+update public.recompensas set costo_puntos = 65000
+ where nombre = 'Pochoclo grande gratis' and costo_puntos = 150;
+update public.recompensas set costo_puntos = 28000
+ where nombre = 'Gaseosa 500 ml gratis' and costo_puntos = 80;
 
 insert into public.recompensas (nombre, tipo, producto_id, costo_puntos)
 select v.nombre, v.tipo::public.tipo_recompensa, p.id, v.costo
 from (values
-  ('Entrada gratis',          'entrada',  null,              500),
-  ('Pochoclo grande gratis',  'producto', 'Pochoclo grande', 150),
-  ('Gaseosa 500 ml gratis',   'producto', 'Gaseosa 500 ml',   80)
+  ('Entrada gratis',          'entrada',  null,              65000),
+  ('Pochoclo grande gratis',  'producto', 'Pochoclo grande', 65000),
+  ('Gaseosa 500 ml gratis',   'producto', 'Gaseosa 500 ml',  28000)
 ) as v(nombre, tipo, producto, costo)
 left join public.productos p on p.nombre = v.producto
 where not exists (select 1 from public.recompensas r where r.nombre = v.nombre);

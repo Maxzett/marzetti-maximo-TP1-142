@@ -11,30 +11,39 @@ import {
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { describirEdad } from '../../core/catalogo/edad';
+import { Cantidades, comoLineas, describirCupon } from '../../core/compra/candy';
 import { edadALaFecha, puedeComprar } from '../../core/compra/edad-compra';
 import { aplicarEvento, primerVencimiento } from '../../core/compra/estado-butacas';
 import { describirVersion } from '../../core/compra/agrupar-funciones';
-import { formatearPrecio } from '../../core/formato/precio';
+import { formatearPrecio, formatearPuntos } from '../../core/formato/precio';
 import { describirInicio, fechaLocal } from '../../core/funciones/programacion';
+import { CatalogoDeCandy } from '../../core/models/candy';
 import {
+  DesgloseDeOrden,
   EstadoDeButaca,
   MEDIOS_DE_PAGO,
   MedioDePago,
   ResumenDeOrden,
+  Saldos,
+  SeleccionDeOrden,
 } from '../../core/models/orden';
 import { Pelicula } from '../../core/models/pelicula';
 import { Butaca, Funcion } from '../../core/models/sala';
 import { NOMBRE_DE_TIPO } from '../../core/salas/distribucion';
 import { Auth } from '../../core/services/auth';
+import { Candy } from '../../core/services/candy';
 import { Catalogo } from '../../core/services/catalogo';
 import { Compra as ServicioDeCompra } from '../../core/services/compra';
+import { Cuenta } from '../../core/services/cuenta';
 import { Funciones } from '../../core/services/funciones';
 import { Salas } from '../../core/services/salas';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
+import { Desglose } from '../../shared/desglose/desglose';
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
+import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { Spinner } from '../../shared/spinner/spinner';
@@ -56,10 +65,12 @@ type Paso = 'butacas' | 'datos' | 'pago';
   imports: [
     Boton,
     Campo,
+    Desglose,
     MapaSala,
     Mensaje,
     RouterLink,
     Seleccion,
+    SelectorCandy,
     SelectorFecha,
     Spinner,
     Tarjeta,
@@ -73,6 +84,8 @@ export class Compra {
   private readonly funciones = inject(Funciones);
   private readonly catalogo = inject(Catalogo);
   private readonly salas = inject(Salas);
+  private readonly candy = inject(Candy);
+  private readonly cuenta = inject(Cuenta);
   private readonly servicio = inject(ServicioDeCompra);
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
@@ -82,6 +95,7 @@ export class Compra {
   readonly funcionId = input.required<string>();
 
   protected readonly formatearPrecio = formatearPrecio;
+  protected readonly formatearPuntos = formatearPuntos;
   protected readonly nombres = NOMBRE_DE_TIPO;
   protected readonly mediosDePago: readonly OpcionSeleccion[] = MEDIOS_DE_PAGO.map((m) => ({
     valor: m.valor,
@@ -109,7 +123,22 @@ export class Compra {
   protected readonly enviando = signal(false);
 
   protected readonly resumen = signal<ResumenDeOrden | null>(null);
+  /** Lo que calculó la base para la orden: subtotal, cupón, crédito y total (D-06) */
+  protected readonly desglose = signal<DesgloseDeOrden | null>(null);
   protected readonly medio = signal('');
+
+  // Candy (RF-34, RF-36, RF-37). Es opcional: si no carga, la compra de entradas sigue igual
+  protected readonly candyBar = signal<CatalogoDeCandy | null>(null);
+  protected readonly productos = signal<Cantidades>(new Map());
+  protected readonly combos = signal<Cantidades>(new Map());
+
+  // Promociones y cuenta (RF-32, RF-39, RF-46). Los saldos solo existen con sesión
+  protected readonly saldos = signal<Saldos | null>(null);
+  protected readonly cupon = signal('');
+  protected readonly usarCredito = signal(false);
+  protected readonly recompensaId = signal('');
+  protected readonly errorDeAjuste = signal('');
+  protected readonly ajustando = signal(false);
   protected readonly errorDePago = signal('');
   protected readonly pagando = signal(false);
 
@@ -120,6 +149,27 @@ export class Compra {
 
   /** Sin cuenta no hay fecha de nacimiento registrada: se declara (D-02) */
   protected readonly debeDeclararEdad = computed(() => this.restriccion() > 0 && !this.haySesion());
+
+  protected readonly describirCupon = describirCupon;
+
+  /** El cupón de bienvenida se ofrece mientras no haya otro aplicado (RF-39) */
+  protected readonly bienvenidaSugerida = computed(() =>
+    this.desglose()?.cupon ? null : (this.saldos()?.bienvenida ?? null),
+  );
+
+  /** Solo se ofrecen las recompensas que alcanzan con los puntos de la cuenta (RF-46) */
+  protected readonly recompensasPosibles = computed<OpcionSeleccion[]>(() => {
+    const puntos = this.saldos()?.puntos ?? 0;
+
+    return (this.candyBar()?.recompensas ?? [])
+      .filter((r) => r.costo_puntos <= puntos)
+      .map((r) => ({
+        valor: r.id,
+        texto: `${r.nombre} · ${formatearPuntos(r.costo_puntos)} puntos`,
+      }));
+  });
+
+  protected readonly total = computed(() => this.desglose()?.total ?? this.resumen()?.total ?? 0);
 
   /** Las butacas elegidas por esta sesión, en orden de fila y número */
   protected readonly elegidas = computed(() => {
@@ -203,6 +253,7 @@ export class Compra {
   protected async alVencer(): Promise<void> {
     this.avisoDeVencimiento.set('Tu reserva venció y liberamos las butacas. Elegí de nuevo.');
     this.resumen.set(null);
+    this.desglose.set(null);
     this.paso.set('butacas');
     await this.recargarEstados();
   }
@@ -233,8 +284,24 @@ export class Compra {
     );
 
     if (resultado.estado === 'creada') {
-      this.resumen.set(resultado.resumen);
-      this.paso.set('pago');
+      // La orden es nueva: arranca sin cupón, sin crédito y sin canje, solo con el candy elegido
+      this.cupon.set('');
+      this.usarCredito.set(false);
+      this.recompensaId.set('');
+
+      const configurada = await this.servicio.configurarOrden(
+        resultado.resumen.orden_id,
+        this.seleccion(),
+      );
+
+      if (configurada.estado === 'configurada') {
+        this.resumen.set(resultado.resumen);
+        this.desglose.set(configurada.desglose);
+        this.errorDeAjuste.set('');
+        this.paso.set('pago');
+      } else {
+        this.errorDeDatos.set(configurada.mensaje);
+      }
     } else {
       this.errorDeDatos.set(resultado.mensaje);
     }
@@ -275,6 +342,75 @@ export class Compra {
 
   // ── Paso 3: pago ─────────────────────────────────────────────────────────
 
+  private seleccion(): SeleccionDeOrden {
+    return {
+      productos: comoLineas(this.productos()),
+      combos: comoLineas(this.combos()),
+      cupon: this.cupon(),
+      usarCredito: this.usarCredito(),
+      recompensaId: this.recompensaId() || null,
+    };
+  }
+
+  /**
+   * Aplica un cambio de cupón, crédito o canje y muestra el desglose que devuelve la base. Si la
+   * base lo rechaza (cupón que no corresponde, sin puntos) la orden quedó como estaba: se vuelve
+   * a lo anterior y se muestra el motivo, en vez de dejar en pantalla algo que no está aplicado.
+   */
+  private async ajustar(cambio: () => void): Promise<void> {
+    const resumen = this.resumen();
+
+    if (!resumen || this.ajustando()) {
+      return;
+    }
+
+    const previa = {
+      cupon: this.desglose()?.cupon?.codigo ?? '',
+      usarCredito: this.usarCredito(),
+      recompensaId: this.recompensaId(),
+    };
+
+    cambio();
+    this.ajustando.set(true);
+    this.errorDeAjuste.set('');
+
+    const resultado = await this.servicio.configurarOrden(resumen.orden_id, this.seleccion());
+
+    if (resultado.estado === 'configurada') {
+      this.desglose.set(resultado.desglose);
+    } else if (resultado.estado === 'vencida') {
+      this.avisoDeVencimiento.set(resultado.mensaje);
+      await this.alVencer();
+    } else {
+      this.errorDeAjuste.set(resultado.mensaje);
+      this.cupon.set(previa.cupon);
+      this.usarCredito.set(previa.usarCredito);
+      this.recompensaId.set(previa.recompensaId);
+    }
+
+    this.ajustando.set(false);
+  }
+
+  protected aplicarCupon(): Promise<void> {
+    return this.ajustar(() => undefined);
+  }
+
+  protected usarBienvenida(codigo: string): Promise<void> {
+    return this.ajustar(() => this.cupon.set(codigo));
+  }
+
+  protected quitarCupon(): Promise<void> {
+    return this.ajustar(() => this.cupon.set(''));
+  }
+
+  protected alternarCredito(activo: boolean): Promise<void> {
+    return this.ajustar(() => this.usarCredito.set(activo));
+  }
+
+  protected elegirRecompensa(id: string): Promise<void> {
+    return this.ajustar(() => this.recompensaId.set(id));
+  }
+
   protected async pagar(): Promise<void> {
     const resumen = this.resumen();
 
@@ -282,7 +418,8 @@ export class Compra {
       return;
     }
 
-    if (!this.medio()) {
+    // Con todo cubierto por crédito o canje no hay nada que cobrar: no se pide medio de pago
+    if (this.total() > 0 && !this.medio()) {
       this.errorDePago.set('Elegí un medio de pago.');
       return;
     }
@@ -292,7 +429,7 @@ export class Compra {
 
     const resultado = await this.servicio.confirmarPago(
       resumen.orden_id,
-      this.medio() as MedioDePago,
+      this.total() > 0 ? (this.medio() as MedioDePago) : null,
     );
 
     if (resultado.estado === 'pagada') {
@@ -300,6 +437,7 @@ export class Compra {
     } else if (resultado.estado === 'vencida') {
       this.avisoDeVencimiento.set(resultado.mensaje);
       this.resumen.set(null);
+      this.desglose.set(null);
       this.paso.set('butacas');
       await this.recargarEstados();
     } else {
@@ -317,6 +455,9 @@ export class Compra {
     this.cargando.set(true);
     this.funcion.set(null);
     this.resumen.set(null);
+    this.desglose.set(null);
+    this.productos.set(new Map());
+    this.combos.set(new Map());
     this.paso.set('butacas');
 
     const funcion = await this.funciones.cargarUna(id);
@@ -332,9 +473,11 @@ export class Compra {
         this.estados.update((estados) => aplicarEvento(estados, evento)),
       );
 
-      const [pelicula, butacas] = await Promise.all([
+      const [pelicula, butacas, candyBar, saldos] = await Promise.all([
         this.catalogo.cargarPelicula(funcion.pelicula_id),
         this.salas.cargarButacas(funcion.sala_id),
+        this.candy.cargar(),
+        this.haySesion() ? this.cuenta.saldos() : Promise.resolve(null),
         this.recargarEstados(),
       ]);
 
@@ -344,6 +487,8 @@ export class Compra {
 
       this.pelicula.set(pelicula);
       this.butacas.set(butacas ?? []);
+      this.candyBar.set(candyBar);
+      this.saldos.set(saldos);
       this.email.set(this.auth.perfil()?.email ?? '');
       this.titulo.setTitle(`Comprar · ${funcion.pelicula.titulo} · Cine Emezeta`);
     }
