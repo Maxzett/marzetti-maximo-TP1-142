@@ -30,6 +30,7 @@ export class Entrada {
   protected readonly cargando = signal(true);
   protected readonly entrada = signal<EntradaComprada | null>(null);
   protected readonly qr = signal('');
+  protected readonly errorDeQr = signal(false);
   protected readonly descargando = signal(false);
   protected readonly errorDeDescarga = signal('');
 
@@ -81,6 +82,7 @@ export class Entrada {
     this.cargando.set(true);
     this.entrada.set(null);
     this.qr.set('');
+    this.errorDeQr.set(false);
 
     const entrada = await this.compra.obtenerEntrada(codigo);
 
@@ -101,8 +103,11 @@ export class Entrada {
         if (codigo === this.codigo()) {
           this.qr.set(imagen);
         }
-      } catch {
-        // Sin QR dibujado el código escrito sigue sirviendo: se tipea en la puerta (RF-53)
+      } catch (error) {
+        // Sin QR dibujado el código escrito sigue sirviendo: se tipea en la puerta (RF-53).
+        // Se avisa en pantalla y se deja el rastro en consola: un fallo mudo ya nos costó un bug.
+        console.error('No se pudo generar el QR', error);
+        this.errorDeQr.set(true);
       }
     }
 

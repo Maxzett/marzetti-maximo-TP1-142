@@ -6,7 +6,12 @@
  * siendo un QR chico que un lector de mano resuelve rápido.
  */
 export async function qrComoImagen(codigo: string, ladoEnPixeles = 320): Promise<string> {
-  const QRCode = await import('qrcode');
+  const modulo = await import('qrcode');
+
+  // `qrcode` es CommonJS. Al empaquetar para producción, esbuild lo expone como `default` y el
+  // namespace queda sin `toDataURL`; en los tests (Vitest) las funciones sí están en el namespace.
+  // Sin este desvío el QR falla solo en el build desplegado.
+  const QRCode = modulo.default ?? modulo;
 
   return QRCode.toDataURL(codigo, {
     errorCorrectionLevel: 'M',

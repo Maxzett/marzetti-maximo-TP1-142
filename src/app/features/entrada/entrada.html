@@ -43,10 +43,12 @@
                 <img
                   class="qr"
                   [src]="qr()"
-                  width="200"
-                  height="200"
                   [alt]="'Código QR de la entrada. Código: ' + e.codigo"
                 />
+              } @else if (errorDeQr()) {
+                <app-mensaje tono="aviso">
+                  No pudimos dibujar el QR. Mostrá el código escrito en la puerta.
+                </app-mensaje>
               }
               <!-- El código escrito es la alternativa al QR: el empleado lo puede ingresar a mano -->
               <p class="texto-codigo">

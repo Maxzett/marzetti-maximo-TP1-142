@@ -98,7 +98,7 @@ h1 {
 .acciones {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: center;
   gap: var(--e-3);
   margin-block-start: var(--e-5);
 }
