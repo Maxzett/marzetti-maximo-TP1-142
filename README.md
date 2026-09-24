@@ -30,7 +30,7 @@ pnpm build          # build de producción en dist/tp1-cine/browser
 pnpm format         # formatea src/ con Prettier
 ```
 
-pnpm no ejecuta los scripts de instalación de las dependencias (`pnpm.ignoredBuiltDependencies` en `package.json`). Las cuatro que los declaran traen binarios precompilados para cada plataforma y el build funciona sin esos scripts, así que no hay motivo para correr código arbitrario al instalar.
+pnpm no ejecuta los scripts de instalación de las dependencias (`pnpm.ignoredBuiltDependencies` en `package.json`). Las que los declaran traen binarios precompilados (o, en el caso de `core-js`, un simple aviso de donación) y el build funciona sin esos scripts, así que no hay motivo para correr código arbitrario al instalar.
 
 El service worker está deshabilitado en `pnpm start` para que el caché no oculte los cambios. Para probar la PWA hay que servir el build de producción, por ejemplo con `pnpm dlx serve -s dist/tp1-cine/browser`.
 
@@ -43,6 +43,17 @@ src/app/
   layout/    header, footer y shells
   shared/    componentes reutilizables, pipes y directivas
 ```
+
+## Entradas: QR y PDF
+
+La entrada se genera en el navegador (RF-27) con `qrcode` y `jspdf`. Las dos se importan con `import()` dinámico recién cuando hacen falta, así que quien navega el catálogo no las descarga: `jspdf` pesa unos 411 kB (113 kB comprimidos) y vive en su propio chunk.
+
+Dos ajustes en `angular.json` mantienen el build sin avisos:
+
+- `externalDependencies`: `jspdf` importa `canvg`, `html2canvas` y `dompurify` de forma dinámica, solo para convertir HTML o SVG a PDF, algo que no se usa. Se excluyen del bundle (unos 270 kB menos).
+- `allowedCommonJsDependencies`: `qrcode` y `dijkstrajs` son CommonJS y no tienen versión ESM.
+
+El service worker precarga todos los chunks al instalar la PWA, así que `jspdf` viaja aunque el visitante no compre.
 
 ## Supabase
 

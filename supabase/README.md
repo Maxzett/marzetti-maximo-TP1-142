@@ -28,6 +28,8 @@ que recrear el proyecto desde cero.
 | `migrations/0017_rls_catalogo.sql` | Catálogo público de solo lectura, `peliculas_mas_vendidas()` y `puntajes_peliculas()` |
 | `migrations/0018_resenas.sql` | Reseñas: escritura propia y `resenas_de_pelicula()` como única lectura pública |
 | `migrations/0019_salas_funciones.sql` | Salas, butacas y funciones: lectura pública, escritura solo por RPC (`crear_funciones`, `modificar_funcion`, `dar_de_baja_funcion`, `crear_sala`, `actualizar_sala`), asignación automática de sala y `generar_butacas_sala()` |
+| `migrations/0020_compra.sql` | Compra: reservas de 10 minutos, orden pendiente y pago simulado. Tabla `configuracion` (recargo VIP, tope de butacas) y seis RPC públicas (`estado_butacas`, `retener_butaca`, `liberar_butaca`, `crear_orden`, `confirmar_pago`, `obtener_orden`) más tres internas |
+| `migrations/0021_estado_butacas_con_vencimiento.sql` | `estado_butacas()` devuelve cuándo vence cada reserva propia, para que el temporizador sobreviva a recargar la página |
 | `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo. **Requiere 0019**: llama a `generar_butacas_sala()` |
 | `seed/002_catalogo_base.sql` | Géneros, categorías, cupones y recompensa inicial |
 | `seed/003_peliculas_demo.sql` | 12 películas inventadas (10 en cartelera, 2 próximas), con aserciones |
@@ -49,6 +51,12 @@ por hora.
 
 Conviene además activar **Leaked password protection** en Authentication: es gratis
 y apaga un aviso del linter de seguridad.
+
+Además, la compra en tiempo real (RF-25) usa **Realtime Broadcast** desde las funciones
+de la base. En **Project Settings → Realtime** tiene que estar activada la opción **Allow
+public access**: las funciones emiten con `private = false`, a canales públicos, y con esa
+opción apagada los eventos no llegan al navegador y el mapa deja de actualizarse en vivo
+(la compra sigue funcionando, solo que sin verse entre pestañas).
 
 ## Modelo de seguridad
 
@@ -110,6 +118,25 @@ reglas que corren son las políticas RLS.
   independientes: el `UPDATE` de esa columna no está otorgado a `authenticated`
   (0013), y un trigger `SECURITY INVOKER` rechaza el cambio si quien ejecuta no es
   `postgres`.
+- **La compra no abre ninguna tabla.** `ordenes`, `orden_items`, `butacas_ordenes`,
+  `holds_butacas` y `configuracion` tienen RLS y ni una política ni un `GRANT` para la API. Todo
+  pasa por funciones `SECURITY DEFINER` con `search_path` fijado que validan por su cuenta la
+  función, la butaca, la edad, la sesión y el estado. Son las únicas con `EXECUTE` para `anon`
+  (la compra es anónima, RF-26): el linter las va a marcar, es intencional. Las tres internas
+  (`avisar_butaca`, `limpiar_vencidos`, `precio_de_entrada`) no tienen `EXECUTE` para nadie de la API.
+- **Una butaca, una venta la garantiza el motor.** `unique (funcion_id, butaca_id)` en `butacas_ordenes`
+  (RN-03) y en `holds_butacas` (D-08). Las funciones de compra bloquean la fila de la función con
+  `FOR UPDATE` para serializar las reservas y respetar el tope, pero el `unique` es la red final.
+- **El comprador anónimo se identifica con `sesion_id`.** Es un valor al azar que genera el
+  navegador; la base retiene las butacas a su nombre y solo quien lo conoce puede pagar esa orden.
+  La entrada se ve con el `codigo` de la orden, que no se puede adivinar (`obtener_orden`).
+- **El precio lo calcula la base, no el cliente.** `precio_de_entrada()` aplica la preventa y el
+  recargo VIP en el momento de `crear_orden`, y se congela en `orden_items` (RN-10). El cliente solo
+  muestra lo que la base ya resolvió.
+- **Nada corre en segundo plano.** No hay `pg_cron`: cada función que toca una función de cine
+  barre primero las reservas vencidas (`limpiar_vencidos`) y pasa a `expirada` las órdenes
+  pendientes que superaron su ventana. Una orden vencida en una función que nadie vuelve a tocar
+  queda `pendiente` hasta que alguien la toque; no ocupa butacas, porque las reservas se borran.
 - **La service role no existe en este repo.** Al frontend solo llega la publishable
   key, que es pública por diseño.
 
@@ -143,6 +170,14 @@ La prueba que cierra RF-38.1: como administrador,
 el anónimo lee el catálogo pero no lo escribe, no lee `resenas` directo pero sí por
 la función, un cliente no puede reseñar en nombre de otro y no puede editar ni
 borrar la reseña ajena. Necesita dos cuentas de cliente.
+
+`pruebas/compra.sql` cubre la F6 y necesita reemplazar dos ids de función (el encabezado explica
+cómo buscarlos): las tablas de la compra no se leen desde la API, otra sesión no reserva una
+butaca ya reservada, el precio suma el recargo VIP, un menor de 18 (declarado) es rechazado y sin
+declarar fecha también, no se paga la orden de otra sesión, y una butaca ya vendida no se puede
+reservar de nuevo. La misma batería se corrió más completa (49 comprobaciones, con la edad en el
+borde del cumpleaños, la reserva vencida, la preventa y el vencimiento propio de `0021`) contra
+Postgres en WASM; **no cubre concurrencia real**.
 
 `pruebas/salas_funciones.sql` cubre la F5, con una cuenta admin y una cliente: ni el
 admin inserta una función a mano (RF-21), la **quinta** función simultánea es rechazada

@@ -248,7 +248,7 @@ export class Compra {
    */
   private validarDatos(): string {
     if (!/^\S+@\S+\.\S+$/.test(this.email().trim())) {
-      return 'Ingresá un email válido: ahí te mandamos la entrada.';
+      return 'Ingresá un email válido: queda como dato de contacto de tu compra.';
     }
 
     const funcion = this.funcion();
