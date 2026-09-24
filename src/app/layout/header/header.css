@@ -49,8 +49,7 @@
   background-size: 18px 10px;
 }
 
-.marca__cine,
-.marca__pie {
+.marca__cine {
   display: block;
   color: var(--texto-tenue);
   font-family: var(--fuente-titulo);
@@ -64,11 +63,6 @@
   letter-spacing: 0.42em;
   /* Compensa el tracking, que solo agrega espacio a la derecha y descentra el texto */
   text-indent: 0.42em;
-}
-
-.marca__pie {
-  letter-spacing: 0.3em;
-  text-indent: 0.3em;
 }
 
 .marca__nombre {
@@ -211,10 +205,6 @@ a.cuenta__rol:hover {
     flex-basis: auto;
     flex-shrink: 0;
     padding-inline: var(--e-5);
-  }
-
-  .marca__pie {
-    display: none;
   }
 
   .nav a {

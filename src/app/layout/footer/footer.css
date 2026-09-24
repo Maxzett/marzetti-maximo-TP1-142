@@ -25,16 +25,6 @@
   text-transform: uppercase;
 }
 
-.marca__pie {
-  margin-top: var(--e-1);
-  color: var(--texto-tenue);
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
-  font-weight: 500;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-}
-
 /* address llega en itálica por defecto del navegador */
 .sala {
   color: var(--texto-tenue);
