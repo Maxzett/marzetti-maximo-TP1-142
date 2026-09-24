@@ -27,12 +27,22 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: var(--e-4);
-  max-width: 40rem;
   margin-top: var(--e-6);
   padding: var(--e-4);
   border: 1px solid var(--borde);
   border-radius: var(--r-medio);
   background: var(--superficie);
+}
+
+/* En escritorio el buscador y los géneros van lado a lado: apilados, el campo de texto se
+   estiraría a todo el ancho y el panel quedaría con un vacío enorme */
+@media (min-width: 48rem) {
+  .filtros {
+    display: grid;
+    grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--e-6);
+  }
 }
 
 fieldset {
@@ -74,6 +84,11 @@ legend {
   gap: var(--e-4);
   margin-top: var(--e-4);
   grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+}
+
+/* El li se estira al alto de la fila y la ficha lo llena: todas las tarjetas miden lo mismo */
+.grilla > li {
+  display: grid;
 }
 
 app-mensaje {

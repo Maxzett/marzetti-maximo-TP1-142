@@ -9,7 +9,9 @@
 
     <div class="cuerpo">
       <h3 class="titulo">
-        <a [routerLink]="['/peliculas', pelicula().id]">{{ pelicula().titulo }}</a>
+        <a [routerLink]="['/peliculas', pelicula().id]" [title]="pelicula().titulo">{{
+          pelicula().titulo
+        }}</a>
       </h3>
 
       <p class="meta">
