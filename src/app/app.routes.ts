@@ -82,6 +82,16 @@ export const routes: Routes = [
     ],
   },
 
+  // Panel del empleado (RF-51 a RF-55). El admin también entra: es_personal() lo admite en la
+  // base, y el guard dice lo mismo para no mostrarle una pantalla que después funciona. El
+  // lector de QR de respaldo (jsQR) se importa desde adentro, en otro chunk.
+  {
+    path: 'empleado',
+    canActivate: [rolRequerido('empleado', 'admin')],
+    loadComponent: () => import('./features/empleado/empleado').then((m) => m.Empleado),
+    title: 'Validar entradas · Cine Emezeta',
+  },
+
   // Catálogo de componentes. No va en la navegación: es una herramienta de desarrollo.
   // loadComponent lo deja en su propio archivo: nadie que entre a comprar se lo descarga.
   {

@@ -1,0 +1,35 @@
+<div class="escaner">
+  <!--
+    El video existe siempre y solo se oculta: el componente necesita el elemento para conectarle
+    la cámara antes de mostrarlo. playsinline evita que iOS lo abra a pantalla completa.
+  -->
+  <div class="visor" [hidden]="estado() !== 'activa'">
+    <video #video playsinline muted aria-label="Imagen de la cámara"></video>
+    <span class="mira" aria-hidden="true"></span>
+  </div>
+
+  @switch (estado()) {
+    @case ('activa') {
+      <p class="ayuda">Apuntá al QR de la entrada. Se lee solo, sin tocar nada.</p>
+      <app-boton variante="borde" (presionado)="apagar()">Apagar cámara</app-boton>
+    }
+    @case ('denegada') {
+      <app-mensaje tono="aviso">
+        El navegador no dio permiso para usar la cámara. Habilitalo en la configuración del sitio, o
+        ingresá el código a mano.
+      </app-mensaje>
+      <app-boton variante="borde" (presionado)="activar()">Probar de nuevo</app-boton>
+    }
+    @case ('sin_camara') {
+      <app-mensaje tono="aviso">
+        No pudimos usar una cámara en este dispositivo. Ingresá el código a mano.
+      </app-mensaje>
+      <app-boton variante="borde" (presionado)="activar()">Probar de nuevo</app-boton>
+    }
+    @default {
+      <app-boton [cargando]="estado() === 'iniciando'" (presionado)="activar()">
+        Activar cámara
+      </app-boton>
+    }
+  }
+</div>

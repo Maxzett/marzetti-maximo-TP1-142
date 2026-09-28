@@ -107,7 +107,7 @@ describe('Header', () => {
     const empleado = await montar('empleado');
     expect(
       (empleado.nativeElement.querySelector('.cuenta__rol') as HTMLElement).textContent,
-    ).toContain('Empleado');
+    ).toContain('Validar entradas');
 
     TestBed.resetTestingModule();
 
@@ -126,11 +126,11 @@ describe('Header', () => {
     expect(enlace.getAttribute('href')).toBe('/admin');
   });
 
-  it('el empleado ve su rótulo pero no un enlace al panel de administración', async () => {
+  it('al empleado lo lleva a validar entradas y no al panel de administración', async () => {
     const empleado = await montar('empleado');
+    const enlace = empleado.nativeElement.querySelector('a.cuenta__rol') as HTMLAnchorElement;
 
-    expect(empleado.nativeElement.querySelector('a.cuenta__rol')).toBeNull();
-    expect(empleado.nativeElement.querySelector('.cuenta__rol')).not.toBeNull();
+    expect(enlace.getAttribute('href')).toBe('/empleado');
     expect(empleado.nativeElement.querySelector('a[href="/admin"]')).toBeNull();
   });
 

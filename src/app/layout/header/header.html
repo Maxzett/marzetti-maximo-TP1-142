@@ -53,8 +53,8 @@
           -->
           <a class="cuenta__rol" routerLink="/admin">Administración</a>
         } @else if (esPersonal()) {
-          <!-- El panel del empleado (escaneo de QR) llega en la F8: hasta entonces es un rótulo -->
-          <span class="cuenta__rol">Empleado</span>
+          <!-- Mismo criterio: el enlace es comodidad, validar_tramo verifica el rol en la base -->
+          <a class="cuenta__rol" routerLink="/empleado">Validar entradas</a>
         }
 
         <button class="boton boton--borde" type="button" (click)="salir()">Salir</button>

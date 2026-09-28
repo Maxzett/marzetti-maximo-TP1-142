@@ -31,7 +31,7 @@ describe('Admin', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('ofrece las dos secciones: funciones y salas', async () => {
+  it('ofrece funciones, salas y el acceso a validar entradas', async () => {
     const raiz = await montar('/admin/funciones');
     const enlaces = Array.from(raiz.querySelectorAll('nav a')).map((a) => [
       a.textContent?.trim(),
@@ -41,6 +41,7 @@ describe('Admin', () => {
     expect(enlaces).toEqual([
       ['Funciones', '/admin/funciones'],
       ['Salas', '/admin/salas'],
+      ['Validar entradas', '/empleado'],
     ]);
   });
 

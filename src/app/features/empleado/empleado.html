@@ -1,0 +1,112 @@
+<section class="contenedor pantalla">
+  <header class="cabecera">
+    <p class="sobretitulo">Personal del cine</p>
+    <h1>Validar entradas</h1>
+    <p class="bajada">
+      Leé el QR de la entrada o tipeá el código que tiene debajo. Cada compra se valida dos veces
+      por separado: al entrar a la sala y al retirar el candy.
+    </p>
+  </header>
+
+  <div class="columnas">
+    <div class="lectura">
+      <app-tarjeta>
+        <h2>Con la cámara</h2>
+        <app-escaner (leido)="alLeer($event)" />
+      </app-tarjeta>
+
+      <app-tarjeta>
+        <h2>Código a mano</h2>
+        <form class="formulario" novalidate (submit)="alEnviar($event)">
+          <app-campo
+            etiqueta="Código de la entrada"
+            marcador="8EEDB649A1B646698A52"
+            ayuda="Son 20 caracteres. Los espacios y guiones no importan."
+            autocompletado="off"
+            [error]="errorDeCodigo()"
+            [(valor)]="codigo"
+          />
+          <app-boton tipo="submit" variante="borde" [cargando]="consultando()">Buscar</app-boton>
+        </form>
+      </app-tarjeta>
+    </div>
+
+    <div class="resultado">
+      @if (aviso(); as a) {
+        <app-mensaje [tono]="a.tono">{{ a.texto }}</app-mensaje>
+      }
+
+      @if (consultando()) {
+        <app-spinner etiqueta="Buscando la entrada" />
+      } @else if (orden(); as o) {
+        <app-tarjeta [destacada]="true">
+          <article class="orden">
+            <header>
+              <p class="codigo">{{ o.codigo }}</p>
+              <h2 #tituloDelResultado tabindex="-1">{{ o.pelicula }}</h2>
+            </header>
+
+            @if (o.restriccion_edad > 0) {
+              <!--
+                D-02: sin cuenta la edad se declara al comprar, y el control efectivo es acá, en
+                la puerta. Se dice con texto y con el rótulo, no con un color.
+              -->
+              <p class="edad">
+                <span class="edad__rotulo">+{{ o.restriccion_edad }}</span>
+                Película con restricción de edad: pedí un documento. Si es menor, tiene que entrar
+                con un adulto.
+              </p>
+            }
+
+            <dl class="datos">
+              @for (dato of datos(); track dato.rotulo) {
+                <div class="dato">
+                  <dt>{{ dato.rotulo }}</dt>
+                  <dd>{{ dato.valor }}</dd>
+                </div>
+              }
+            </dl>
+
+            @if (bloqueo()) {
+              <app-mensaje tono="aviso">{{ bloqueo() }}</app-mensaje>
+            }
+
+            <!-- RN-05: dos tramos independientes; cada uno dice su estado con texto y símbolo -->
+            <ul class="tramos">
+              @for (t of tramos(); track t.tramo) {
+                <li class="tramo" [class.tramo--usado]="t.uso?.usado_at">
+                  <h3>{{ t.titulo }}</h3>
+
+                  @if (!t.uso) {
+                    <p class="estado">
+                      <span aria-hidden="true">–</span> Esta compra no incluye candy.
+                    </p>
+                  } @else if (t.uso.usado_at) {
+                    <p class="estado">
+                      <span aria-hidden="true">✕</span> {{ describirUso(t.uso) }}
+                    </p>
+                  } @else {
+                    <p class="estado"><span aria-hidden="true">✓</span> Sin usar.</p>
+                    @if (!bloqueo()) {
+                      <app-boton
+                        [cargando]="validando() === t.tramo"
+                        [deshabilitado]="validando() !== null && validando() !== t.tramo"
+                        (presionado)="validar(t.tramo)"
+                      >
+                        {{ t.accion }}
+                      </app-boton>
+                    }
+                  }
+                </li>
+              }
+            </ul>
+
+            <app-boton variante="fantasma" (presionado)="limpiar()">Siguiente entrada</app-boton>
+          </article>
+        </app-tarjeta>
+      } @else if (!aviso()) {
+        <p class="vacio">Acá aparece la entrada que leas.</p>
+      }
+    </div>
+  </div>
+</section>

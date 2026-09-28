@@ -31,6 +31,7 @@ que recrear el proyecto desde cero.
 | `migrations/0020_compra.sql` | Compra: reservas de 10 minutos, orden pendiente y pago simulado. Tabla `configuracion` (recargo VIP, tope de butacas) y seis RPC públicas (`estado_butacas`, `retener_butaca`, `liberar_butaca`, `crear_orden`, `confirmar_pago`, `obtener_orden`) más tres internas |
 | `migrations/0021_estado_butacas_con_vencimiento.sql` | `estado_butacas()` devuelve cuándo vence cada reserva propia, para que el temporizador sobreviva a recargar la página |
 | `migrations/0022_candy_y_promociones.sql` | Candy, combos, cupones, puntos, crédito y cancelación. Lectura pública del candy y de las recompensas, y del libro mayor solo propio. `calcular_orden()` (el único lugar que decide un monto, en el orden de D-06), `configurar_orden`, `cancelar_orden`, `mis_saldos`, `mis_ordenes`, y `confirmar_pago` / `obtener_orden` reescritas |
+| `migrations/0023_panel_empleado.sql` | Validación del QR por tramos (D-03, RN-05): `consultar_orden_personal` y `validar_tramo`, solo para `es_personal()`. Ventana de una hora antes del inicio al fin de la película, rechazos devueltos (no lanzados) y registrados en el log |
 | `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo. **Requiere 0019**: llama a `generar_butacas_sala()` |
 | `seed/002_catalogo_base.sql` | Géneros, categorías, cupones y recompensa inicial |
 | `seed/003_peliculas_demo.sql` | 12 películas inventadas (10 en cartelera, 2 próximas), con aserciones |
@@ -197,6 +198,16 @@ corrió más completa (91 comprobaciones, con el cupón por edad en el borde de 
 aplicado después del cupón, el total cero, la ventana de 2 horas, los tramos del QR consumidos y la
 reversión de puntos al cancelar) contra Postgres en WASM; **no cubre concurrencia real**: dos pagos de
 la misma cuenta se serializan con `FOR UPDATE` sobre la orden y el perfil, que se razona, no se midió.
+
+`pruebas/panel_empleado.sql` cubre la F8 con una cuenta cliente, dos del personal y dos códigos de
+orden pagada (una con candy y otra sin). Los bloques que validan mueven la función a "empezó hace 10
+minutos" dentro de la misma transacción, así no dependen de la hora a la que se corren. Ni el
+anónimo ni el cliente validan; el segundo intento sobre un tramo devuelve `ya_usado` con cuándo y
+quién, aunque lo haga otro empleado; el candy es independiente del ingreso; una orden sin candy
+responde `sin_candy`; fuera de la ventana no se consume; el log guarda la validación y el rechazo, y
+el código inexistente no. La batería se corrió tal cual, y otras 36 comprobaciones (orden pendiente
+y cancelada, función terminada, no cancelar después de validar), contra Postgres en WASM. Dos
+empleados sobre la misma orden se serializan por el `FOR UPDATE`: se razona, no se midió.
 
 Para cambiar lo que "configura el administrador" hasta que la F9 construya el panel:
 

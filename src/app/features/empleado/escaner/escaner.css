@@ -1,0 +1,44 @@
+.escaner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  align-items: flex-start;
+}
+
+.visor {
+  position: relative;
+  inline-size: 100%;
+  max-inline-size: 26rem;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: var(--fondo-hondo);
+}
+
+/* [hidden] pierde contra el display de arriba si no se lo repite */
+.visor[hidden] {
+  display: none;
+}
+
+video {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* Las cuatro esquinas de la marquesina marcan dónde poner el QR */
+.mira {
+  position: absolute;
+  inset: 18%;
+  border: 3px solid var(--acento);
+  border-radius: var(--r-chico);
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+.ayuda {
+  margin: 0;
+  color: var(--texto-tenue);
+}

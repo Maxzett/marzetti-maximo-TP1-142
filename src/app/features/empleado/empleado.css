@@ -1,0 +1,171 @@
+.pantalla {
+  padding-block: var(--e-6);
+}
+
+.cabecera {
+  display: grid;
+  gap: var(--e-2);
+}
+
+.sobretitulo {
+  margin: 0;
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  letter-spacing: 0.02em;
+}
+
+.bajada {
+  max-width: 44rem;
+  margin: 0;
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo-lg);
+}
+
+h2 {
+  margin: 0 0 var(--e-3);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+}
+
+.columnas {
+  display: grid;
+  gap: var(--e-6);
+  margin-top: var(--e-5);
+  align-items: start;
+  /* minmax(0, 1fr) y no auto: con auto la columna crece hasta el ancho de su contenido */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 64rem) {
+  .columnas {
+    grid-template-columns: minmax(18rem, 26rem) minmax(0, 1fr);
+  }
+}
+
+.lectura,
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  min-inline-size: 0;
+}
+
+.formulario {
+  display: grid;
+  gap: var(--e-3);
+  justify-items: start;
+}
+
+.formulario app-campo {
+  justify-self: stretch;
+}
+
+.orden {
+  display: grid;
+  gap: var(--e-4);
+}
+
+.orden h2 {
+  margin: 0;
+  font-size: var(--t-titulo);
+}
+
+.codigo {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  letter-spacing: 0.12em;
+  overflow-wrap: anywhere;
+}
+
+.edad {
+  display: flex;
+  gap: var(--e-3);
+  align-items: center;
+  margin: 0;
+  padding: var(--e-3);
+  border: 2px solid var(--rojo-claro);
+  border-radius: var(--r-chico);
+}
+
+.edad__rotulo {
+  flex: none;
+  padding: var(--e-1) var(--e-2);
+  border-radius: var(--r-chico);
+  background: var(--rojo-butaca);
+  color: var(--texto-sobre-rojo);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-rotulo);
+}
+
+.datos {
+  display: grid;
+  gap: var(--e-3);
+  margin: 0;
+}
+
+.dato dt {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dato dd {
+  margin: 0;
+  font-size: var(--t-cuerpo-lg);
+}
+
+.tramos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--e-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tramo {
+  display: grid;
+  gap: var(--e-2);
+  align-content: start;
+  justify-items: start;
+  padding: var(--e-4);
+  border: 2px solid var(--acento);
+  border-radius: var(--r-medio);
+}
+
+/* Usado: borde punteado además del color, para que no dependa solo de él (RNF-10) */
+.tramo--usado {
+  border-style: dashed;
+  border-color: var(--borde-fuerte);
+}
+
+.tramo h3 {
+  margin: 0;
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.estado {
+  margin: 0;
+}
+
+.vacio {
+  margin: 0;
+  color: var(--texto-tenue);
+}

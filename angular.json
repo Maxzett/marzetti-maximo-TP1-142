@@ -20,7 +20,7 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "externalDependencies": ["canvg", "dompurify", "html2canvas"],
-            "allowedCommonJsDependencies": ["qrcode", "dijkstrajs"],
+            "allowedCommonJsDependencies": ["qrcode", "dijkstrajs", "jsqr"],
             "assets": [
               {
                 "glob": "**/*",
