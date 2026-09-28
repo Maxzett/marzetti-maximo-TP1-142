@@ -1,0 +1,42 @@
+.filtros {
+  max-width: 40rem;
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.cuenta {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.cuando {
+  font-variant-numeric: tabular-nums;
+}
+
+/* La frase de lo que pasó es la cabecera de su fila y puede ser larga: corta en varias líneas */
+.que {
+  min-inline-size: 20rem;
+  font-weight: 400;
+  white-space: normal;
+}
+
+.tipo {
+  display: block;
+  margin-block-end: var(--e-1);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.paginas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  justify-content: space-between;
+}

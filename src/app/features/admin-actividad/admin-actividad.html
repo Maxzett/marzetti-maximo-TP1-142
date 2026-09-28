@@ -1,0 +1,105 @@
+<div class="pantalla">
+  <header class="encabezado">
+    <h1>Actividad</h1>
+    <p class="bajada">
+      Quién hizo qué y cuándo: altas y cambios de funciones, precios, productos y promociones, y
+      cada validación en la puerta. El registro no se edita ni se borra.
+    </p>
+  </header>
+
+  <section class="seccion" aria-labelledby="t-registro">
+    <h2 id="t-registro" class="solo-lectores">Registro de actividad</h2>
+
+    <fieldset class="filtros">
+      <legend>Filtrar</legend>
+
+      <app-seleccion
+        etiqueta="Tipo de acción"
+        marcador="Todas las acciones"
+        [opciones]="opcionesDeAccion"
+        [(valor)]="accion"
+      />
+
+      <div class="par">
+        <div class="fecha">
+          <p class="etiqueta">Desde</p>
+          <app-selector-fecha etiqueta="Desde" [maximo]="hoy" [(valor)]="desde" />
+        </div>
+        <div class="fecha">
+          <p class="etiqueta">Hasta</p>
+          <app-selector-fecha etiqueta="Hasta" [maximo]="hoy" [(valor)]="hasta" />
+        </div>
+      </div>
+
+      @if (errorDeRango()) {
+        <p class="error" role="alert">{{ errorDeRango() }}</p>
+      }
+
+      @if (hayFiltros()) {
+        <div class="acciones">
+          <app-boton variante="fantasma" (presionado)="limpiar()">Quitar filtros</app-boton>
+        </div>
+      }
+    </fieldset>
+
+    <div aria-live="polite" [attr.aria-busy]="cargando()" class="resultado">
+      @if (cargando() && !resultado()) {
+        <app-spinner etiqueta="Cargando la actividad" />
+      } @else if (error()) {
+        <app-mensaje tono="error">No pudimos cargar la actividad. Recargá la página.</app-mensaje>
+      } @else if (resultado(); as r) {
+        @if (r.total === 0) {
+          <app-mensaje tono="aviso">
+            {{ hayFiltros() ? 'No hay actividad con esos filtros.' : 'Todavía no hay actividad.' }}
+          </app-mensaje>
+        } @else {
+          <p #cuenta class="cuenta" tabindex="-1">
+            {{ desdeFila() }}–{{ hastaFila() }} de {{ r.total }}
+            {{ r.total === 1 ? 'registro' : 'registros' }}, lo más reciente primero.
+          </p>
+
+          <div class="tabla" role="region" tabindex="0" aria-label="Tabla de actividad">
+            <table>
+              <caption class="solo-lectores">
+                Registro de actividad, lo más reciente primero
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Cuándo</th>
+                  <th scope="col">Quién</th>
+                  <th scope="col">Qué hizo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (registro of r.registros; track registro.id) {
+                  <tr>
+                    <td class="cuando">{{ cuando(registro) }}</td>
+                    <td>
+                      {{ describirActor(registro) }}
+                      <span class="secundario">{{ rolDe(registro) }}</span>
+                    </td>
+                    <th scope="row" class="que">
+                      <span class="tipo">{{ nombreDeAccion(registro.accion) }}</span>
+                      {{ describirAccion(registro) }}
+                    </th>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (hayAnterior() || haySiguiente()) {
+            <nav class="paginas" aria-label="Páginas de la actividad">
+              <app-boton variante="borde" [deshabilitado]="!hayAnterior()" (presionado)="irA(-1)">
+                <span aria-hidden="true">←</span> Más recientes
+              </app-boton>
+              <app-boton variante="borde" [deshabilitado]="!haySiguiente()" (presionado)="irA(1)">
+                Más antiguos <span aria-hidden="true">→</span>
+              </app-boton>
+            </nav>
+          }
+        }
+      }
+    </div>
+  </section>
+</div>

@@ -20,8 +20,10 @@
   text-transform: uppercase;
 }
 
+/* Siete secciones no entran en una fila de celular: bajan a la siguiente en vez de desbordar */
 .secciones ul {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--e-2);
   margin: 0;
   padding: 0;

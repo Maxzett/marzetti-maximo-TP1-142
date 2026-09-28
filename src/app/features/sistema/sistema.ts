@@ -15,6 +15,7 @@ import { Desglose } from '../../shared/desglose/desglose';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Estrellas } from '../../shared/estrellas/estrellas';
 import { FichaPelicula } from '../../shared/ficha-pelicula/ficha-pelicula';
+import { DatoDeBarra, GraficoBarras } from '../../shared/grafico-barras/grafico-barras';
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
@@ -41,6 +42,7 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     Dialogo,
     Estrellas,
     FichaPelicula,
+    GraficoBarras,
     MapaSala,
     Mensaje,
     Poster,
@@ -235,6 +237,14 @@ export class Sistema {
   protected readonly productosDeMuestra = signal<Cantidades>(new Map());
   protected readonly combosDeMuestra = signal<Cantidades>(new Map());
   protected readonly unidades = signal(1);
+  // Un ranking con un valor muy chico: su barra no desaparece contra la más larga
+  protected readonly barrasDeMuestra: readonly DatoDeBarra[] = [
+    { etiqueta: 'Dune: Parte Dos', valor: 48 },
+    { etiqueta: 'Intensamente 2', valor: 31 },
+    { etiqueta: 'El Eternauta', valor: 17 },
+    { etiqueta: 'Relatos salvajes', valor: 1 },
+  ];
+
   protected readonly desgloseDeMuestra: DesgloseDeOrden = {
     subtotal: 27800,
     descuento_cupon: 5560,

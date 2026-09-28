@@ -1,0 +1,126 @@
+.rango {
+  max-width: 40rem;
+}
+
+/* ── Cifras del período ── */
+.cifras {
+  display: grid;
+  gap: var(--e-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  margin: 0;
+}
+
+.cifra {
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borde);
+  border-block-start: 3px solid var(--acento);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.cifra dt {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cifra dd {
+  margin: var(--e-1) 0 0;
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* Un día sin ventas se lee más tenue, pero sigue en la tabla: el cero también es un dato */
+.sin-ventas > * {
+  color: var(--texto-tenue);
+}
+
+/* ── Candy ── */
+.destacado {
+  max-width: 28rem;
+  padding: var(--e-4) var(--e-5);
+  border: 1px solid var(--acento);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  box-shadow: 0 0 18px -8px var(--acento);
+}
+
+.sobretitulo {
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ganador {
+  margin-block: var(--e-1);
+  font-family: var(--fuente-display);
+  font-size: var(--t-titulo);
+  letter-spacing: 0.02em;
+}
+
+/* ── Películas ── */
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+}
+
+.conmutador {
+  flex-direction: row;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--borde-fuerte);
+  overflow: hidden;
+}
+
+/* El radio queda para el teclado y el lector; lo que se ve es la etiqueta entera como botón */
+.opcion {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--toque-min);
+  padding-inline: var(--e-4);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.opcion input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* El anillo de foco del radio invisible se pasa a la etiqueta que lo contiene */
+.opcion:has(input:focus-visible) {
+  outline: 3px solid var(--acento);
+  outline-offset: -3px;
+}
+
+.opcion--elegida {
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+}
+
+/* Sobre el relleno ámbar, un anillo ámbar no se vería: va en el color del texto */
+.opcion--elegida:has(input:focus-visible) {
+  outline-color: var(--texto-sobre-acento);
+}
+
+.navegacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}

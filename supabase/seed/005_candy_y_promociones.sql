@@ -2,9 +2,9 @@
 -- (RF-33, RF-36, RF-39, RF-43, RF-44, RF-47)
 --
 -- Idempotente: se puede volver a correr sin duplicar nada. Requiere 0022.
--- Hasta que la F9 construya el panel, esto es lo que "configura el administrador":
--- los precios, el porcentaje de bienvenida y el costo en puntos se editan con UPDATE
--- sobre estas tablas desde el editor SQL.
+-- Son los valores iniciales. Desde la F9 los precios, el porcentaje de bienvenida y el
+-- costo en puntos se cambian desde el panel de administración (0024), que deja el cambio
+-- en el log de actividad; un UPDATE a mano desde el editor SQL no deja rastro.
 
 insert into public.categorias_productos (nombre, orden) values
   ('Pochoclos', 1),

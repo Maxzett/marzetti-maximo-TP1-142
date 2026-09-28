@@ -1,0 +1,219 @@
+/*
+ * Piezas comunes de las pantallas del panel que suma la F9 (reportes, candy, promociones,
+ * actividad): encabezado, secciones, tablas y formularios. Cada pantalla lo incluye en sus
+ * styleUrls antes de su propio CSS. Sin esto serían cuatro copias de las mismas reglas, que es
+ * lo que pasa hoy entre funciones y salas.
+ */
+
+.pantalla {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-7);
+  padding-block: var(--e-6) 0;
+}
+
+.encabezado h1 {
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  letter-spacing: 0.02em;
+}
+
+.bajada {
+  max-width: 44rem;
+  margin-block-start: var(--e-2);
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo-lg);
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  min-inline-size: 0;
+}
+
+/* Título de una sección con su botón de alta al lado; en el celular el botón baja */
+.titulo-con-accion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+}
+
+.seccion > h2,
+.titulo-con-accion h2 {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-titulo);
+  letter-spacing: 0.02em;
+}
+
+.nota {
+  max-width: 50rem;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  line-height: 1.5;
+}
+
+/* ── Formularios ── */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  min-inline-size: 0;
+  margin: 0;
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+legend {
+  padding-inline: var(--e-2);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.par {
+  display: grid;
+  gap: var(--e-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.fecha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.etiqueta {
+  color: var(--texto);
+  font-size: var(--t-mini);
+}
+
+.error {
+  color: var(--rojo-claro);
+  font-size: var(--t-mini);
+  line-height: 1.4;
+}
+
+/* Casilla nativa con su texto: el navegador ya trae el teclado y el estado para el lector */
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-block-size: var(--toque-min);
+  font-size: var(--t-cuerpo);
+  cursor: pointer;
+}
+
+.casilla input {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  accent-color: var(--acento);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  justify-content: flex-end;
+}
+
+/* ── Tablas ── */
+/*
+ * position: relative mantiene adentro del cuadro los textos .solo-lectores de las celdas: son
+ * absolutos, y sin un contenedor posicionado se escapan del desplazamiento y agrandan la página.
+ */
+.tabla {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+}
+
+table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-cuerpo);
+}
+
+th,
+td {
+  padding: var(--e-3);
+  border-block-end: 1px solid var(--borde);
+  text-align: start;
+  white-space: nowrap;
+}
+
+thead th {
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+tbody th {
+  font-weight: 500;
+  white-space: normal;
+}
+
+tfoot th,
+tfoot td {
+  border-block-start: 2px solid var(--borde-fuerte);
+  border-block-end: 0;
+  font-weight: 600;
+}
+
+tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+.numero {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.secundario {
+  display: block;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/*
+ * Estado de un ítem gestionado. Lo dado de baja se dice con la palabra y con el tachado del
+ * nombre, no solo con un color (RNF-10).
+ */
+.estado {
+  display: inline-block;
+  padding: 0.125rem var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.estado--activo {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+.dado-de-baja {
+  color: var(--texto-tenue);
+  text-decoration: line-through;
+}

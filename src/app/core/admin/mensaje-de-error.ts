@@ -22,7 +22,15 @@ export interface ErrorDeBase {
   message: string;
 }
 
-export function mensajeDeError(error: ErrorDeBase): string {
+/**
+ * `siDuplicado` es el texto del 23505, que depende de qué se estaba guardando. Las funciones de
+ * 0024 ya comprueban el duplicado con un mensaje propio: el 23505 solo llega si otra alta ganó
+ * la carrera entre ese chequeo y la escritura.
+ */
+export function mensajeDeError(
+  error: ErrorDeBase,
+  siDuplicado = 'Ya existe una sala con ese nombre.',
+): string {
   const codigo = error.code ?? '';
 
   if (CON_MENSAJE_PROPIO.has(codigo)) {
@@ -38,7 +46,7 @@ export function mensajeDeError(error: ErrorDeBase): string {
       // que otra alta ganó la carrera por la misma sala entre la búsqueda y la escritura.
       return 'Esa sala se ocupó justo ahora en ese horario. Probá de nuevo.';
     case '23505':
-      return 'Ya existe una sala con ese nombre.';
+      return siDuplicado;
     default:
       return 'No pudimos completar la operación. Probá de nuevo.';
   }

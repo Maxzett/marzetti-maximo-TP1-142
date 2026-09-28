@@ -55,6 +55,14 @@ Dos ajustes en `angular.json` mantienen el build sin avisos:
 
 El service worker precarga todos los chunks al instalar la PWA, así que `jspdf` viaja aunque el visitante no compre.
 
+## Reportes: PDF y Excel
+
+El reporte de facturación del panel de administración se exporta a PDF (con `jspdf`) y a Excel (RF-58) con [SheetJS](https://sheetjs.com), también con `import()` dinámico: pesa unos 336 kB (92 kB comprimidos) y solo se descarga al tocar el botón.
+
+SheetJS se instala desde su propio CDN y no desde el registro de npm: el paquete `xlsx` de npm quedó congelado en la 0.18.5, que tiene vulnerabilidades conocidas sin parche, y las versiones nuevas se publican solo ahí. La dependencia en `package.json` apunta al tarball de la 0.20.3, que queda fijado en `pnpm-lock.yaml`. Trae versión ESM, así que no necesita `allowedCommonJsDependencies`.
+
+El Excel lleva los montos como números con formato de pesos, no como texto, para que se puedan sumar y graficar sin convertir nada. Ninguno de los dos archivos lleva datos de personas: solo cifras por día (RNF-11).
+
 ## Supabase
 
 La URL del proyecto y la clave pública están en `src/environments/`. Se versionan a propósito: esa clave viaja igual dentro del bundle que descarga el navegador, así que no es un secreto. Lo que protege los datos son las políticas RLS de la base, no el cliente.

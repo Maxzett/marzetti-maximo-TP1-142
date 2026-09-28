@@ -16,6 +16,7 @@ describe('Admin', () => {
             path: 'admin',
             component: Admin,
             children: [
+              { path: 'reportes', component: Seccion },
               { path: 'funciones', component: Seccion },
               { path: 'salas', component: Seccion },
             ],
@@ -31,7 +32,7 @@ describe('Admin', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('ofrece funciones, salas y el acceso a validar entradas', async () => {
+  it('ofrece reportes, la gestión, el log y el acceso a validar entradas', async () => {
     const raiz = await montar('/admin/funciones');
     const enlaces = Array.from(raiz.querySelectorAll('nav a')).map((a) => [
       a.textContent?.trim(),
@@ -39,8 +40,12 @@ describe('Admin', () => {
     ]);
 
     expect(enlaces).toEqual([
+      ['Reportes', '/admin/reportes'],
       ['Funciones', '/admin/funciones'],
       ['Salas', '/admin/salas'],
+      ['Candy', '/admin/candy'],
+      ['Promociones', '/admin/promociones'],
+      ['Actividad', '/admin/actividad'],
       ['Validar entradas', '/empleado'],
     ]);
   });

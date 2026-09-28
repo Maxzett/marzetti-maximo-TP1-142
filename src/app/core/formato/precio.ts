@@ -29,3 +29,15 @@ export function formatearPuntos(puntos: number): string {
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
+
+/**
+ * Lee un importe escrito por el administrador: "6500", "6500.50" o "6500,50". Devuelve null si no
+ * es un número de cero o más, y lo redondea a centavos, que es lo que guarda un numeric(10, 2).
+ * El chequeo que vale es el de la base; este evita un viaje de red para un error de tipeo.
+ */
+export function leerImporte(texto: string): number | null {
+  const valor = Number(texto.trim().replace(',', '.'));
+  return texto.trim() !== '' && Number.isFinite(valor) && valor >= 0
+    ? Math.round(valor * 100) / 100
+    : null;
+}

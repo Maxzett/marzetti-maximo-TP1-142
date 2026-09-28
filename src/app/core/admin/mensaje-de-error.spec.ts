@@ -39,6 +39,15 @@ describe('mensajeDeError', () => {
     );
   });
 
+  it('el duplicado dice qué se estaba guardando', () => {
+    expect(
+      mensajeDeError(
+        { code: '23505', message: 'duplicate key' },
+        'Ya existe un cupón con ese código.',
+      ),
+    ).toBe('Ya existe un cupón con ese código.');
+  });
+
   it('un error imprevisto no se muestra crudo', () => {
     const mensaje = mensajeDeError({ code: 'XX000', message: 'internal error at line 42' });
 

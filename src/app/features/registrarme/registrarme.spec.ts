@@ -5,6 +5,7 @@ import { DatosRegistro } from '../../core/models/perfil';
 import { Auth } from '../../core/services/auth';
 import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { Registrarme } from './registrarme';
+import { hoyIso } from '../../shared/selector-fecha/fechas';
 
 describe('Registrarme', () => {
   let fixture: ComponentFixture<Registrarme>;
@@ -147,7 +148,8 @@ describe('Registrarme', () => {
   it('no deja elegir una fecha posterior a hoy', () => {
     const selector = fixture.debugElement.query(By.directive(SelectorFecha))
       .componentInstance as SelectorFecha;
-    const hoy = new Date().toISOString().slice(0, 10);
+    // hoyIso() y no toISOString(): esa da la fecha UTC, que de 21 a 24 h en Argentina ya es mañana
+    const hoy = hoyIso();
 
     expect(selector.maximo()).toBe(hoy);
   });

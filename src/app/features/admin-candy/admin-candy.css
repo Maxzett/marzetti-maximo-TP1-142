@@ -1,0 +1,59 @@
+/* El contenido del combo es una frase: puede cortar en varias líneas */
+.incluye {
+  min-inline-size: 16rem;
+  white-space: normal;
+}
+
+.categorias {
+  display: flex;
+  flex-direction: column;
+  max-width: 32rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  list-style: none;
+}
+
+.categorias li {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-2) var(--e-3);
+  border-block-end: 1px solid var(--borde);
+}
+
+.categorias li:last-child {
+  border-block-end: 0;
+}
+
+.orden {
+  min-inline-size: 2rem;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-display);
+  font-size: var(--t-rotulo);
+  text-align: center;
+}
+
+.nombre {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* ── Editor del contenido del combo ── */
+.renglon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--e-3);
+}
+
+.renglon__nombre {
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+}
+
+span.renglon__nombre {
+  align-self: center;
+  font-size: var(--t-cuerpo);
+}

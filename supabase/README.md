@@ -32,6 +32,7 @@ que recrear el proyecto desde cero.
 | `migrations/0021_estado_butacas_con_vencimiento.sql` | `estado_butacas()` devuelve cuándo vence cada reserva propia, para que el temporizador sobreviva a recargar la página |
 | `migrations/0022_candy_y_promociones.sql` | Candy, combos, cupones, puntos, crédito y cancelación. Lectura pública del candy y de las recompensas, y del libro mayor solo propio. `calcular_orden()` (el único lugar que decide un monto, en el orden de D-06), `configurar_orden`, `cancelar_orden`, `mis_saldos`, `mis_ordenes`, y `confirmar_pago` / `obtener_orden` reescritas |
 | `migrations/0023_panel_empleado.sql` | Validación del QR por tramos (D-03, RN-05): `consultar_orden_personal` y `validar_tramo`, solo para `es_personal()`. Ventana de una hora antes del inicio al fin de la película, rechazos devueltos (no lanzados) y registrados en el log |
+| `migrations/0024_panel_admin.sql` | Panel de administración (RF-56 a RF-61). Reportes como funciones que devuelven el agregado (`reporte_facturacion`, `peliculas_mas_vistas`, `productos_mas_vendidos`), lectura del log y de lo dado de baja solo para `es_admin()`, y la gestión del candy y las promociones solo por RPC (`guardar_categoria`, `guardar_producto`, `guardar_combo`, `guardar_cupon`, `guardar_recompensa`, `guardar_configuracion`), cada una registrando el cambio en el log en la misma transacción. Deja 5 tablas sin política |
 | `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo. **Requiere 0019**: llama a `generar_butacas_sala()` |
 | `seed/002_catalogo_base.sql` | Géneros, categorías, cupones y recompensa inicial |
 | `seed/003_peliculas_demo.sql` | 12 películas inventadas (10 en cartelera, 2 próximas), con aserciones |
@@ -105,8 +106,9 @@ reglas que corren son las políticas RLS.
   `crear_funciones()`, y el seed 004 usa el algoritmo directo porque corre sin sesión.
 - **Lo público se declara, no se hereda.** El catálogo se abre con una política
   `using (true)` explícita y un `GRANT SELECT` a `anon`. Las escrituras no tienen
-  ni una ni otro, así que el catálogo es de solo lectura desde la API hasta que la
-  F9 abra el alta para el administrador.
+  ni una ni otro, así que el catálogo es de solo lectura desde la API. Lo que el
+  administrador gestiona (candy, promociones) se escribe por funciones que verifican
+  el rol y registran el cambio en el log (0024), nunca por tabla.
 - **Un agregado no necesita abrir la tabla.** El top de ventas y el promedio de
   estrellas salen de funciones `SECURITY DEFINER` con `search_path` fijado y
   `EXECUTE` otorgado a mano: devuelven la cifra, y `ordenes` y `resenas` siguen
@@ -209,10 +211,15 @@ el código inexistente no. La batería se corrió tal cual, y otras 36 comprobac
 y cancelada, función terminada, no cancelar después de validar), contra Postgres en WASM. Dos
 empleados sobre la misma orden se serializan por el `FOR UPDATE`: se razona, no se midió.
 
-Para cambiar lo que "configura el administrador" hasta que la F9 construya el panel:
+`pruebas/panel_admin.sql` cubre la F9 con una cuenta admin, una cliente y una empleado. Ni el cliente
+ni el empleado ven reportes ni cambian la configuración; el log le muestra 0 filas a los dos y
+todas al admin, que tampoco lo puede borrar; la facturación trae una fila por día con los días sin
+ventas en cero; un cambio de precio queda en el log con antes y después; el contenido de un combo
+vendido no se cambia; no hay dos cupones de bienvenida activos, y los cupones siguen sin lista
+pública. La batería se corrió tal cual, y otras 97 comprobaciones (anon, cliente y empleado contra
+las nueve funciones; órdenes pagada, pendiente y cancelada en el reporte; el contenido de los combos
+en el ranking del candy; `peliculas_mas_vendidas()` con ventas reales), contra Postgres en WASM.
 
-```sql
-update public.cupones set valor = 25 where codigo = 'BIENVENIDA';   -- RF-43
-update public.recompensas set costo_puntos = 70000 where nombre = 'Entrada gratis';   -- RF-47
-update public.productos set precio = 7000 where nombre = 'Pochoclo grande';
-```
+Desde la F9, precios, cupones, recompensas, recargo VIP y topes se cambian desde **/admin** y no
+por SQL: un `UPDATE` desde el editor funciona (corre como `postgres`), pero no deja rastro en el
+log de actividad, que es lo que pide RN-12.

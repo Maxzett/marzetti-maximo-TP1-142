@@ -330,6 +330,29 @@
     <app-desglose [desglose]="desgloseDeMuestra" [mostrarPuntos]="true" />
   </section>
 
+  <section aria-labelledby="s-graficos">
+    <h2 id="s-graficos">Gráfico de barras</h2>
+    <p class="bajada">
+      El gráfico del panel de reportes es una lista ordenada con barras de CSS, no un
+      <code>&lt;canvas&gt;</code>: cada renglón dice su valor con la unidad escrita, así el lector
+      de pantalla lee el ranking entero y nadie depende del largo ni del color de la barra. La barra
+      es una tira de bombillas, el mismo recurso de la guirnalda del header.
+    </p>
+
+    <app-grafico-barras
+      titulo="Semana del 21 al 27 de septiembre de 2026"
+      [unidad]="['entrada', 'entradas']"
+      [datos]="barrasDeMuestra"
+    />
+
+    <h3 class="titulo-caso">Sin datos</h3>
+    <app-grafico-barras
+      titulo="Semana del 28 de septiembre al 4 de octubre de 2026"
+      vacio="No hay entradas vendidas para funciones de este período."
+      [datos]="[]"
+    />
+  </section>
+
   <section aria-labelledby="s-a11y">
     <h2 id="s-a11y">Accesibilidad</h2>
     <p class="bajada">

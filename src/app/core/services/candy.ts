@@ -4,8 +4,11 @@ import { Supabase } from './supabase';
 
 /**
  * Candy bar y recompensas (RF-33 a RF-37, RF-46). Lectura pública (migración 0022): la compra es
- * anónima y el candy se ofrece antes de que exista una cuenta. La base ya filtra lo dado de baja
- * con RLS, así que acá no se vuelve a filtrar por `activo`.
+ * anónima y el candy se ofrece antes de que exista una cuenta.
+ *
+ * Filtra lo dado de baja aunque la política pública (0022) ya lo haga: desde la 0024 el
+ * administrador ve también lo inactivo para poder gestionarlo, y un admin que compra no tiene
+ * que ver en el candy algo que configurar_orden después le va a rechazar.
  *
  * Devuelve null si alguna de las lecturas falla, para que la pantalla distinga un error de un
  * candy vacío. El candy es opcional: si no carga, la compra de entradas sigue funcionando.
@@ -26,6 +29,7 @@ export class Candy {
       cliente
         .from('productos')
         .select('id, categoria_id, nombre, descripcion, imagen_url, precio')
+        .eq('activo', true)
         .order('nombre')
         .overrideTypes<Producto[], { merge: false }>(),
       cliente
@@ -33,11 +37,13 @@ export class Candy {
         .select(
           'id, nombre, descripcion, imagen_url, precio, destacado, combo_items(incluye_entrada, cantidad, productos(nombre))',
         )
+        .eq('activo', true)
         .order('nombre')
         .overrideTypes<Combo[], { merge: false }>(),
       cliente
         .from('recompensas')
         .select('id, nombre, tipo, producto_id, costo_puntos')
+        .eq('activa', true)
         .order('costo_puntos')
         .overrideTypes<Recompensa[], { merge: false }>(),
     ]);

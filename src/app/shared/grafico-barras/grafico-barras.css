@@ -1,0 +1,111 @@
+.grafico {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  margin: 0;
+}
+
+.titulo {
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.vacio {
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo);
+}
+
+.barras {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * En el celular la etiqueta va arriba y la barra con su valor abajo, a todo el ancho. En pantallas
+ * anchas, los tres en una fila. minmax(0, …) y no auto: con auto una etiqueta larga empuja la
+ * grilla más allá del borde de la pantalla.
+ */
+.fila {
+  display: grid;
+  grid-template-areas:
+    'puesto etiqueta etiqueta'
+    'puesto pista valor';
+  grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+  gap: var(--e-1) var(--e-3);
+  align-items: center;
+}
+
+@media (min-width: 48rem) {
+  .fila {
+    grid-template-areas: 'puesto etiqueta pista valor';
+    grid-template-columns: 1.75rem minmax(0, 14rem) minmax(0, 1fr) 7.5rem;
+  }
+}
+
+.puesto {
+  grid-area: puesto;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-display);
+  font-size: var(--t-rotulo);
+  text-align: center;
+}
+
+.etiqueta {
+  grid-area: etiqueta;
+  overflow: hidden;
+  font-size: var(--t-cuerpo);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pista {
+  grid-area: pista;
+  display: block;
+  block-size: 1rem;
+  border-radius: var(--r-chico);
+  background: var(--superficie-alta);
+}
+
+/*
+ * La barra es una tira de bombillas encendidas: el mismo recurso de la guirnalda del header,
+ * así el gráfico es de la marquesina y no de una planilla. Un bloque, no en línea: un elemento
+ * en línea ignora el ancho y la barra no se vería.
+ */
+.relleno {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--r-chico);
+  background-color: var(--acento);
+  background-image: radial-gradient(circle, var(--bombilla) 0 2px, transparent 2.5px);
+  background-size: 0.75rem 100%;
+  box-shadow: 0 0 10px -2px var(--acento);
+}
+
+.valor {
+  grid-area: valor;
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+/* En alto contraste los fondos se descartan: la barra se pinta con el color del sistema */
+@media (forced-colors: active) {
+  .relleno {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .pista {
+    outline: 1px solid CanvasText;
+  }
+}

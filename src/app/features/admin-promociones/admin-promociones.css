@@ -1,0 +1,9 @@
+/* El código se tipea tal cual: letra de máquina, como en el panel del empleado */
+.codigo {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  letter-spacing: 0.06em;
+}
+
+.configuracion {
+  max-width: 32rem;
+}

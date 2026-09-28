@@ -1,0 +1,267 @@
+<div class="pantalla">
+  <header class="encabezado">
+    <h1>Promociones</h1>
+    <p class="bajada">
+      Cupones, recompensas por puntos y la configuración de la venta. Cada cambio rige para las
+      compras nuevas: las que ya se hicieron conservan lo que pagaron.
+    </p>
+  </header>
+
+  @if (aviso()) {
+    <app-mensaje tono="exito">{{ aviso() }}</app-mensaje>
+  }
+
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando las promociones" />
+  } @else if (datos(); as d) {
+    <section class="seccion" aria-labelledby="t-cupones">
+      <div class="titulo-con-accion">
+        <h2 id="t-cupones">Cupones</h2>
+        <app-boton (presionado)="abrirCupon(null)">Nuevo cupón</app-boton>
+      </div>
+
+      <div class="tabla" role="region" tabindex="0" aria-labelledby="t-cupones">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Descuento</th>
+              <th scope="col">Vigencia</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="solo-lectores">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cupon of d.cupones; track cupon.id) {
+              <tr>
+                <th scope="row">
+                  <span class="codigo" [class.dado-de-baja]="!cupon.activo">{{
+                    cupon.codigo
+                  }}</span>
+                </th>
+                <td>{{ describirCupon(cupon) }}</td>
+                <td>{{ describirVigencia(cupon) }}</td>
+                <td>
+                  <span class="estado" [class.estado--activo]="cupon.activo">
+                    {{ cupon.activo ? 'Activo' : 'De baja' }}
+                  </span>
+                </td>
+                <td>
+                  <app-boton variante="borde" (presionado)="abrirCupon(cupon)">
+                    Editar <span class="solo-lectores">el cupón {{ cupon.codigo }}</span>
+                  </app-boton>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="t-recompensas">
+      <div class="titulo-con-accion">
+        <h2 id="t-recompensas">Recompensas por puntos</h2>
+        <app-boton (presionado)="abrirRecompensa(null)">Nueva recompensa</app-boton>
+      </div>
+
+      <p class="nota">
+        Cada cliente suma 1 punto por peso pagado. Con eso, el costo decide cuánto devuelve el cine:
+        una entrada de $ 6.500 a 65.000 puntos devuelve el 10 % de lo gastado.
+      </p>
+
+      <div class="tabla" role="region" tabindex="0" aria-labelledby="t-recompensas">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Recompensa</th>
+              <th scope="col">Entrega</th>
+              <th scope="col" class="numero">Costo</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="solo-lectores">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (recompensa of d.recompensas; track recompensa.id) {
+              <tr>
+                <th scope="row">
+                  <span [class.dado-de-baja]="!recompensa.activa">{{ recompensa.nombre }}</span>
+                </th>
+                <td>{{ describirRecompensa(recompensa) }}</td>
+                <td class="numero">{{ puntos(recompensa.costo_puntos) }} puntos</td>
+                <td>
+                  <span class="estado" [class.estado--activo]="recompensa.activa">
+                    {{ recompensa.activa ? 'Activa' : 'De baja' }}
+                  </span>
+                </td>
+                <td>
+                  <app-boton variante="borde" (presionado)="abrirRecompensa(recompensa)">
+                    Editar <span class="solo-lectores">{{ recompensa.nombre }}</span>
+                  </app-boton>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="t-configuracion">
+      <h2 id="t-configuracion">Configuración de la venta</h2>
+
+      <form
+        class="formulario configuracion"
+        novalidate
+        (submit)="$event.preventDefault(); guardarConfiguracion()"
+      >
+        @for (opcion of opcionesDeConfiguracion; track opcion.clave) {
+          <app-campo
+            tipo="number"
+            [etiqueta]="opcion.etiqueta"
+            [ayuda]="opcion.ayuda"
+            [valor]="valorDe(opcion.clave)"
+            (valorChange)="cambiarValor(opcion.clave, $event)"
+          />
+        }
+
+        @if (errorDeConfiguracion()) {
+          <app-mensaje tono="error">{{ errorDeConfiguracion() }}</app-mensaje>
+        }
+        @if (avisoDeConfiguracion()) {
+          <app-mensaje tono="exito">{{ avisoDeConfiguracion() }}</app-mensaje>
+        }
+
+        <div class="acciones">
+          <app-boton tipo="submit" [cargando]="guardandoConfiguracion()">
+            Guardar configuración
+          </app-boton>
+        </div>
+      </form>
+    </section>
+  } @else {
+    <app-mensaje tono="error">No pudimos cargar las promociones. Recargá la página.</app-mensaje>
+  }
+
+  <app-dialogo [titulo]="cuponId() ? 'Modificar cupón' : 'Nuevo cupón'" [(abierto)]="cuponAbierto">
+    <form class="formulario" novalidate (submit)="$event.preventDefault(); guardarCupon()">
+      <app-campo
+        etiqueta="Código"
+        ayuda="Lo que escribe el cliente al pagar. Se guarda en mayúsculas."
+        [requerido]="true"
+        [(valor)]="cupCodigo"
+      />
+      <div class="par">
+        <app-seleccion
+          etiqueta="Para quién"
+          [opciones]="opcionesDeTipo"
+          [requerido]="true"
+          [(valor)]="cupTipo"
+        />
+        <app-seleccion
+          etiqueta="Tipo de descuento"
+          [opciones]="opcionesDeDescuento"
+          [requerido]="true"
+          [(valor)]="cupDescuento"
+        />
+      </div>
+      <div class="par">
+        <app-campo
+          tipo="number"
+          [etiqueta]="cupDescuento() === 'porcentaje' ? 'Porcentaje' : 'Monto en pesos'"
+          [requerido]="true"
+          [(valor)]="cupValor"
+        />
+        <app-campo
+          tipo="number"
+          etiqueta="Edad mínima"
+          [ayuda]="cupTipo() === 'por_edad' ? 'Obligatoria en un cupón por edad.' : 'Opcional.'"
+          [requerido]="cupTipo() === 'por_edad'"
+          [(valor)]="cupEdad"
+        />
+      </div>
+
+      <fieldset>
+        <legend>Vigencia</legend>
+        <p class="nota">Sin fechas, el cupón no vence.</p>
+
+        <div class="fecha">
+          <p class="etiqueta">Desde</p>
+          <app-selector-fecha etiqueta="Vigente desde" [(valor)]="cupDesde" />
+          @if (cupDesde()) {
+            <app-boton variante="fantasma" (presionado)="cupDesde.set('')">
+              Quitar la fecha de inicio
+            </app-boton>
+          }
+        </div>
+        <div class="fecha">
+          <p class="etiqueta">Hasta</p>
+          <app-selector-fecha etiqueta="Vigente hasta" [minimo]="cupDesde()" [(valor)]="cupHasta" />
+          @if (cupHasta()) {
+            <app-boton variante="fantasma" (presionado)="cupHasta.set('')">
+              Quitar la fecha de fin
+            </app-boton>
+          }
+        </div>
+      </fieldset>
+
+      <label class="casilla">
+        <input type="checkbox" [checked]="cupActivo()" (change)="cupActivo.set(casilla($event))" />
+        Activo
+      </label>
+
+      @if (error()) {
+        <app-mensaje tono="error">{{ error() }}</app-mensaje>
+      }
+
+      <div class="acciones">
+        <app-boton variante="fantasma" (presionado)="cuponAbierto.set(false)">Cancelar</app-boton>
+        <app-boton tipo="submit" [cargando]="guardando()">Guardar</app-boton>
+      </div>
+    </form>
+  </app-dialogo>
+
+  <app-dialogo
+    [titulo]="recompensaId() ? 'Modificar recompensa' : 'Nueva recompensa'"
+    [(abierto)]="recompensaAbierta"
+  >
+    <form class="formulario" novalidate (submit)="$event.preventDefault(); guardarRecompensa()">
+      <app-campo etiqueta="Nombre" [requerido]="true" [(valor)]="recNombre" />
+      <app-seleccion
+        etiqueta="Qué entrega"
+        [opciones]="opcionesDeRecompensa"
+        [requerido]="true"
+        [(valor)]="recTipo"
+      />
+      @if (recTipo() === 'producto') {
+        <app-seleccion
+          etiqueta="Producto"
+          marcador="Elegí un producto"
+          [opciones]="opcionesDeProducto()"
+          [requerido]="true"
+          [(valor)]="recProducto"
+        />
+      }
+      <app-campo
+        etiqueta="Costo en puntos"
+        tipo="number"
+        ayuda="Los canjes ya hechos conservan lo que costaron."
+        [requerido]="true"
+        [(valor)]="recCosto"
+      />
+      <label class="casilla">
+        <input type="checkbox" [checked]="recActiva()" (change)="recActiva.set(casilla($event))" />
+        Activa
+      </label>
+
+      @if (error()) {
+        <app-mensaje tono="error">{{ error() }}</app-mensaje>
+      }
+
+      <div class="acciones">
+        <app-boton variante="fantasma" (presionado)="recompensaAbierta.set(false)">
+          Cancelar
+        </app-boton>
+        <app-boton tipo="submit" [cargando]="guardando()">Guardar</app-boton>
+      </div>
+    </form>
+  </app-dialogo>
+</div>

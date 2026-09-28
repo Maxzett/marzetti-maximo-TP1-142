@@ -6,6 +6,8 @@ import { RolUsuario } from './core/models/perfil';
 import { Auth } from './core/services/auth';
 import { Catalogo } from './core/services/catalogo';
 import { Funciones } from './core/services/funciones';
+import { Gestion } from './core/services/gestion';
+import { Reportes } from './core/services/reportes';
 import { Resenas } from './core/services/resenas';
 import { Salas } from './core/services/salas';
 import { NotFound } from './features/not-found/not-found';
@@ -37,6 +39,22 @@ function configurar(haySesion: boolean, rol: RolUsuario | null = null): void {
       { provide: Resenas, useValue: { deLaPelicula: async () => [] } },
       // El panel de administración pide sus datos al crearse: el test de rutas no sale a la red
       { provide: Funciones, useValue: { cargarProgramacion: vi.fn(async () => []) } },
+      {
+        provide: Reportes,
+        useValue: {
+          facturacion: vi.fn(async () => []),
+          productosMasVendidos: vi.fn(async () => []),
+          peliculasMasVistas: vi.fn(async () => []),
+          actividad: vi.fn(async () => ({ registros: [], total: 0 })),
+        },
+      },
+      {
+        provide: Gestion,
+        useValue: {
+          cargarCandy: vi.fn(async () => null),
+          cargarPromociones: vi.fn(async () => null),
+        },
+      },
       {
         provide: Salas,
         useValue: { cargarSalas: vi.fn(async () => []), cargarButacas: vi.fn(async () => []) },
@@ -172,13 +190,29 @@ describe('routes', () => {
       expect(TestBed.inject(Router).url).toBe('/');
     });
 
-    it('/admin lleva a la programación de funciones para el administrador', async () => {
+    it('/admin lleva a los reportes: es lo primero que se mira al entrar', async () => {
       configurar(true, 'admin');
 
       const harness = await RouterTestingHarness.create();
       await harness.navigateByUrl('/admin');
 
-      expect(TestBed.inject(Router).url).toBe('/admin/funciones');
+      expect(TestBed.inject(Router).url).toBe('/admin/reportes');
+    });
+
+    it('reportes, candy, promociones y actividad cargan sus pantallas', async () => {
+      configurar(true, 'admin');
+      const harness = await RouterTestingHarness.create();
+
+      for (const [ruta, selector] of [
+        ['reportes', 'app-admin-reportes'],
+        ['candy', 'app-admin-candy'],
+        ['promociones', 'app-admin-promociones'],
+        ['actividad', 'app-admin-actividad'],
+      ]) {
+        await harness.navigateByUrl(`/admin/${ruta}`);
+        await harness.fixture.whenStable();
+        expect(harness.fixture.nativeElement.querySelector(selector)).not.toBeNull();
+      }
     });
 
     it('/admin/funciones y /admin/salas cargan sus pantallas', async () => {

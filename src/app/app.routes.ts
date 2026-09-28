@@ -67,7 +67,14 @@ export const routes: Routes = [
     canActivate: [rolRequerido('admin')],
     loadComponent: () => import('./layout/admin/admin').then((m) => m.Admin),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'funciones' },
+      // Los reportes son lo primero que se mira al entrar: cómo viene la venta (RF-57)
+      { path: '', pathMatch: 'full', redirectTo: 'reportes' },
+      {
+        path: 'reportes',
+        loadComponent: () =>
+          import('./features/admin-reportes/admin-reportes').then((m) => m.AdminReportes),
+        title: 'Reportes · Administración · Cine Emezeta',
+      },
       {
         path: 'funciones',
         loadComponent: () =>
@@ -78,6 +85,23 @@ export const routes: Routes = [
         path: 'salas',
         loadComponent: () => import('./features/admin-salas/admin-salas').then((m) => m.AdminSalas),
         title: 'Salas · Administración · Cine Emezeta',
+      },
+      {
+        path: 'candy',
+        loadComponent: () => import('./features/admin-candy/admin-candy').then((m) => m.AdminCandy),
+        title: 'Candy · Administración · Cine Emezeta',
+      },
+      {
+        path: 'promociones',
+        loadComponent: () =>
+          import('./features/admin-promociones/admin-promociones').then((m) => m.AdminPromociones),
+        title: 'Promociones · Administración · Cine Emezeta',
+      },
+      {
+        path: 'actividad',
+        loadComponent: () =>
+          import('./features/admin-actividad/admin-actividad').then((m) => m.AdminActividad),
+        title: 'Actividad · Administración · Cine Emezeta',
       },
     ],
   },

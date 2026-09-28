@@ -10,14 +10,20 @@ type Respuesta = { data: unknown; error: { message: string } | null };
  */
 function crearSupabaseFalso(porTabla: Record<string, Respuesta>) {
   const tablas: string[] = [];
+  const filtros: string[] = [];
 
   return {
     tablas,
+    filtros,
     client: {
       from: vi.fn((tabla: string) => {
         tablas.push(tabla);
         const constructor = {
           select: () => constructor,
+          eq: (columna: string, valor: unknown) => {
+            filtros.push(`${tabla}.${columna}=${String(valor)}`);
+            return constructor;
+          },
           order: () => constructor,
           overrideTypes: async () => porTabla[tabla],
         };
@@ -56,6 +62,23 @@ describe('Candy', () => {
       'combos',
       'productos',
       'recompensas',
+    ]);
+  });
+
+  it('pide solo lo activo, aunque quien compra sea admin y RLS le muestre también lo inactivo', async () => {
+    const falso = crearSupabaseFalso({
+      categorias_productos: ok([]),
+      productos: ok([]),
+      combos: ok([]),
+      recompensas: ok([]),
+    });
+
+    await crearServicio(falso).cargar();
+
+    expect(falso.filtros.sort()).toEqual([
+      'combos.activo=true',
+      'productos.activo=true',
+      'recompensas.activa=true',
     ]);
   });
 

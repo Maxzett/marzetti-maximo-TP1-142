@@ -1,0 +1,222 @@
+<div class="pantalla">
+  <header class="encabezado">
+    <h1>Reportes</h1>
+    <p class="bajada">
+      Cómo viene la venta: facturación por día, el candy más pedido y las películas más vistas. Las
+      cifras salen de la base y no llevan datos personales de nadie.
+    </p>
+  </header>
+
+  <section class="seccion" aria-labelledby="t-facturacion">
+    <h2 id="t-facturacion">Facturación por día</h2>
+
+    <fieldset class="rango">
+      <legend>Período</legend>
+
+      <div class="par">
+        <div class="fecha">
+          <p class="etiqueta">Desde</p>
+          <app-selector-fecha etiqueta="Desde" [maximo]="hoy" [(valor)]="desde" />
+        </div>
+        <div class="fecha">
+          <p class="etiqueta">Hasta</p>
+          <app-selector-fecha etiqueta="Hasta" [maximo]="hoy" [(valor)]="hasta" />
+        </div>
+      </div>
+
+      @if (errorDeRango()) {
+        <p class="error" role="alert">{{ errorDeRango() }}</p>
+      }
+    </fieldset>
+
+    @if (cargandoVentas() && !facturacion()) {
+      <app-spinner etiqueta="Cargando la facturación" />
+    } @else if (errorDeVentas()) {
+      <app-mensaje tono="error">No pudimos cargar el reporte. Recargá la página.</app-mensaje>
+    } @else if (facturacion(); as dias) {
+      @if (totales(); as t) {
+        <!-- Los totales del período antes que el detalle: es lo primero que se busca -->
+        <dl class="cifras" [attr.aria-busy]="cargandoVentas()">
+          <div class="cifra">
+            <dt>Cobrado</dt>
+            <dd>{{ precio(t.cobrado) }}</dd>
+          </div>
+          <div class="cifra">
+            <dt>Entradas vendidas</dt>
+            <dd>{{ t.entradas }}</dd>
+          </div>
+          <div class="cifra">
+            <dt>Órdenes</dt>
+            <dd>{{ t.ordenes }}</dd>
+          </div>
+          <div class="cifra">
+            <dt>Canceladas</dt>
+            <dd>{{ t.canceladas }}</dd>
+          </div>
+        </dl>
+
+        <!-- Región con foco: la tabla es más ancha que un celular y un teclado tiene que poder desplazarla -->
+        <div class="tabla" role="region" tabindex="0" aria-labelledby="t-facturacion">
+          <table>
+            <caption class="solo-lectores">
+              Facturación por día,
+              {{
+                rango()
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Día</th>
+                @for (columna of columnas; track columna.clave) {
+                  <th scope="col" class="numero">{{ columna.titulo }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (dia of dias; track dia.dia) {
+                <tr [class.sin-ventas]="dia.ordenes === 0">
+                  <th scope="row">{{ describirDia(dia.dia) }}</th>
+                  @for (columna of columnas; track columna.clave; let i = $index) {
+                    <td class="numero">{{ valorDe(dia, i) }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row">Total</th>
+                @for (columna of columnas; track columna.clave; let i = $index) {
+                  <td class="numero">{{ valorDe(t, i) }}</td>
+                }
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <p class="nota">
+          <strong>Cobrado</strong> es lo que entró por el medio de pago, e incluye las compras que
+          después se cancelaron: la cancelación no devuelve dinero, acredita crédito.
+          <strong>Pagado con crédito</strong> no se suma a Cobrado porque ya se había cobrado en la
+          compra que originó el crédito. <strong>Entradas</strong> cuenta solo las de compras
+          vigentes.
+        </p>
+
+        <div class="acciones">
+          <app-boton
+            variante="borde"
+            [cargando]="exportando() === 'pdf'"
+            [deshabilitado]="exportando() !== null"
+            (presionado)="exportar('pdf')"
+          >
+            Descargar PDF
+          </app-boton>
+          <app-boton
+            variante="borde"
+            [cargando]="exportando() === 'excel'"
+            [deshabilitado]="exportando() !== null"
+            (presionado)="exportar('excel')"
+          >
+            Descargar Excel
+          </app-boton>
+        </div>
+
+        @if (errorDeExportacion()) {
+          <app-mensaje tono="error">{{ errorDeExportacion() }}</app-mensaje>
+        }
+      }
+    }
+  </section>
+
+  <section class="seccion" aria-labelledby="t-candy">
+    <h2 id="t-candy">Candy más vendido</h2>
+    <p class="nota">
+      Mismo período que la facturación. Cuenta las unidades que salieron del mostrador: sueltas,
+      canjeadas con puntos y las que van dentro de cada combo.
+    </p>
+
+    @if (!errorDeVentas() && candy()) {
+      @if (masVendido(); as primero) {
+        <div class="destacado" role="status">
+          <p class="sobretitulo">El más pedido</p>
+          <p class="ganador">{{ primero.nombre }}</p>
+          <p class="secundario">
+            {{ primero.unidades }} {{ primero.unidades === 1 ? 'unidad' : 'unidades' }} ·
+            {{ rango() }}
+          </p>
+        </div>
+      }
+
+      <app-grafico-barras
+        titulo="Los cinco más vendidos"
+        vacio="No se vendió candy en este período."
+        [unidad]="['unidad', 'unidades']"
+        [datos]="barrasDeCandy()"
+      />
+    }
+  </section>
+
+  <section class="seccion" aria-labelledby="t-peliculas">
+    <h2 id="t-peliculas">Películas más vistas</h2>
+
+    <div class="controles">
+      <!-- Radios nativos: de las dos opciones se elige una, y el navegador ya trae las flechas -->
+      <fieldset class="conmutador">
+        <legend class="solo-lectores">Agrupar por</legend>
+        <label class="opcion" [class.opcion--elegida]="periodo() === 'semana'">
+          <input
+            type="radio"
+            name="periodo"
+            value="semana"
+            [checked]="periodo() === 'semana'"
+            (change)="elegirPeriodo('semana')"
+          />
+          Semana
+        </label>
+        <label class="opcion" [class.opcion--elegida]="periodo() === 'mes'">
+          <input
+            type="radio"
+            name="periodo"
+            value="mes"
+            [checked]="periodo() === 'mes'"
+            (change)="elegirPeriodo('mes')"
+          />
+          Mes
+        </label>
+      </fieldset>
+
+      <div class="navegacion">
+        <app-boton variante="fantasma" (presionado)="moverPeriodo(-1)">
+          <span aria-hidden="true">←</span> Anterior
+        </app-boton>
+        @if (!esElActual()) {
+          <app-boton variante="fantasma" (presionado)="volverAlActual()">
+            {{ periodo() === 'semana' ? 'Esta semana' : 'Este mes' }}
+          </app-boton>
+        }
+        <app-boton variante="fantasma" (presionado)="moverPeriodo(1)">
+          Siguiente <span aria-hidden="true">→</span>
+        </app-boton>
+      </div>
+    </div>
+
+    <p class="nota">
+      Entradas vendidas en compras vigentes, contadas por la fecha de la función: una preventa
+      vendida hoy suma en la semana del estreno.
+    </p>
+
+    <div aria-live="polite" [attr.aria-busy]="cargandoPeliculas()">
+      @if (cargandoPeliculas() && !peliculas()) {
+        <app-spinner etiqueta="Cargando las películas más vistas" />
+      } @else if (peliculas() === null) {
+        <app-mensaje tono="error">No pudimos cargar el gráfico. Recargá la página.</app-mensaje>
+      } @else {
+        <app-grafico-barras
+          [titulo]="rotuloDelPeriodo()"
+          vacio="No hay entradas vendidas para funciones de este período."
+          [unidad]="['entrada', 'entradas']"
+          [datos]="barrasDePeliculas()"
+        />
+      }
+    </div>
+  </section>
+</div>

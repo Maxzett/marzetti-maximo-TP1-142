@@ -16,7 +16,7 @@ describe('Sistema', () => {
   });
 
   // Si un componente de shared/ deja de compilar, el catálogo es el primero en avisar
-  it('muestra los doce componentes del sistema', () => {
+  it('muestra los trece componentes del sistema', () => {
     const etiquetas = [
       'app-boton',
       'app-campo',
@@ -30,6 +30,7 @@ describe('Sistema', () => {
       'app-poster',
       'app-estrellas',
       'app-ficha-pelicula',
+      'app-grafico-barras',
     ];
 
     for (const etiqueta of etiquetas) {

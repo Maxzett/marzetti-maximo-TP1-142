@@ -8,7 +8,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
  *
  * El acceso lo filtra el guard `rolRequerido('admin')` de la ruta, que es una ayuda de
  * interfaz (RNF-09): lo que impide de verdad tocar los datos son las funciones de la base,
- * que verifican el rol por su cuenta. La F9 le suma reportes y log a este mismo marco.
+ * que verifican el rol por su cuenta.
  */
 @Component({
   imports: [RouterLink, RouterLinkActive, RouterOutlet],

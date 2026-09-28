@@ -1,0 +1,20 @@
+<figure class="grafico">
+  <figcaption class="titulo">{{ titulo() }}</figcaption>
+
+  @if (barras().length === 0) {
+    <p class="vacio">{{ vacio() }}</p>
+  } @else {
+    <ol class="barras">
+      @for (barra of barras(); track barra.etiqueta; let i = $index) {
+        <li class="fila">
+          <span class="puesto" aria-hidden="true">{{ i + 1 }}</span>
+          <span class="etiqueta">{{ barra.etiqueta }}</span>
+          <span class="pista" aria-hidden="true">
+            <span class="relleno" [style.inline-size.%]="barra.porcentaje"></span>
+          </span>
+          <span class="valor">{{ barra.texto }}</span>
+        </li>
+      }
+    </ol>
+  }
+</figure>

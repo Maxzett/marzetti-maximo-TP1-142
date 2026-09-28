@@ -1,0 +1,280 @@
+<div class="pantalla">
+  <header class="encabezado">
+    <h1>Candy</h1>
+    <p class="bajada">
+      Categorías, productos y combos del candy bar. Nada se borra: lo que se vendió sigue
+      necesitando su nombre, así que se da de baja y se puede volver a activar.
+    </p>
+  </header>
+
+  @if (aviso()) {
+    <app-mensaje tono="exito">{{ aviso() }}</app-mensaje>
+  }
+
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando el candy" />
+  } @else if (candy(); as c) {
+    <section class="seccion" aria-labelledby="t-productos">
+      <div class="titulo-con-accion">
+        <h2 id="t-productos">Productos</h2>
+        <app-boton (presionado)="abrirProducto(null)">Nuevo producto</app-boton>
+      </div>
+
+      <div class="tabla" role="region" tabindex="0" aria-labelledby="t-productos">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Producto</th>
+              <th scope="col">Categoría</th>
+              <th scope="col" class="numero">Precio</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="solo-lectores">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (producto of c.productos; track producto.id) {
+              <tr>
+                <th scope="row">
+                  <span [class.dado-de-baja]="!producto.activo">{{ producto.nombre }}</span>
+                  <span class="secundario">{{ producto.descripcion }}</span>
+                </th>
+                <td>{{ nombreDeCategoria(producto.categoria_id) }}</td>
+                <td class="numero">{{ precio(producto.precio) }}</td>
+                <td>
+                  <span class="estado" [class.estado--activo]="producto.activo">
+                    {{ producto.activo ? 'A la venta' : 'De baja' }}
+                  </span>
+                </td>
+                <td>
+                  <app-boton variante="borde" (presionado)="abrirProducto(producto)">
+                    Editar <span class="solo-lectores">{{ producto.nombre }}</span>
+                  </app-boton>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="t-combos">
+      <div class="titulo-con-accion">
+        <h2 id="t-combos">Combos</h2>
+        <app-boton (presionado)="abrirCombo(null)">Nuevo combo</app-boton>
+      </div>
+
+      <div class="tabla" role="region" tabindex="0" aria-labelledby="t-combos">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Combo</th>
+              <th scope="col">Incluye</th>
+              <th scope="col" class="numero">Precio</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="solo-lectores">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (combo of c.combos; track combo.id) {
+              <tr>
+                <th scope="row">
+                  <span [class.dado-de-baja]="!combo.activo">{{ combo.nombre }}</span>
+                  @if (combo.destacado) {
+                    <span class="secundario">Destacado en la compra</span>
+                  }
+                </th>
+                <td class="incluye">{{ describirCombo(combo) }}</td>
+                <td class="numero">{{ precio(combo.precio) }}</td>
+                <td>
+                  <span class="estado" [class.estado--activo]="combo.activo">
+                    {{ combo.activo ? 'A la venta' : 'De baja' }}
+                  </span>
+                </td>
+                <td>
+                  <app-boton variante="borde" (presionado)="abrirCombo(combo)">
+                    Editar <span class="solo-lectores">{{ combo.nombre }}</span>
+                  </app-boton>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="seccion" aria-labelledby="t-categorias">
+      <div class="titulo-con-accion">
+        <h2 id="t-categorias">Categorías</h2>
+        <app-boton (presionado)="abrirCategoria(null)">Nueva categoría</app-boton>
+      </div>
+
+      <p class="nota">El orden es el de la pantalla de compra: primero el número más chico.</p>
+
+      <ul class="categorias">
+        @for (categoria of c.categorias; track categoria.id) {
+          <li>
+            <span class="orden">{{ categoria.orden }}</span>
+            <span class="nombre">{{ categoria.nombre }}</span>
+            <app-boton variante="fantasma" (presionado)="abrirCategoria(categoria)">
+              Editar <span class="solo-lectores">la categoría {{ categoria.nombre }}</span>
+            </app-boton>
+          </li>
+        }
+      </ul>
+    </section>
+  } @else {
+    <app-mensaje tono="error">No pudimos cargar el candy. Recargá la página.</app-mensaje>
+  }
+
+  <app-dialogo
+    [titulo]="productoId() ? 'Modificar producto' : 'Nuevo producto'"
+    [(abierto)]="productoAbierto"
+  >
+    <form class="formulario" novalidate (submit)="$event.preventDefault(); guardarProducto()">
+      <app-seleccion
+        etiqueta="Categoría"
+        [opciones]="opcionesDeCategoria()"
+        [requerido]="true"
+        [(valor)]="prodCategoria"
+      />
+      <app-campo etiqueta="Nombre" [requerido]="true" [(valor)]="prodNombre" />
+      <app-campo etiqueta="Descripción" [(valor)]="prodDescripcion" />
+      <app-campo
+        etiqueta="Precio"
+        tipo="number"
+        ayuda="En pesos. Las compras ya hechas conservan el precio que pagaron."
+        [requerido]="true"
+        [(valor)]="prodPrecio"
+      />
+      <label class="casilla">
+        <input
+          type="checkbox"
+          [checked]="prodActivo()"
+          (change)="prodActivo.set(casilla($event))"
+        />
+        A la venta
+      </label>
+
+      @if (error()) {
+        <app-mensaje tono="error">{{ error() }}</app-mensaje>
+      }
+
+      <div class="acciones">
+        <app-boton variante="fantasma" (presionado)="productoAbierto.set(false)">
+          Cancelar
+        </app-boton>
+        <app-boton tipo="submit" [cargando]="guardando()">Guardar</app-boton>
+      </div>
+    </form>
+  </app-dialogo>
+
+  <app-dialogo [titulo]="comboId() ? 'Modificar combo' : 'Nuevo combo'" [(abierto)]="comboAbierto">
+    <form class="formulario" novalidate (submit)="$event.preventDefault(); guardarCombo()">
+      <app-campo etiqueta="Nombre" [requerido]="true" [(valor)]="comboNombre" />
+      <app-campo etiqueta="Descripción" [(valor)]="comboDescripcion" />
+      <app-campo
+        etiqueta="Precio fijo"
+        tipo="number"
+        ayuda="En pesos. No es la suma de las partes: es el precio del combo."
+        [requerido]="true"
+        [(valor)]="comboPrecio"
+      />
+
+      <fieldset>
+        <legend>Contenido</legend>
+
+        <div class="renglon">
+          <span class="renglon__nombre">Entradas</span>
+          <app-cantidad etiqueta="Entradas" [maximo]="10" [(valor)]="comboEntradas" />
+        </div>
+
+        @for (renglon of comboRenglones(); track $index; let i = $index) {
+          <div class="renglon">
+            <div class="renglon__nombre">
+              <app-seleccion
+                [etiqueta]="'Producto ' + (i + 1)"
+                marcador="Elegí un producto"
+                [opciones]="opcionesDeProducto()"
+                [valor]="renglon.producto_id"
+                (valorChange)="cambiarRenglon(i, { producto_id: $event })"
+              />
+            </div>
+            <app-cantidad
+              [etiqueta]="'Producto ' + (i + 1)"
+              [minimo]="1"
+              [maximo]="10"
+              [valor]="renglon.cantidad"
+              (valorChange)="cambiarRenglon(i, { cantidad: $event })"
+            />
+            <app-boton variante="fantasma" (presionado)="quitarRenglon(i)">
+              Quitar <span class="solo-lectores">el producto {{ i + 1 }}</span>
+            </app-boton>
+          </div>
+        }
+
+        <div>
+          <app-boton variante="borde" (presionado)="agregarRenglon()">Agregar producto</app-boton>
+        </div>
+
+        @if (comboId()) {
+          <p class="nota">
+            Si el combo ya se vendió, su contenido no se puede cambiar: creá uno nuevo y dale de
+            baja a este. El precio sí se puede cambiar.
+          </p>
+        }
+      </fieldset>
+
+      <label class="casilla">
+        <input
+          type="checkbox"
+          [checked]="comboDestacado()"
+          (change)="comboDestacado.set(casilla($event))"
+        />
+        Destacado en la pantalla de compra
+      </label>
+      <label class="casilla">
+        <input
+          type="checkbox"
+          [checked]="comboActivo()"
+          (change)="comboActivo.set(casilla($event))"
+        />
+        A la venta
+      </label>
+
+      @if (error()) {
+        <app-mensaje tono="error">{{ error() }}</app-mensaje>
+      }
+
+      <div class="acciones">
+        <app-boton variante="fantasma" (presionado)="comboAbierto.set(false)"> Cancelar </app-boton>
+        <app-boton tipo="submit" [cargando]="guardando()">Guardar</app-boton>
+      </div>
+    </form>
+  </app-dialogo>
+
+  <app-dialogo
+    [titulo]="categoriaId() ? 'Modificar categoría' : 'Nueva categoría'"
+    [(abierto)]="categoriaAbierta"
+  >
+    <form class="formulario" novalidate (submit)="$event.preventDefault(); guardarCategoria()">
+      <app-campo etiqueta="Nombre" [requerido]="true" [(valor)]="catNombre" />
+      <app-campo
+        etiqueta="Orden"
+        tipo="number"
+        ayuda="Posición en la pantalla de compra."
+        [(valor)]="catOrden"
+      />
+
+      @if (error()) {
+        <app-mensaje tono="error">{{ error() }}</app-mensaje>
+      }
+
+      <div class="acciones">
+        <app-boton variante="fantasma" (presionado)="categoriaAbierta.set(false)">
+          Cancelar
+        </app-boton>
+        <app-boton tipo="submit" [cargando]="guardando()">Guardar</app-boton>
+      </div>
+    </form>
+  </app-dialogo>
+</div>
