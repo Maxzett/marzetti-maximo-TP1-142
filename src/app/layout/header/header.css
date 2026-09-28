@@ -193,6 +193,34 @@ a.cuenta__rol:hover {
   background: var(--superficie-alta);
 }
 
+/* RF-42: el número va en una bombilla encendida, y la palabra al lado dice qué cuenta */
+.cuenta__avisos {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  color: var(--bombilla);
+  font-size: var(--t-mini);
+  text-decoration: none;
+}
+
+.cuenta__avisos:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cuenta__avisos-numero {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 1.4rem;
+  block-size: 1.4rem;
+  padding-inline: var(--e-1);
+  border-radius: 999px;
+  background: var(--acento);
+  color: var(--fondo);
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+}
+
 /* ---- Escritorio: todo en una fila ---- */
 @media (min-width: 64rem) {
   .barra {

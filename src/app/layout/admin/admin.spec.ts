@@ -41,6 +41,7 @@ describe('Admin', () => {
 
     expect(enlaces).toEqual([
       ['Reportes', '/admin/reportes'],
+      ['Películas', '/admin/peliculas'],
       ['Funciones', '/admin/funciones'],
       ['Salas', '/admin/salas'],
       ['Candy', '/admin/candy'],

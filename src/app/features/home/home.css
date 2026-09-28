@@ -44,3 +44,8 @@ h2 {
   margin-top: var(--e-7);
   text-align: center;
 }
+
+.mas {
+  margin-top: var(--e-4);
+  text-align: right;
+}

@@ -22,6 +22,38 @@ const registro = (
 const normal = (texto: string) => texto.replace(/\$\s*/g, '$ ');
 
 describe('log de actividad', () => {
+  // F10: películas y preventa (RF-56, RF-61)
+  it('el alta de una película con preventa dice a qué precio', () => {
+    const texto = describirAccion(
+      registro('crear_pelicula', { nombre: 'Cielo de papel', precio_preventa: 3500 }),
+    );
+
+    expect(normal(texto)).toBe('Dio de alta la película Cielo de papel con preventa a $ 3.500.');
+  });
+
+  it('distingue abrir, cambiar y quitar la preventa', () => {
+    const preventa = (antes: unknown, despues: unknown) =>
+      normal(
+        describirAccion(registro('modificar_precio_preventa', { nombre: 'Ecos', antes, despues })),
+      );
+
+    expect(preventa(null, 3000)).toBe('Abrió la preventa de Ecos a $ 3.000.');
+    expect(preventa(3000, 2500)).toBe('Cambió el precio de preventa de Ecos de $ 3.000 a $ 2.500.');
+    expect(preventa(3000, null)).toBe('Quitó la preventa de Ecos.');
+  });
+
+  it('dice si una película pasó a estar destacada en la portada', () => {
+    const texto = describirAccion(
+      registro('modificar_pelicula', {
+        nombre: 'Ecos',
+        antes: { destacada: false },
+        despues: { destacada: true },
+      }),
+    );
+
+    expect(texto).toBe('Modificó la película Ecos (ahora destacada en la portada).');
+  });
+
   it('el cambio de precio dice qué, de cuánto y a cuánto (RF-61)', () => {
     const texto = describirAccion(
       registro('modificar_precio_producto', {

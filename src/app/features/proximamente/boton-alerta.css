@@ -1,0 +1,27 @@
+/* Por encima del enlace estirado de la tarjeta: si no, el clic caería en el título */
+:host {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.alerta {
+  gap: var(--e-2);
+}
+
+.alerta__icono {
+  font-size: 1em;
+  line-height: 1;
+}
+
+.alerta__texto {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+/* El texto "Error:" no hace falta: el rol alert y el color acompañan una frase que ya lo dice */
+.alerta__texto--error {
+  color: var(--rojo-claro);
+}

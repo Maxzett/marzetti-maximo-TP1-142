@@ -46,6 +46,22 @@
       </section>
     }
 
+    @if (proximas().length > 0) {
+      <section class="bloque" aria-labelledby="titulo-proximas">
+        <h2 id="titulo-proximas">Próximamente</h2>
+        <ul class="grilla">
+          @for (pelicula of proximas(); track pelicula.id) {
+            <li>
+              <app-ficha-proxima [pelicula]="pelicula" />
+            </li>
+          }
+        </ul>
+        <p class="mas">
+          <a routerLink="/proximamente">Todos los estrenos y avisos de venta →</a>
+        </p>
+      </section>
+    }
+
     <p class="todas">
       <a class="boton boton--borde" routerLink="/peliculas">Ver todas y buscar</a>
     </p>

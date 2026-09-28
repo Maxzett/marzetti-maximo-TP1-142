@@ -3,9 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { Pelicula, Puntaje, Resena } from '../../core/models/pelicula';
+import { Alertas } from '../../core/services/alertas';
 import { Auth } from '../../core/services/auth';
 import { Catalogo } from '../../core/services/catalogo';
 import { Resenas } from '../../core/services/resenas';
+import { hoyIso, sumarDias } from '../../shared/selector-fecha/fechas';
 import { PeliculaDetalle } from './pelicula-detalle';
 
 const PELICULA: Pelicula = {
@@ -94,6 +96,7 @@ describe('PeliculaDetalle', () => {
         { provide: Catalogo, useValue: catalogo },
         { provide: Resenas, useValue: resenas },
         { provide: Auth, useValue: { haySesion: signal(escenario.conSesion ?? false) } },
+        { provide: Alertas, useValue: { peliculasConAlerta: signal(new Set<string>()) } },
       ],
     }).compileComponents();
 
@@ -438,6 +441,37 @@ describe('PeliculaDetalle', () => {
       expect(resenas.borrar).toHaveBeenCalledWith('r-mia');
       expect(resenas.deLaPelicula).toHaveBeenCalledTimes(2);
       expect(texto()).toContain('Borramos tu reseña');
+    });
+  });
+
+  // RF-08, RF-42 y RF-49: la ficha de una película que todavía no se vende
+  describe('antes de que salga a la venta', () => {
+    it('dice el estreno y la apertura, no ofrece funciones y ofrece el aviso', async () => {
+      await crear({ pelicula: { ...PELICULA, fecha_estreno: sumarDias(hoyIso(), 30) } });
+
+      expect(texto()).toContain('Se estrena el');
+      expect(texto()).toContain('Las entradas salen a la venta el');
+      expect(raiz().querySelector('app-elegir-funcion')).toBeNull();
+      expect(raiz().querySelector('app-boton-alerta')).not.toBeNull();
+    });
+
+    it('en preventa ya se eligen funciones y se muestra el precio especial', async () => {
+      await crear({
+        pelicula: { ...PELICULA, fecha_estreno: sumarDias(hoyIso(), 3), precio_preventa: 3500 },
+      });
+
+      expect(texto()).toContain('Estás en la preventa');
+      // Intl escribe un espacio de no separación entre el signo y el número
+      expect(texto().replace(/\s/g, ' ')).toContain('$ 3.500');
+      expect(raiz().querySelector('app-elegir-funcion')).not.toBeNull();
+      expect(raiz().querySelector('app-boton-alerta')).toBeNull();
+    });
+
+    it('una película en cartelera no habla de estreno', async () => {
+      await crear();
+
+      expect(texto()).not.toContain('Se estrena el');
+      expect(raiz().querySelector('app-elegir-funcion')).not.toBeNull();
     });
   });
 });

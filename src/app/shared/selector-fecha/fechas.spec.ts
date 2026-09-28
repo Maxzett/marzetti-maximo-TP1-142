@@ -6,6 +6,7 @@ import {
   diasDeLaSemana,
   diasDelMes,
   esIsoValida,
+  formatearDiaYMes,
   formatearLargo,
   limitar,
   nombreMes,
@@ -74,5 +75,12 @@ describe('fechas', () => {
     expect(formatearLargo('2026-09-24')).toContain('24 de septiembre de 2026');
     expect(formatearLargo('2026-09-24')).toContain('jueves');
     expect(formatearLargo('no es una fecha')).toBe('');
+  });
+});
+
+describe('formatearDiaYMes', () => {
+  it('escribe día de la semana, día y mes, sin año ni coma', () => {
+    expect(formatearDiaYMes('2026-10-15')).toBe('jueves 15 de octubre');
+    expect(formatearDiaYMes('')).toBe('');
   });
 });

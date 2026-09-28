@@ -23,6 +23,7 @@ interface Datos {
   cartelera: Pelicula[] | null;
   ventas?: VentaPelicula[];
   puntajes?: Puntaje[];
+  proximas?: Pelicula[] | null;
 }
 
 describe('Home', () => {
@@ -31,6 +32,7 @@ describe('Home', () => {
     cargarCartelera: ReturnType<typeof vi.fn>;
     masVendidas: ReturnType<typeof vi.fn>;
     cargarPuntajes: ReturnType<typeof vi.fn>;
+    cargarProximas: ReturnType<typeof vi.fn>;
   };
 
   async function crear(datos: Datos) {
@@ -41,6 +43,7 @@ describe('Home', () => {
         async () =>
           new Map((datos.puntajes ?? []).map((puntaje) => [puntaje.pelicula_id, puntaje])),
       ),
+      cargarProximas: vi.fn(async () => (datos.proximas === undefined ? [] : datos.proximas)),
     };
 
     await TestBed.configureTestingModule({
@@ -176,12 +179,34 @@ describe('Home', () => {
     });
   });
 
+  describe('Próximamente (RF-08)', () => {
+    const futura = (id: string): Pelicula => ({ ...pelicula(id), fecha_estreno: '2999-01-01' });
+
+    it('muestra los tres estrenos más cercanos y enlaza a la sección', async () => {
+      await crear({
+        cartelera: [pelicula('a', true)],
+        proximas: [futura('x'), futura('y'), futura('z'), futura('w')],
+      });
+
+      expect(titulosDe('titulo-proximas')).toEqual(['Película x', 'Película y', 'Película z']);
+      expect(raiz().querySelector('a[href="/proximamente"]')).not.toBeNull();
+    });
+
+    it('si Próximamente falla, la portada sigue sin esa franja', async () => {
+      await crear({ cartelera: [pelicula('a', true)], proximas: null });
+
+      expect(raiz().querySelector('#titulo-proximas')).toBeNull();
+      expect(titulosDe('titulo-destacadas')).toEqual(['Película a']);
+    });
+  });
+
   describe('estados', () => {
     it('muestra un spinner mientras carga', async () => {
       catalogo = {
         cargarCartelera: vi.fn(() => new Promise<Pelicula[]>(() => {})),
         masVendidas: vi.fn(async () => []),
         cargarPuntajes: vi.fn(async () => new Map()),
+        cargarProximas: vi.fn(async () => []),
       };
       await TestBed.configureTestingModule({
         imports: [Home],

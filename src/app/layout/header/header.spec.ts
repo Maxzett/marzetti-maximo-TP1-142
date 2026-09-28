@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { Perfil, RolUsuario } from '../../core/models/perfil';
+import { Alertas } from '../../core/services/alertas';
 import { Auth } from '../../core/services/auth';
 import { Header } from './header';
 
@@ -17,7 +18,7 @@ const PERFIL: Perfil = {
 
 const salir = vi.fn(async () => undefined);
 
-async function montar(rol: RolUsuario | null): Promise<ComponentFixture<Header>> {
+async function montar(rol: RolUsuario | null, avisosNuevos = 0): Promise<ComponentFixture<Header>> {
   const perfil = rol ? { ...PERFIL, rol } : null;
 
   await TestBed.configureTestingModule({
@@ -33,6 +34,14 @@ async function montar(rol: RolUsuario | null): Promise<ComponentFixture<Header>>
           esPersonal: signal(rol === 'empleado' || rol === 'admin'),
           esAdmin: signal(rol === 'admin'),
           salir,
+        },
+      },
+      {
+        provide: Alertas,
+        useValue: {
+          nuevas: signal(
+            Array.from({ length: avisosNuevos }, (_, i) => ({ pelicula_id: String(i) })),
+          ),
         },
       },
     ],
@@ -54,13 +63,14 @@ describe('Header', () => {
     const enlaces = (fixture: ComponentFixture<Header>) =>
       Array.from(fixture.nativeElement.querySelectorAll('nav a') as NodeListOf<HTMLAnchorElement>);
 
-    it('lleva a la cartelera y al catálogo completo', async () => {
+    it('lleva a la cartelera, al catálogo completo y a Próximamente', async () => {
       const fixture = await montar(null);
 
       const destinos = enlaces(fixture).map((a) => [a.textContent?.trim(), a.getAttribute('href')]);
       expect(destinos).toEqual([
         ['Cartelera', '/'],
         ['Películas', '/peliculas'],
+        ['Próximamente', '/proximamente'],
       ]);
     });
 
@@ -144,5 +154,21 @@ describe('Header', () => {
 
     expect(salir).toHaveBeenCalledOnce();
     expect(navegar).toHaveBeenCalledWith('/');
+  });
+
+  // RF-42: el aviso dice cuántas y con palabras, y lleva a la lista en Próximamente
+  it('muestra los avisos nuevos de venta con su número escrito', async () => {
+    const fixture = await montar('cliente', 2);
+    const enlace = fixture.nativeElement.querySelector('.cuenta__avisos') as HTMLAnchorElement;
+
+    expect(enlace.textContent).toContain('2');
+    expect(enlace.textContent).toContain('avisos nuevos');
+    expect(enlace.getAttribute('href')).toBe('/proximamente#avisos');
+  });
+
+  it('sin avisos nuevos no muestra nada', async () => {
+    const fixture = await montar('cliente');
+
+    expect(fixture.nativeElement.querySelector('.cuenta__avisos')).toBeNull();
   });
 });

@@ -208,6 +208,20 @@
       enlace que envolviera el póster y las estrellas haría que el lector de pantalla los leyera
       como nombre del enlace. La edad va escrita (+13, +18, ATP), no solo pintada.
     </p>
+
+    <h3 class="titulo-caso">Ficha de Próximamente</h3>
+    <ul class="fila fila--fichas">
+      @for (pelicula of proximasDeMuestra; track pelicula.id) {
+        <li>
+          <app-ficha-proxima [pelicula]="pelicula" [hoy]="hoyDeMuestra" />
+        </li>
+      }
+    </ul>
+    <p class="pie">
+      Los tres estados de la venta: en preventa, preventa anunciada y a la venta desde el estreno.
+      Se dicen con texto y con la bombilla encendida (●) o apagada (○), no solo con el color. Lo que
+      se proyecta adentro (el botón de aviso) queda por encima del enlace estirado.
+    </p>
   </section>
 
   <section aria-labelledby="s-fechas">

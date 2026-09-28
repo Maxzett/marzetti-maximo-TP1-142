@@ -7,11 +7,28 @@ import {
   ClaveDeConfiguracion,
   ComboGestionado,
   Cupon,
+  DatosDePelicula,
+  PeliculasGestionadas,
   ProductoGestionado,
   Promociones,
   RecompensaGestionada,
 } from '../models/gestion';
+import { Genero } from '../models/pelicula';
+import { Catalogo } from './catalogo';
 import { Supabase } from './supabase';
+
+/** Los mismos tipos que acepta el bucket `posters` (0025), con la extensión de cada uno */
+const EXTENSIONES_DE_POSTER: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
+/** 2 MB: el `file_size_limit` del bucket */
+export const TAMANIO_MAXIMO_DE_POSTER = 2 * 1024 * 1024;
+
+/** Lo que precede al nombre del archivo en la URL pública de un póster del bucket */
+const RUTA_PUBLICA_DE_POSTERS = '/storage/v1/object/public/posters/';
 
 /**
  * Gestión del candy y las promociones desde el panel (RF-33, RF-36, RF-43, RF-44, RF-47, RF-56).
@@ -27,6 +44,7 @@ import { Supabase } from './supabase';
 @Service()
 export class Gestion {
   private readonly supabase = inject(Supabase);
+  private readonly catalogo = inject(Catalogo);
 
   async cargarCandy(): Promise<CandyGestionado | null> {
     const cliente = this.supabase.client;
@@ -167,6 +185,86 @@ export class Gestion {
 
   guardarConfiguracion(clave: ClaveDeConfiguracion, valor: number): Promise<string | null> {
     return this.guardar('guardar_configuracion', { p_clave: clave, p_valor: valor });
+  }
+
+  // ── Películas (RF-56, migración 0025) ──
+
+  /** Todas las películas, estreno futuro incluido, y los géneros para elegir */
+  async cargarPeliculas(): Promise<PeliculasGestionadas | null> {
+    const [peliculas, generos] = await Promise.all([
+      this.catalogo.cargarTodas(),
+      this.supabase.client
+        .from('generos')
+        .select('id, nombre, slug')
+        .order('nombre')
+        .overrideTypes<Genero[], { merge: false }>(),
+    ]);
+
+    return peliculas === null || generos.error ? null : { peliculas, generos: generos.data };
+  }
+
+  guardarPelicula(pelicula: DatosDePelicula): Promise<string | null> {
+    return this.guardar(
+      'guardar_pelicula',
+      {
+        p_id: pelicula.id,
+        p_titulo: pelicula.titulo,
+        p_sinopsis: pelicula.sinopsis,
+        p_poster_url: pelicula.poster_url,
+        p_duracion: pelicula.duracion_minutos,
+        p_restriccion: pelicula.restriccion_edad,
+        p_estreno: pelicula.fecha_estreno,
+        p_destacada: pelicula.destacada,
+        p_precio_preventa: pelicula.precio_preventa,
+        p_generos: pelicula.generos,
+      },
+      // El título no es único (puede haber remakes): un 23505 acá no tiene un motivo que contar
+      'No pudimos guardar la película. Probá de nuevo.',
+    );
+  }
+
+  /**
+   * Sube un póster al bucket `posters` y devuelve su URL pública (RNF-02). El bucket vuelve a
+   * controlar tipo y tamaño, y solo deja escribir a la administración (0025): esto evita subir
+   * 20 MB para enterarse después de que no se aceptaban.
+   *
+   * El nombre es un UUID nuevo, no el título: dos películas con el mismo nombre no se pisan, y
+   * como cada versión tiene su propia URL, el caché del navegador nunca muestra la vieja.
+   */
+  async subirPoster(archivo: File): Promise<{ url: string } | { error: string }> {
+    const extension = EXTENSIONES_DE_POSTER[archivo.type];
+
+    if (!extension) {
+      return { error: 'El póster tiene que ser una imagen JPG, PNG o WebP.' };
+    }
+    if (archivo.size > TAMANIO_MAXIMO_DE_POSTER) {
+      return { error: 'El póster puede pesar hasta 2 MB.' };
+    }
+
+    const ruta = `${crypto.randomUUID()}.${extension}`;
+    const bucket = this.supabase.client.storage.from('posters');
+    const { error } = await bucket.upload(ruta, archivo, {
+      contentType: archivo.type,
+      cacheControl: '31536000',
+    });
+
+    if (error) {
+      return { error: 'No pudimos subir el póster. Probá de nuevo.' };
+    }
+
+    return { url: bucket.getPublicUrl(ruta).data.publicUrl };
+  }
+
+  /**
+   * Borra un póster del bucket, si la URL es de ahí. Es de mejor esfuerzo: un archivo huérfano
+   * ocupa lugar pero no rompe nada, así que un error acá no se le muestra a nadie.
+   */
+  async borrarPoster(url: string | null): Promise<void> {
+    const ruta = url?.split(`${RUTA_PUBLICA_DE_POSTERS}`)[1];
+
+    if (ruta) {
+      await this.supabase.client.storage.from('posters').remove([decodeURIComponent(ruta)]);
+    }
   }
 
   private async guardar(

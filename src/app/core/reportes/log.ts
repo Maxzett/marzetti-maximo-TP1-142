@@ -15,6 +15,9 @@ import { MotivoDeRechazo } from '../models/validacion';
 
 /** Las acciones que se registran, con su nombre corto para el filtro de la pantalla */
 export const ACCIONES_DEL_LOG: readonly { accion: string; nombre: string }[] = [
+  { accion: 'crear_pelicula', nombre: 'Alta de película' },
+  { accion: 'modificar_pelicula', nombre: 'Cambio de película' },
+  { accion: 'modificar_precio_preventa', nombre: 'Precio de preventa' },
   { accion: 'crear_funcion', nombre: 'Alta de función' },
   { accion: 'modificar_funcion', nombre: 'Cambio de función' },
   { accion: 'modificar_precio_funcion', nombre: 'Precio de función' },
@@ -78,6 +81,23 @@ export function describirAccion(registro: RegistroDeActividad): string {
   const sujeto = (quien: string) => (quien ? ` ${quien}` : '');
 
   switch (registro.accion) {
+    case 'crear_pelicula': {
+      const preventa = aNumero(d['precio_preventa']);
+      return `Dio de alta la película${sujeto(nombre)}${preventa === null ? '' : ` con preventa a ${formatearPrecio(preventa)}`}.`;
+    }
+    case 'modificar_pelicula':
+      return `Modificó la película${sujeto(nombre)}${destacadaAhora(antes['destacada'], despues['destacada'])}.`;
+    case 'modificar_precio_preventa': {
+      const a = aNumero(d['antes']);
+      const b = aNumero(d['despues']);
+      if (a === null && b !== null) {
+        return `Abrió la preventa${de(nombre)} a ${formatearPrecio(b)}.`;
+      }
+      if (a !== null && b === null) {
+        return `Quitó la preventa${de(nombre)}.`;
+      }
+      return `Cambió el precio de preventa${de(nombre)}${deA(a, b, formatearPrecio)}.`;
+    }
     case 'crear_funcion':
       return `Programó una función${de(pelicula)}${texto('sala') ? ` en ${texto('sala')}` : ''}${cuando(d['inicio'])}.`;
     case 'modificar_funcion':
@@ -174,6 +194,17 @@ function estado(antes: unknown, despues: unknown): string {
   }
   if (antes === false && despues === true) {
     return ' (reactivación)';
+  }
+  return '';
+}
+
+/** RF-07: " (ahora destacada en la portada)" si el cambio fue ese */
+function destacadaAhora(antes: unknown, despues: unknown): string {
+  if (antes === false && despues === true) {
+    return ' (ahora destacada en la portada)';
+  }
+  if (antes === true && despues === false) {
+    return ' (ya no destacada en la portada)';
   }
   return '';
 }

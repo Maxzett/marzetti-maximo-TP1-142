@@ -1,4 +1,5 @@
 import { CategoriaDeProducto } from './candy';
+import { Genero, Pelicula } from './pelicula';
 
 /**
  * Lo que gestiona el administrador en el candy y las promociones (RF-33, RF-36, RF-43, RF-44,
@@ -74,6 +75,15 @@ export interface Promociones {
   /** Los productos activos, para elegir cuál entrega una recompensa */
   productos: { id: string; nombre: string }[];
 }
+
+/** Las películas con sus géneros y la lista de géneros para elegir (RF-56) */
+export interface PeliculasGestionadas {
+  peliculas: Pelicula[];
+  generos: Genero[];
+}
+
+/** Lo que se manda para guardar una película: los géneros van como lista de ids */
+export type DatosDePelicula = Borrador<Omit<Pelicula, 'generos'>> & { generos: string[] };
 
 /** Lo que se manda para guardar: sin id es un alta */
 export type Borrador<T extends { id: string }> = Omit<T, 'id'> & { id: string | null };

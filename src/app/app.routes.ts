@@ -21,6 +21,14 @@ export const routes: Routes = [
     title: 'Película · Cine Emezeta',
   },
 
+  // Próximamente (RF-08) es pública como el catálogo; el aviso de venta (RF-42) pide sesión
+  // recién al tocarlo.
+  {
+    path: 'proximamente',
+    loadComponent: () => import('./features/proximamente/proximamente').then((m) => m.Proximamente),
+    title: 'Próximamente · Cine Emezeta',
+  },
+
   // Compra (RF-24 a RF-29). Sin guard: se puede comprar sin cuenta (RF-26), y la seguridad de
   // cada paso la ponen las funciones de la base, no el router. El id llega como input().
   {
@@ -58,6 +66,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/perfil/perfil').then((m) => m.Perfil),
     title: 'Mi perfil · Cine Emezeta',
   },
+  {
+    path: 'mis-peliculas',
+    canActivate: [sesionIniciada],
+    loadComponent: () =>
+      import('./features/mis-peliculas/mis-peliculas').then((m) => m.MisPeliculas),
+    title: 'Mis películas · Cine Emezeta',
+  },
 
   // Panel de administración. El guard es una ayuda de interfaz (RNF-09): lo que protege los
   // datos son las funciones de la base, que verifican el rol por su cuenta. Todo va en chunks
@@ -74,6 +89,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin-reportes/admin-reportes').then((m) => m.AdminReportes),
         title: 'Reportes · Administración · Cine Emezeta',
+      },
+      {
+        path: 'peliculas',
+        loadComponent: () =>
+          import('./features/admin-peliculas/admin-peliculas').then((m) => m.AdminPeliculas),
+        title: 'Películas · Administración · Cine Emezeta',
       },
       {
         path: 'funciones',

@@ -1,0 +1,180 @@
+<div class="pantalla">
+  <header class="encabezado">
+    <h1>Películas</h1>
+    <p class="bajada">
+      El catálogo, los estrenos y la preventa. Las destacadas aparecen en la portada; las de estreno
+      futuro, en Próximamente.
+    </p>
+  </header>
+
+  @if (aviso()) {
+    <app-mensaje tono="exito">{{ aviso() }}</app-mensaje>
+  }
+
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando las películas" />
+  } @else if (datos(); as d) {
+    <section class="seccion" aria-labelledby="t-peliculas">
+      <div class="titulo-con-accion">
+        <h2 id="t-peliculas">Catálogo</h2>
+        <app-boton (presionado)="abrir(null)">Nueva película</app-boton>
+      </div>
+
+      <div class="tabla" role="region" tabindex="0" aria-labelledby="t-peliculas">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Película</th>
+              <th scope="col">Estreno</th>
+              <th scope="col" class="numero">Preventa</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="solo-lectores">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pelicula of d.peliculas; track pelicula.id) {
+              <tr>
+                <th scope="row">
+                  {{ pelicula.titulo }}
+                  <span class="secundario">
+                    {{ pelicula.duracion_minutos }} min
+                    @if (pelicula.destacada) {
+                      · Destacada en la portada
+                    }
+                  </span>
+                </th>
+                <td>{{ estrenoDe(pelicula) }}</td>
+                <td class="numero">
+                  {{ pelicula.precio_preventa === null ? '—' : precio(pelicula.precio_preventa) }}
+                </td>
+                <td>
+                  <span
+                    class="estado"
+                    [class.estado--activo]="estadoDe(pelicula) !== 'Próximamente'"
+                  >
+                    {{ estadoDe(pelicula) }}
+                  </span>
+                </td>
+                <td>
+                  <app-boton variante="borde" (presionado)="abrir(pelicula)">
+                    Editar <span class="solo-lectores">{{ pelicula.titulo }}</span>
+                  </app-boton>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <app-dialogo
+      [titulo]="peliculaId() ? 'Modificar película' : 'Nueva película'"
+      [(abierto)]="abierto"
+    >
+      <form class="formulario" novalidate (submit)="$event.preventDefault(); guardar()">
+        <app-campo etiqueta="Título" [requerido]="true" [(valor)]="titulo" />
+        <app-campo etiqueta="Sinopsis" [filas]="4" [(valor)]="sinopsis" />
+
+        <div class="par">
+          <app-campo
+            etiqueta="Duración"
+            tipo="number"
+            ayuda="En minutos. Con funciones programadas no se puede cambiar."
+            [requerido]="true"
+            [(valor)]="duracion"
+          />
+          <app-seleccion
+            etiqueta="Restricción de edad"
+            [opciones]="opcionesDeEdad"
+            [requerido]="true"
+            [(valor)]="edad"
+          />
+        </div>
+
+        <fieldset>
+          <legend>Géneros</legend>
+          <div class="generos">
+            @for (genero of d.generos; track genero.id) {
+              <label class="casilla">
+                <input
+                  type="checkbox"
+                  [checked]="generos().has(genero.id)"
+                  (change)="alternarGenero(genero.id, $event)"
+                />
+                {{ genero.nombre }}
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Estreno y preventa</legend>
+          <div class="fecha">
+            <p class="etiqueta">Fecha de estreno</p>
+            <app-selector-fecha etiqueta="Fecha de estreno" [(valor)]="estreno" />
+            @if (estreno()) {
+              <app-boton variante="fantasma" (presionado)="estreno.set('')">
+                Sin fecha: ya está en cartelera
+              </app-boton>
+            }
+          </div>
+          <app-campo
+            etiqueta="Precio de preventa"
+            tipo="number"
+            ayuda="Opcional. Rige desde siete días antes del estreno hasta el día anterior; vacío, la venta abre el día del estreno."
+            [(valor)]="preventa"
+          />
+        </fieldset>
+
+        <fieldset>
+          <legend>Póster</legend>
+          <div class="poster">
+            <app-poster
+              class="poster__vista"
+              [titulo]="titulo() || 'Sin título'"
+              [url]="posterVisible()"
+              [decorativo]="true"
+            />
+            <div class="poster__acciones">
+              <label class="archivo">
+                <span class="etiqueta">Imagen JPG, PNG o WebP, hasta 2 MB</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  (change)="elegirArchivo($event)"
+                />
+              </label>
+              @if (posterVisible()) {
+                <app-boton variante="fantasma" (presionado)="quitarPoster()">
+                  Quitar el póster
+                </app-boton>
+              } @else {
+                <p class="nota">Sin imagen, la app dibuja un póster con el título.</p>
+              }
+            </div>
+          </div>
+        </fieldset>
+
+        <label class="casilla">
+          <input
+            type="checkbox"
+            [checked]="destacada()"
+            (change)="destacada.set(casilla($event))"
+          />
+          Destacada en la portada
+        </label>
+
+        @if (error()) {
+          <p class="error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="acciones">
+          <app-boton variante="borde" (presionado)="abierto.set(false)">Cancelar</app-boton>
+          <app-boton tipo="submit" [cargando]="guardando()">Guardar</app-boton>
+        </div>
+      </form>
+    </app-dialogo>
+  } @else {
+    <app-mensaje tono="error">No pudimos cargar las películas. Recargá la página.</app-mensaje>
+  }
+</div>

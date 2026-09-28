@@ -15,6 +15,7 @@ import { Desglose } from '../../shared/desglose/desglose';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Estrellas } from '../../shared/estrellas/estrellas';
 import { FichaPelicula } from '../../shared/ficha-pelicula/ficha-pelicula';
+import { FichaProxima } from '../../shared/ficha-proxima/ficha-proxima';
 import { DatoDeBarra, GraficoBarras } from '../../shared/grafico-barras/grafico-barras';
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
@@ -42,6 +43,7 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     Dialogo,
     Estrellas,
     FichaPelicula,
+    FichaProxima,
     GraficoBarras,
     MapaSala,
     Mensaje,
@@ -130,6 +132,34 @@ export class Sistema {
       destacada: false,
       precio_preventa: null,
       generos: [{ id: 'c', nombre: 'Terror', slug: 'terror' }],
+    },
+  ];
+
+  /**
+   * Los tres estados de Próximamente (RF-08, RF-49), con un "hoy" fijo para que la muestra no
+   * cambie según el día en que se mire
+   */
+  protected readonly hoyDeMuestra = '2026-09-28';
+  protected readonly proximasDeMuestra: readonly Pelicula[] = [
+    {
+      ...this.peliculasDeMuestra[0],
+      id: 'prox-1',
+      titulo: 'Cielo de papel',
+      fecha_estreno: '2026-10-01',
+      precio_preventa: 3500,
+    },
+    {
+      ...this.peliculasDeMuestra[0],
+      id: 'prox-2',
+      titulo: 'La última función',
+      fecha_estreno: '2026-10-15',
+      precio_preventa: 3200,
+    },
+    {
+      ...this.peliculasDeMuestra[1],
+      id: 'prox-3',
+      titulo: 'Ecos de medianoche',
+      fecha_estreno: '2026-11-05',
     },
   ];
 

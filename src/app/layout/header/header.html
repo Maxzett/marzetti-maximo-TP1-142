@@ -28,7 +28,11 @@
             >Películas</a
           >
         </li>
-        <!-- Próximamente, Candy y Mi entrada se suman cuando exista su ruta -->
+        <li>
+          <a routerLink="/proximamente" routerLinkActive="activo" ariaCurrentWhenActive="page"
+            >Próximamente</a
+          >
+        </li>
       </ul>
     </nav>
 
@@ -44,6 +48,17 @@
           <span class="cuenta__hola">Hola,</span>
           {{ perfil()?.nombre || 'tu cuenta' }}
         </a>
+
+        @if (avisosNuevos() > 0) {
+          <!--
+            RF-42: películas con alerta que salieron a la venta y todavía no se miraron. El número
+            va escrito y con su palabra: una burbuja de color sola no dice qué cuenta.
+          -->
+          <a class="cuenta__avisos" routerLink="/proximamente" fragment="avisos">
+            <span class="cuenta__avisos-numero">{{ avisosNuevos() }}</span>
+            {{ avisosNuevos() === 1 ? 'aviso nuevo' : 'avisos nuevos' }}
+          </a>
+        }
 
         @if (esAdmin()) {
           <!--

@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Pelicula, Puntaje, VentaPelicula } from '../../core/models/pelicula';
 import { Catalogo } from '../../core/services/catalogo';
 import { FichaPelicula } from '../../shared/ficha-pelicula/ficha-pelicula';
+import { FichaProxima } from '../../shared/ficha-proxima/ficha-proxima';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Spinner } from '../../shared/spinner/spinner';
 
@@ -10,9 +11,10 @@ import { Spinner } from '../../shared/spinner/spinner';
  * Portada: primero las 3 películas más vendidas (RF-04) y después las que el
  * administrador marcó como destacadas (RF-07). El catálogo completo, con buscador y filtro
  * de géneros, está en /peliculas: si el buscador viviera acá solo encontraría lo destacado.
+ * Al final, los tres estrenos más cercanos (RF-08), con enlace a Próximamente.
  */
 @Component({
-  imports: [FichaPelicula, Mensaje, RouterLink, Spinner],
+  imports: [FichaPelicula, FichaProxima, Mensaje, RouterLink, Spinner],
   selector: 'app-home',
   styleUrl: './home.css',
   templateUrl: './home.html',
@@ -26,6 +28,8 @@ export class Home {
   private readonly cartelera = signal<Pelicula[]>([]);
   private readonly ventas = signal<VentaPelicula[]>([]);
   protected readonly puntajes = signal(new Map<string, Puntaje>());
+  /** Si Próximamente no se pudo leer, la portada sigue: esa franja es un extra, no la cartelera */
+  protected readonly proximas = signal<Pelicula[]>([]);
 
   /**
    * El top con la película ya resuelta. Una fila del ranking cuya película no está en la
@@ -57,11 +61,12 @@ export class Home {
     this.cargando.set(true);
     this.fallo.set(false);
 
-    // Las tres consultas no dependen entre sí: van en paralelo y no una detrás de otra
-    const [cartelera, ventas, puntajes] = await Promise.all([
+    // Las consultas no dependen entre sí: van en paralelo y no una detrás de otra
+    const [cartelera, ventas, puntajes, proximas] = await Promise.all([
       this.catalogo.cargarCartelera(),
       this.catalogo.masVendidas(3),
       this.catalogo.cargarPuntajes(),
+      this.catalogo.cargarProximas(),
     ]);
 
     if (cartelera === null) {
@@ -70,6 +75,7 @@ export class Home {
       this.cartelera.set(cartelera);
       this.ventas.set(ventas);
       this.puntajes.set(puntajes);
+      this.proximas.set((proximas ?? []).slice(0, 3));
     }
 
     this.cargando.set(false);

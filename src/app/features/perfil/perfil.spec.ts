@@ -161,11 +161,12 @@ describe('Perfil', () => {
     expect(fixture.nativeElement.querySelector('app-spinner')).not.toBeNull();
   });
 
-  // RF-41 llega en la F10: el lugar ya está reservado
-  it('reserva el lugar de Mis Películas', async () => {
+  // RF-41: el historial tiene su propia pantalla
+  it('lleva a Mis Películas', async () => {
     const fixture = await montar(PERFIL, SENSIBLES);
 
     expect(texto(fixture)).toContain('Mis Películas');
+    expect(fixture.nativeElement.querySelector('a[href="/mis-peliculas"]')).not.toBeNull();
   });
 
   describe('puntos y crédito (RF-40)', () => {

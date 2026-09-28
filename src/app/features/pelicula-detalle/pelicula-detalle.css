@@ -91,6 +91,24 @@ h2 {
   font-size: var(--t-rotulo);
 }
 
+/* ── Estreno y apertura de la venta (RF-08, RF-49) ── */
+
+.estreno,
+.apertura {
+  margin-top: var(--e-3);
+  color: var(--texto-tenue);
+}
+
+.estreno strong,
+.apertura strong {
+  color: var(--bombilla);
+}
+
+app-boton-alerta {
+  margin-top: var(--e-4);
+  align-items: flex-start;
+}
+
 /* ── Reseñas ── */
 
 .resenas {

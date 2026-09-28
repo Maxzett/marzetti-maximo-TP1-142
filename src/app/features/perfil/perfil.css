@@ -54,6 +54,10 @@ dd {
   text-transform: capitalize;
 }
 
+.pendiente + .boton {
+  margin-top: var(--e-4);
+}
+
 .nota,
 .pendiente {
   margin-top: var(--e-4);

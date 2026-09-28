@@ -1,6 +1,7 @@
 import { inject, Service } from '@angular/core';
 import { mensajeDeError } from '../admin/mensaje-de-error';
 import { Canje, OrdenPropia, ResultadoDeCancelacion, Saldos } from '../models/orden';
+import { PeliculaVista } from '../models/pelicula';
 import { Supabase } from './supabase';
 
 /**
@@ -28,6 +29,16 @@ export class Cuenta {
     const { data, error } = await this.supabase.client.rpc('mis_ordenes');
 
     return error ? null : (data as OrdenPropia[]);
+  }
+
+  /**
+   * Mis Películas (RF-41): lo que vio, con el ingreso validado, la más reciente primero. Una
+   * compra sin usar no cuenta: comprar una entrada no es haber visto la película.
+   */
+  async misPeliculas(): Promise<PeliculaVista[] | null> {
+    const { data, error } = await this.supabase.client.rpc('mis_peliculas');
+
+    return error ? null : (data as PeliculaVista[]);
   }
 
   async canjes(): Promise<Canje[] | null> {

@@ -127,6 +127,27 @@ export function diasDeLaSemana(): { corto: string; largo: string }[] {
   });
 }
 
+/**
+ * "jueves 15 de octubre", sin el año: para fechas cercanas, como un estreno de Próximamente,
+ * donde el año no agrega nada y alarga cada tarjeta.
+ */
+export function formatearDiaYMes(iso: string): string {
+  const fecha = desdeIso(iso);
+
+  if (!fecha) {
+    return '';
+  }
+
+  const formato = new Intl.DateTimeFormat(LOCALE, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  });
+
+  return formato.format(new Date(Date.UTC(fecha.anio, fecha.mes, fecha.dia))).replace(',', '');
+}
+
 /** "jueves, 24 de septiembre de 2026", para el resumen y para los lectores de pantalla */
 export function formatearLargo(iso: string): string {
   const fecha = desdeIso(iso);

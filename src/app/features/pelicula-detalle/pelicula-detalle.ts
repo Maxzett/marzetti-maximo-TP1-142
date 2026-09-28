@@ -2,6 +2,8 @@ import { Component, computed, effect, inject, input, signal, untracked } from '@
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { describirEdad } from '../../core/catalogo/edad';
+import { esProxima, estadoDeVenta } from '../../core/catalogo/venta';
+import { formatearPrecio } from '../../core/formato/precio';
 import { LARGO_MAXIMO_COMENTARIO, Pelicula, Puntaje, Resena } from '../../core/models/pelicula';
 import { Auth } from '../../core/services/auth';
 import { Catalogo } from '../../core/services/catalogo';
@@ -12,8 +14,10 @@ import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Estrellas } from '../../shared/estrellas/estrellas';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
+import { formatearDiaYMes, hoyIso } from '../../shared/selector-fecha/fechas';
 import { Spinner } from '../../shared/spinner/spinner';
 import { Tarjeta } from '../../shared/tarjeta/tarjeta';
+import { BotonAlerta } from '../proximamente/boton-alerta';
 import { ElegirFuncion } from './elegir-funcion';
 
 /**
@@ -25,6 +29,7 @@ import { ElegirFuncion } from './elegir-funcion';
 @Component({
   imports: [
     Boton,
+    BotonAlerta,
     Campo,
     Dialogo,
     ElegirFuncion,
@@ -59,6 +64,32 @@ export class PeliculaDetalle {
   protected readonly edad = computed(() => {
     const pelicula = this.pelicula();
     return pelicula ? describirEdad(pelicula.restriccion_edad) : null;
+  });
+
+  /** RF-49: si ya se venden entradas y si rige la preventa. La base lo vuelve a decidir */
+  protected readonly venta = computed(() => {
+    const pelicula = this.pelicula();
+    return pelicula
+      ? estadoDeVenta(pelicula, hoyIso())
+      : { aLaVenta: false, desde: null, enPreventa: false };
+  });
+
+  /** La fecha de estreno escrita, solo si todavía no se estrenó: después ya no es noticia */
+  protected readonly estreno = computed(() => {
+    const pelicula = this.pelicula();
+    return pelicula?.fecha_estreno && esProxima(pelicula, hoyIso())
+      ? formatearDiaYMes(pelicula.fecha_estreno)
+      : '';
+  });
+
+  protected readonly aperturaDeVenta = computed(() => {
+    const desde = this.venta().desde;
+    return desde ? formatearDiaYMes(desde) : '';
+  });
+
+  protected readonly preventa = computed(() => {
+    const precio = this.pelicula()?.precio_preventa;
+    return precio === null || precio === undefined ? '' : formatearPrecio(precio);
   });
 
   /** La reseña del que mira la pantalla, si ya dejó una. La marca es_propia la pone la base */

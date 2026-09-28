@@ -48,7 +48,34 @@
 
     <app-tarjeta>
       <h2>Funciones y entradas</h2>
-      <app-elegir-funcion [peliculaId]="datos.id" />
+
+      <!-- RF-08 y RF-49: una película de Próximamente dice cuándo se estrena y cuándo se vende -->
+      @if (estreno(); as fecha) {
+        <p class="estreno">
+          Se estrena el <strong>{{ fecha }}</strong
+          >.
+          @if (venta().enPreventa) {
+            Estás en la preventa: las entradas cuestan <strong>{{ preventa() }}</strong> hasta el
+            estreno.
+          }
+        </p>
+      }
+
+      @if (venta().aLaVenta) {
+        <app-elegir-funcion [peliculaId]="datos.id" />
+      } @else {
+        <!-- La base rechaza igual la reserva antes de esta fecha: esto evita llegar hasta ahí -->
+        <p class="apertura">
+          Las entradas salen a la venta el <strong>{{ aperturaDeVenta() }}</strong
+          >.
+          @if (datos.precio_preventa !== null) {
+            Hasta el estreno se venden con precio de preventa:
+            <strong>{{ preventa() }}</strong
+            >.
+          }
+        </p>
+        <app-boton-alerta [pelicula]="datos" />
+      }
     </app-tarjeta>
 
     <section class="resenas" aria-labelledby="titulo-resenas">

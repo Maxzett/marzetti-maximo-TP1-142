@@ -33,11 +33,13 @@ que recrear el proyecto desde cero.
 | `migrations/0022_candy_y_promociones.sql` | Candy, combos, cupones, puntos, crédito y cancelación. Lectura pública del candy y de las recompensas, y del libro mayor solo propio. `calcular_orden()` (el único lugar que decide un monto, en el orden de D-06), `configurar_orden`, `cancelar_orden`, `mis_saldos`, `mis_ordenes`, y `confirmar_pago` / `obtener_orden` reescritas |
 | `migrations/0023_panel_empleado.sql` | Validación del QR por tramos (D-03, RN-05): `consultar_orden_personal` y `validar_tramo`, solo para `es_personal()`. Ventana de una hora antes del inicio al fin de la película, rechazos devueltos (no lanzados) y registrados en el log |
 | `migrations/0024_panel_admin.sql` | Panel de administración (RF-56 a RF-61). Reportes como funciones que devuelven el agregado (`reporte_facturacion`, `peliculas_mas_vistas`, `productos_mas_vendidos`), lectura del log y de lo dado de baja solo para `es_admin()`, y la gestión del candy y las promociones solo por RPC (`guardar_categoria`, `guardar_producto`, `guardar_combo`, `guardar_cupon`, `guardar_recompensa`, `guardar_configuracion`), cada una registrando el cambio en el log en la misma transacción. Deja 5 tablas sin política |
+| `migrations/0025_proximamente_y_peliculas.sql` | Próximamente, preventa, alertas, Mis Películas y alta/edición de películas (RF-08, RF-41, RF-42, RF-49, RF-56). `venta_desde()` como única definición de la apertura de la venta, un trigger en `holds_butacas` que rechaza reservar antes y otro en `funciones` que rechaza programar antes del estreno; `alertas_estreno` abierta con políticas del titular; `mis_peliculas()` (solo ingresos validados); `guardar_pelicula()` con log y el precio de preventa aparte; bucket `posters` de Storage con escritura solo para `es_admin()`. Deja 4 tablas sin política |
 | `seed/001_salas_y_butacas.sql` | 4 salas × 532 ubicaciones, con aserción de conteo. **Requiere 0019**: llama a `generar_butacas_sala()` |
 | `seed/002_catalogo_base.sql` | Géneros, categorías, cupones y recompensa inicial |
 | `seed/003_peliculas_demo.sql` | 12 películas inventadas (10 en cartelera, 2 próximas), con aserciones |
 | `seed/004_funciones_demo.sql` | Funciones de los próximos 14 días (6 películas × 3 horarios), programadas con el mismo algoritmo que usa la app. Requiere 0019 y los seeds 001 y 003 |
 | `seed/005_candy_y_promociones.sql` | 10 productos, 3 combos (uno con entrada para dos), 3 recompensas con costo de ~10 % de retorno (entrada 65.000 puntos, con 1 punto por peso), y corrige las de versiones anteriores del seed. Idempotente. Requiere 0022 |
+| `seed/006_proximamente_demo.sql` | Deja, relativo a hoy, una película en preventa con funciones, una preventa por abrir (para mostrar la alerta) y una futura sin preventa. Idempotente: **correrlo el día anterior o la mañana de la defensa**. Requiere 0025 y los seeds 001 a 004 |
 
 Si una tabla recién creada devuelve `PGRST205 Could not find the table in the
 schema cache`, es el caché de PostgREST. Se refresca con:
@@ -210,6 +212,8 @@ responde `sin_candy`; fuera de la ventana no se consume; el log guarda la valida
 el código inexistente no. La batería se corrió tal cual, y otras 36 comprobaciones (orden pendiente
 y cancelada, función terminada, no cancelar después de validar), contra Postgres en WASM. Dos
 empleados sobre la misma orden se serializan por el `FOR UPDATE`: se razona, no se midió.
+
+`pruebas/proximamente.sql` cubre la F10 con una cuenta admin y una cliente. No se reserva una butaca antes de que abra la venta y sí siete días antes del estreno con preventa; no se programa una función antes del estreno; nadie pide una alerta en nombre de otro ni de una película que ya está a la venta, y el admin no ve alertas ajenas; el cliente no da de alta películas; no se cambia la duración de una película con funciones; el anónimo no ejecuta `mis_peliculas`. El último bloque (un cliente no sube pósters) solo corre en el proyecto real: Storage no existe fuera de Supabase. La batería se corrió tal cual, y otras 60 comprobaciones (preventa lejana, funciones movidas antes del estreno, alta en lote rechazada entera, Mis Películas antes y después de validar, los mensajes del log), contra Postgres en WASM con un Storage mínimo simulado.
 
 `pruebas/panel_admin.sql` cubre la F9 con una cuenta admin, una cliente y una empleado. Ni el cliente
 ni el empleado ven reportes ni cambian la configuración; el log le muestra 0 filas a los dos y

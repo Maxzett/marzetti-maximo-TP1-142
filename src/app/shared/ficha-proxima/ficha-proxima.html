@@ -1,0 +1,37 @@
+<app-tarjeta [destacada]="venta().enPreventa">
+  <article class="ficha">
+    <app-poster [titulo]="pelicula().titulo" [url]="pelicula().poster_url" [decorativo]="true" />
+
+    <div class="cuerpo">
+      <h3 class="titulo">
+        <a [routerLink]="['/peliculas', pelicula().id]" [title]="pelicula().titulo">{{
+          pelicula().titulo
+        }}</a>
+      </h3>
+
+      @if (estreno()) {
+        <p class="estreno">
+          <span class="estreno__rotulo">Estreno</span>
+          <span>{{ estreno() }}</span>
+        </p>
+      }
+
+      <p class="meta">
+        <span class="edad" [class.edad--mayores]="pelicula().restriccion_edad === 18">
+          <span aria-hidden="true">{{ edad().corto }}</span>
+          <span class="solo-lectores">{{ edad().largo }}</span>
+        </span>
+        <span>{{ pelicula().duracion_minutos }} min</span>
+      </p>
+
+      <p class="venta" [class.venta--abierta]="venta().aLaVenta">
+        <span class="venta__marca" aria-hidden="true">{{ venta().aLaVenta ? '●' : '○' }}</span>
+        {{ estadoDeVenta() }}
+      </p>
+
+      <div class="acciones">
+        <ng-content />
+      </div>
+    </div>
+  </article>
+</app-tarjeta>

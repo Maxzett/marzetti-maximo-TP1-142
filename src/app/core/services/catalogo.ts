@@ -1,6 +1,7 @@
 import { inject, Service } from '@angular/core';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { enCartelera } from '../catalogo/filtrar';
+import { ordenarProximas } from '../catalogo/venta';
 import { Genero, Pelicula, Puntaje, VentaPelicula } from '../models/pelicula';
 import { Supabase } from './supabase';
 
@@ -70,6 +71,15 @@ export class Catalogo {
 
     const hoy = hoyIso();
     return todas.filter((pelicula) => enCartelera(pelicula, hoy));
+  }
+
+  /**
+   * Las de Próximamente (RF-08), de la más cercana a la más lejana. Null si la consulta falló.
+   * La preventa entra acá y no en la cartelera: la película todavía no se estrenó.
+   */
+  async cargarProximas(): Promise<Pelicula[] | null> {
+    const todas = await this.cargarTodas();
+    return todas === null ? null : ordenarProximas(todas, hoyIso());
   }
 
   /**

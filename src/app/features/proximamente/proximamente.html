@@ -1,0 +1,62 @@
+<section class="contenedor pantalla">
+  <p class="sobretitulo">Lo que viene</p>
+  <h1>Próximamente</h1>
+  <p class="bajada">
+    Los estrenos de las próximas semanas. Algunas tienen preventa con precio especial desde siete
+    días antes; pedí un aviso y te contamos cuando salgan las entradas.
+  </p>
+
+  @if (haySesion() && avisos().length > 0) {
+    <section class="avisos" id="avisos" aria-labelledby="titulo-avisos">
+      <h2 id="titulo-avisos">Tus avisos: ya hay entradas</h2>
+      <ul class="avisos__lista">
+        @for (aviso of avisos(); track aviso.id) {
+          <li class="aviso">
+            <p class="aviso__texto">
+              @if (aviso.nueva) {
+                <span class="aviso__nueva">Nuevo</span>
+              }
+              <strong>{{ aviso.titulo }}</strong>
+              <span class="aviso__detalle">{{ aviso.detalle }}</span>
+            </p>
+            <div class="aviso__acciones">
+              <a class="boton boton--primario" [routerLink]="['/peliculas', aviso.id]"
+                >Comprar<span class="solo-lectores"> entradas de {{ aviso.titulo }}</span></a
+              >
+              <button class="boton boton--fantasma" type="button" (click)="quitarAviso(aviso.id)">
+                Quitar aviso<span class="solo-lectores"> de {{ aviso.titulo }}</span>
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+      @if (errorAlQuitar()) {
+        <app-mensaje tono="error">{{ errorAlQuitar() }}</app-mensaje>
+      }
+    </section>
+  }
+
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando los próximos estrenos" />
+  } @else if (fallo()) {
+    <app-mensaje tono="error">
+      No pudimos cargar los próximos estrenos.
+      <button class="boton boton--fantasma" type="button" (click)="cargar()">Reintentar</button>
+    </app-mensaje>
+  } @else if (proximas().length === 0) {
+    <app-mensaje tono="aviso">Por ahora no hay estrenos anunciados. Volvé pronto.</app-mensaje>
+  } @else {
+    <ul class="grilla">
+      @for (pelicula of proximas(); track pelicula.id) {
+        <li>
+          <app-ficha-proxima [pelicula]="pelicula">
+            <!-- En preventa ya se compra desde la ficha: el aviso no tiene nada que avisar -->
+            @if (!aLaVenta(pelicula)) {
+              <app-boton-alerta [pelicula]="pelicula" />
+            }
+          </app-ficha-proxima>
+        </li>
+      }
+    </ul>
+  }
+</section>

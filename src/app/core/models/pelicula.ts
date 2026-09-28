@@ -62,6 +62,20 @@ export interface Resena {
   es_propia: boolean;
 }
 
+/**
+ * Una película de Mis Películas (RF-41), tal como la devuelve mis_peliculas(): solo las que el
+ * usuario vio de verdad, con el ingreso validado por un empleado.
+ */
+export interface PeliculaVista {
+  pelicula_id: string;
+  titulo: string;
+  poster_url: string | null;
+  /** Instante de la función: la última vez que la vio */
+  vista_el: string;
+  /** Su propia calificación, o null si todavía no la reseñó */
+  estrellas: number | null;
+}
+
 /** Lo que el usuario completa al opinar (RF-09) */
 export interface DatosResena {
   estrellas: number;

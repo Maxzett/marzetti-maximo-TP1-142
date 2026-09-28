@@ -142,6 +142,31 @@ describe('Catalogo', () => {
     });
   });
 
+  describe('cargarProximas', () => {
+    it('deja solo las de estreno futuro, la más cercana primero', async () => {
+      const servicio = crearServicio(
+        crearSupabaseFalso({
+          filas: [
+            fila('Lejana', { fecha_estreno: '2999-06-01' }),
+            fila('Ya estrenada', { fecha_estreno: '2000-01-01' }),
+            fila('Cercana', { fecha_estreno: '2999-01-01' }),
+            fila('Sin fecha', { fecha_estreno: null }),
+          ],
+        }),
+      );
+
+      const proximas = await servicio.cargarProximas();
+
+      expect(proximas?.map((p) => p.titulo)).toEqual(['Cercana', 'Lejana']);
+    });
+
+    it('devuelve null si la base falla', async () => {
+      const servicio = crearServicio(crearSupabaseFalso({ error: true }));
+
+      expect(await servicio.cargarProximas()).toBeNull();
+    });
+  });
+
   // A diferencia de la cartelera, quien programa funciones tiene que ver también las que
   // todavía no se estrenaron: la preventa arranca 7 días antes (RF-49)
   describe('cargarTodas', () => {

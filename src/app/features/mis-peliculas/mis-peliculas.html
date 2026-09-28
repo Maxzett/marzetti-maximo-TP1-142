@@ -1,0 +1,50 @@
+<section class="contenedor pantalla">
+  <p class="sobretitulo">Tu historial</p>
+  <h1>Mis películas</h1>
+  <p class="bajada">Todo lo que viste en Cine Emezeta, de la más reciente a la más vieja.</p>
+
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando tus películas" />
+  } @else if (vistas(); as lista) {
+    @if (lista.length === 0) {
+      <app-mensaje tono="aviso">
+        Todavía no hay películas acá. Aparecen cuando entrás a la sala y el personal valida tu
+        entrada.
+      </app-mensaje>
+      <p class="accion">
+        <a class="boton boton--primario" routerLink="/peliculas">Ver la cartelera</a>
+      </p>
+    } @else {
+      <ul class="grilla">
+        @for (vista of lista; track vista.pelicula_id) {
+          <li class="vista">
+            <app-poster [titulo]="vista.titulo" [url]="vista.poster_url" [decorativo]="true" />
+            <h2 class="titulo">
+              <a [routerLink]="['/peliculas', vista.pelicula_id]">{{ vista.titulo }}</a>
+            </h2>
+            <p class="fecha">La viste el {{ describirInicio(vista.vista_el) }}</p>
+
+            @if (vista.estrellas !== null) {
+              <div class="calificacion">
+                <span class="calificacion__rotulo">Tu calificación</span>
+                <app-estrellas [valor]="vista.estrellas" />
+              </div>
+            } @else {
+              <a
+                class="calificar"
+                [routerLink]="['/peliculas', vista.pelicula_id]"
+                fragment="titulo-resenas"
+                >Calificala<span class="solo-lectores"> ({{ vista.titulo }})</span> →</a
+              >
+            }
+          </li>
+        }
+      </ul>
+    }
+  } @else {
+    <app-mensaje tono="error">
+      No pudimos cargar tus películas.
+      <button class="boton boton--fantasma" type="button" (click)="cargar()">Reintentar</button>
+    </app-mensaje>
+  }
+</section>

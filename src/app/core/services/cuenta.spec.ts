@@ -43,6 +43,23 @@ describe('Cuenta', () => {
     expect(await servicio.canjes()).toBeNull();
   });
 
+  it('Mis Películas sale de la función de la base, no de leer órdenes', async () => {
+    const vistas = [
+      { pelicula_id: 'p1', titulo: 'X', poster_url: null, vista_el: '', estrellas: 4 },
+    ];
+    const falso = crearSupabaseFalso({ data: vistas });
+
+    expect(await crearServicio(falso).misPeliculas()).toEqual(vistas);
+    expect(falso.client.rpc).toHaveBeenCalledWith('mis_peliculas');
+    expect(falso.client.from).not.toHaveBeenCalled();
+  });
+
+  it('si no puede leer Mis Películas devuelve null', async () => {
+    const servicio = crearServicio(crearSupabaseFalso({ error: { message: 'boom' } }));
+
+    expect(await servicio.misPeliculas()).toBeNull();
+  });
+
   it('lee el historial de compras y de canjes', async () => {
     const compras = crearServicio(crearSupabaseFalso({ data: [{ orden_id: 'o1' }] }));
     expect(await compras.ordenes()).toEqual([{ orden_id: 'o1' }]);

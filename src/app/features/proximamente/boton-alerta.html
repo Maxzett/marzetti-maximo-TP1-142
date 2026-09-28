@@ -1,0 +1,25 @@
+@if (haySesion()) {
+  <button
+    class="boton alerta"
+    type="button"
+    [class.boton--primario]="!activa()"
+    [class.boton--borde]="activa()"
+    [attr.aria-pressed]="activa()"
+    [attr.aria-busy]="guardando() || null"
+    [attr.aria-label]="'Avisame cuando salga a la venta ' + pelicula().titulo"
+    (click)="alternar()"
+  >
+    <span class="alerta__icono" aria-hidden="true">{{ activa() ? '✓' : '+' }}</span>
+    {{ activa() ? 'Te avisamos' : 'Avisame' }}
+  </button>
+} @else {
+  <a class="boton boton--borde alerta" routerLink="/ingresar"
+    >Ingresá para que te avisemos<span class="solo-lectores"> de {{ pelicula().titulo }}</span></a
+  >
+}
+
+@if (error()) {
+  <p class="alerta__texto alerta__texto--error" role="alert">{{ error() }}</p>
+} @else if (nota()) {
+  <p class="alerta__texto" role="status">{{ nota() }}</p>
+}
