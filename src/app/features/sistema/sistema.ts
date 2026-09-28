@@ -1,8 +1,8 @@
 import { Component, computed, signal } from '@angular/core';
 import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
 import { Cantidades } from '../../core/compra/candy';
-import { CatalogoDeCandy } from '../../core/models/candy';
-import { DesgloseDeOrden, EstadoDeButaca } from '../../core/models/orden';
+import { CatalogoDeCandy, Recompensa } from '../../core/models/candy';
+import { DesgloseDeOrden, EstadoDeButaca, Saldos } from '../../core/models/orden';
 import { Pelicula } from '../../core/models/pelicula';
 import { Butaca } from '../../core/models/sala';
 import { COLORES_DE_OJOS, TIPOS_DE_SANGRE } from '../../core/models/perfil';
@@ -20,6 +20,7 @@ import { DatoDeBarra, GraficoBarras } from '../../shared/grafico-barras/grafico-
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
+import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
 import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
@@ -48,6 +49,7 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     MapaSala,
     Mensaje,
     Poster,
+    PromocionesOrden,
     Seleccion,
     SelectorCandy,
     SelectorFecha,
@@ -273,6 +275,32 @@ export class Sistema {
     { etiqueta: 'Intensamente 2', valor: 31 },
     { etiqueta: 'El Eternauta', valor: 17 },
     { etiqueta: 'Relatos salvajes', valor: 1 },
+  ];
+
+  // Una cuenta de 66 años con crédito y puntos: se ven los dos cupones sugeridos, el crédito y el canje
+  protected readonly saldosDeMuestra: Saldos = {
+    puntos: 70000,
+    credito: 3000,
+    bienvenida: { codigo: 'BIENVENIDA', tipo_descuento: 'porcentaje', valor: 20 },
+    cupon_edad: { codigo: 'PLATINO50', tipo_descuento: 'porcentaje', valor: 25, edad_minima: 50 },
+  };
+  protected readonly cuponDeMuestra = signal('');
+  // Con 70.000 puntos alcanza la gaseosa y no la entrada: solo se ofrece la que alcanza
+  protected readonly recompensasDeMuestra: readonly Recompensa[] = [
+    {
+      id: 'r1',
+      nombre: 'Gaseosa 500 ml',
+      tipo: 'producto',
+      producto_id: 'p2',
+      costo_puntos: 28000,
+    },
+    {
+      id: 'r2',
+      nombre: 'Entrada gratis',
+      tipo: 'entrada',
+      producto_id: null,
+      costo_puntos: 650000,
+    },
   ];
 
   protected readonly desgloseDeMuestra: DesgloseDeOrden = {

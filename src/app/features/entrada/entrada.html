@@ -6,12 +6,18 @@
       @case ('pagada') {
         <header class="cabecera">
           <p class="sobretitulo">Compra confirmada</p>
-          <h1>Tu entrada</h1>
+          <h1>{{ esCandy() ? 'Tu ticket del candy bar' : 'Tu entrada' }}</h1>
           <p class="aviso-mail">
-            Guardá esta pantalla o descargá el PDF. La entrada corresponde a
+            Guardá esta pantalla o descargá el PDF. La compra corresponde a
             <strong>{{ e.email }}</strong
             >.
           </p>
+          @if (esCandy()) {
+            <!-- RF-34.1: sin función, el ticket vale 7 días y se retira en el candy bar -->
+            <p class="aviso-mail">
+              Mostrá el QR en el candy bar del cine para retirar tus productos. Sirve una sola vez.
+            </p>
+          }
         </header>
 
         @if (e.entrada_validada_at) {
@@ -43,7 +49,7 @@
                 <img
                   class="qr"
                   [src]="qr()"
-                  [alt]="'Código QR de la entrada. Código: ' + e.codigo"
+                  [alt]="'Código QR de la compra. Código: ' + e.codigo"
                 />
               } @else if (errorDeQr()) {
                 <app-mensaje tono="aviso">
@@ -63,7 +69,11 @@
           }
 
           <div class="acciones">
-            <a class="boton boton--borde" routerLink="/peliculas">Ver más películas</a>
+            @if (esCandy()) {
+              <a class="boton boton--borde" routerLink="/candy">Volver al candy bar</a>
+            } @else {
+              <a class="boton boton--borde" routerLink="/peliculas">Ver más películas</a>
+            }
             <app-boton
               [cargando]="descargando()"
               [deshabilitado]="!qr()"

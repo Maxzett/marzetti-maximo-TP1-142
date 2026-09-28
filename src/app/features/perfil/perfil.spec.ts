@@ -31,6 +31,7 @@ function orden(cambios: Partial<OrdenPropia> = {}): OrdenPropia {
   return {
     orden_id: 'o1',
     codigo: 'ABC123',
+    tipo: 'funcion',
     estado: 'pagada',
     total: 13000,
     credito_aplicado: 2000,
@@ -247,6 +248,8 @@ describe('Perfil', () => {
 
       expect(items).toHaveLength(2);
       expect(items[0].textContent).toContain('Te alcanza');
+      // Un producto se puede canjear sin entrada: lleva al candy bar (RF-34.1)
+      expect(items[0].querySelector('a')?.getAttribute('href')).toBe('/candy');
       expect(items[1].textContent?.replace(/ /g, ' ')).toContain('Te faltan 35.000 puntos');
       // La barra no se anuncia: el texto ya dice el avance
       expect(items[1].querySelector('.barra')?.getAttribute('aria-hidden')).toBe('true');
@@ -301,6 +304,30 @@ describe('Perfil', () => {
       expect(texto(fixture)).toContain(
         'No se puede cancelar: Solo se puede cancelar hasta 2 horas antes de la función.',
       );
+    });
+
+    // RF-34.1: una compra solo de candy se lista con su fecha de pago y no se cancela
+    it('una compra de candy se ve como ticket y explica que no se cancela', async () => {
+      const fixture = await montar(PERFIL, SENSIBLES, {
+        ordenes: [
+          orden({
+            tipo: 'candy',
+            pelicula: null,
+            inicio: null,
+            sala: null,
+            entradas: 0,
+            tiene_candy: true,
+            cancelable: false,
+            motivo_no_cancelable: 'Las compras del candy bar no se cancelan.',
+          }),
+        ],
+      });
+
+      expect(texto(fixture)).toContain('Candy bar');
+      expect(texto(fixture)).toContain('Ticket del candy bar · comprado el');
+      expect(texto(fixture)).toContain('Las compras del candy bar no se cancelan.');
+      expect(texto(fixture)).toContain('Ver ticket');
+      expect(botonDeTexto(fixture, 'Cancelar compra')).toBeUndefined();
     });
 
     it('una compra cancelada lo dice y no tiene entrada para ver', async () => {

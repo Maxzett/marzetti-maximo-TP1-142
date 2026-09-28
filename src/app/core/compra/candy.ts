@@ -1,4 +1,4 @@
-import { CategoriaDeProducto, Combo, Producto } from '../models/candy';
+import { CatalogoDeCandy, CategoriaDeProducto, Combo, Producto } from '../models/candy';
 import { CuponAplicado } from '../models/orden';
 
 /**
@@ -112,6 +112,19 @@ export function describirCupon(cupon: Pick<CuponAplicado, 'tipo_descuento' | 'va
   return cupon.tipo_descuento === 'porcentaje'
     ? `${cupon.valor} %`
     : `$${new Intl.NumberFormat('es-AR').format(cupon.valor)}`;
+}
+
+/**
+ * El catálogo para comprar candy sin entrada (RF-34.1): sin los combos que traen entrada ni el
+ * canje de una entrada, que no tendrían butaca que cubrir. La base los rechazaría igual; acá
+ * no se ofrecen para no invitar al error.
+ */
+export function catalogoSinEntradas(catalogo: CatalogoDeCandy): CatalogoDeCandy {
+  return {
+    ...catalogo,
+    combos: catalogo.combos.filter((combo) => entradasDelCombo(combo) === 0),
+    recompensas: catalogo.recompensas.filter((recompensa) => recompensa.tipo === 'producto'),
+  };
 }
 
 /** Cuánto le falta a una cuenta para un canje: lo que el perfil muestra como incentivo (RF-46) */

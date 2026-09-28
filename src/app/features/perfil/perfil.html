@@ -101,8 +101,12 @@
                     <span class="barra-avance" [style.inline-size.%]="r.porcentaje"></span>
                   </span>
                   <p class="recompensa-estado">
-                    @if (r.alcanza) {
-                      ✓ Te alcanza: canjeala al pagar tu próxima compra.
+                    @if (r.alcanza && r.tipo === 'producto') {
+                      <!-- RF-34.1: un producto se canjea también sin sacar una entrada -->
+                      ✓ Te alcanza: canjeala en el
+                      <a routerLink="/candy">candy bar</a> o al comprar tu entrada.
+                    } @else if (r.alcanza) {
+                      ✓ Te alcanza: canjeala al comprar tu próxima entrada.
                     } @else {
                       Te faltan {{ formatearPuntos(r.faltan) }} puntos.
                     }
@@ -155,7 +159,7 @@
                 <li class="compra">
                   <div class="compra-datos">
                     <p class="compra-titulo">
-                      {{ compra.pelicula }}
+                      {{ compra.pelicula ?? 'Candy bar' }}
                       <!-- El estado va escrito: nunca solo un color (RNF-10) -->
                       <span
                         class="estado"
@@ -165,11 +169,16 @@
                       </span>
                     </p>
                     <p class="detalle">
-                      {{ describirInicio(compra.inicio) }} · {{ compra.sala }} ·
-                      {{ compra.entradas }}
-                      {{ compra.entradas === 1 ? 'entrada' : 'entradas' }}
-                      @if (compra.tiene_candy) {
-                        · con candy bar
+                      @if (compra.inicio) {
+                        {{ describirInicio(compra.inicio) }} · {{ compra.sala }} ·
+                        {{ compra.entradas }}
+                        {{ compra.entradas === 1 ? 'entrada' : 'entradas' }}
+                        @if (compra.tiene_candy) {
+                          · con candy bar
+                        }
+                      } @else if (compra.pagada_at) {
+                        <!-- RF-34.1: una compra solo de candy no tiene función: se fecha por el pago -->
+                        Ticket del candy bar · comprado el {{ describirInicio(compra.pagada_at) }}
                       }
                       · {{ formatearPrecio(compra.total) }}
                     </p>
@@ -181,7 +190,7 @@
                   @if (compra.estado === 'pagada') {
                     <div class="compra-acciones">
                       <a class="boton boton--borde" [routerLink]="['/entrada', compra.codigo]">
-                        Ver entrada
+                        {{ compra.tipo === 'candy' ? 'Ver ticket' : 'Ver entrada' }}
                       </a>
                       @if (compra.cancelable) {
                         <app-boton variante="fantasma" (presionado)="pedirCancelacion(compra)">
@@ -217,7 +226,8 @@
       @if (aCancelar(); as orden) {
         <p>
           Vas a cancelar la compra de <strong>{{ orden.pelicula }}</strong> del
-          {{ describirInicio(orden.inicio) }}. Las butacas se liberan y el código QR deja de servir.
+          {{ orden.inicio ? describirInicio(orden.inicio) : '' }}. Las butacas se liberan y el
+          código QR deja de servir.
         </p>
         <p>
           <strong>No se devuelve dinero:</strong> se acreditan

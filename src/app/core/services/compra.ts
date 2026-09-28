@@ -8,8 +8,10 @@ import {
   EntradaComprada,
   EventoDeButaca,
   MedioDePago,
+  OrdenDeCandy,
   ResultadoDeConfiguracion,
   ResultadoDeOrden,
+  ResultadoDeOrdenDeCandy,
   ResultadoDePago,
   ResultadoDeReserva,
   ResumenDeOrden,
@@ -103,6 +105,24 @@ export class Compra {
     }
 
     return { estado: 'creada', resumen: data as ResumenDeOrden };
+  }
+
+  /**
+   * Abre una compra solo de candy, sin entrada (RF-34.1). La orden nace vacía: lo elegido, el
+   * cupón y el canje se mandan después con configurarOrden, y se paga con confirmarPago, las
+   * mismas que la compra de entradas. Con cuenta, un mail vacío usa el del perfil.
+   */
+  async crearOrdenCandy(email: string): Promise<ResultadoDeOrdenDeCandy> {
+    const { data, error } = await this.supabase.client.rpc('crear_orden_candy', {
+      p_sesion: this.sesionId,
+      p_email: email,
+    });
+
+    if (error) {
+      return { estado: 'error', mensaje: mensajeDeError(error) };
+    }
+
+    return { estado: 'creada', orden: data as OrdenDeCandy };
   }
 
   /**

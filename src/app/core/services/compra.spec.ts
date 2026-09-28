@@ -162,6 +162,19 @@ describe('Compra', () => {
     });
   });
 
+  // RF-34.1: la compra de candy sola abre la orden con la misma sesión que las entradas
+  it('abre una orden de candy con su sesión y el mail', async () => {
+    const orden = { orden_id: 'o9', codigo: 'X', expira_at: '2026-10-01T00:00:00Z' };
+    const falso = crearSupabaseFalso({ data: orden });
+    const servicio = crearServicio(falso);
+
+    expect(await servicio.crearOrdenCandy('a@b.com')).toEqual({ estado: 'creada', orden });
+    expect(falso.client.rpc).toHaveBeenCalledWith('crear_orden_candy', {
+      p_sesion: servicio.sesionId,
+      p_email: 'a@b.com',
+    });
+  });
+
   it('no muestra un error inesperado de la base tal cual', async () => {
     const servicio = crearServicio(
       crearSupabaseFalso({ error: { code: 'XX000', message: 'internal stack trace' } }),

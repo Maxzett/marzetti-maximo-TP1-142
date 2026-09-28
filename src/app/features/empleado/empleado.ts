@@ -68,12 +68,20 @@ export class Empleado {
       return [];
     }
 
+    // RF-34.1: un ticket del candy bar no tiene función; lo que importa es qué retira y hasta cuándo
+    if (orden.tipo === 'candy') {
+      return [
+        { rotulo: 'Candy bar', valor: describirCandy(orden.candy) },
+        { rotulo: 'Válido hasta', valor: describirInicio(orden.ventana.hasta) },
+      ];
+    }
+
     return [
       {
         rotulo: 'Función',
-        valor: `${describirInicio(orden.inicio)} · ${orden.formato} · ${orden.idioma}`,
+        valor: `${orden.inicio ? describirInicio(orden.inicio) : ''} · ${orden.formato} · ${orden.idioma}`,
       },
-      { rotulo: 'Sala', valor: orden.sala },
+      { rotulo: 'Sala', valor: orden.sala ?? '' },
       { rotulo: 'Butacas', valor: listarButacas(orden.butacas ?? []) },
       ...(orden.tiene_candy ? [{ rotulo: 'Candy bar', valor: describirCandy(orden.candy) }] : []),
     ];
@@ -99,6 +107,10 @@ export class Empleado {
         return 'Esta compra venció sin pagarse.';
     }
 
+    if (orden.tipo === 'candy' && orden.ventana.estado === 'terminada') {
+      return `El ticket venció el ${describirInicio(orden.ventana.hasta)}: servía por 7 días desde la compra.`;
+    }
+
     switch (orden.ventana.estado) {
       case 'antes':
         return `Todavía es temprano: esta función se valida desde el ${describirInicio(orden.ventana.desde)}.`;
@@ -112,22 +124,29 @@ export class Empleado {
   protected readonly tramos = computed<TramoEnPantalla[]>(() => {
     const orden = this.orden();
 
-    return orden
-      ? [
+    if (!orden) {
+      return [];
+    }
+
+    const candy: TramoEnPantalla = {
+      tramo: 'candy',
+      titulo: 'Candy bar',
+      accion: 'Entregar candy',
+      uso: orden.tramos.candy,
+    };
+
+    // Un ticket del candy bar no tiene tramo de ingreso: no se ofrece un botón que no aplica
+    return orden.tipo === 'candy'
+      ? [candy]
+      : [
           {
             tramo: 'entrada',
             titulo: 'Ingreso a la sala',
             accion: 'Validar ingreso',
             uso: orden.tramos.entrada,
           },
-          {
-            tramo: 'candy',
-            titulo: 'Candy bar',
-            accion: 'Entregar candy',
-            uso: orden.tramos.candy,
-          },
-        ]
-      : [];
+          candy,
+        ];
   });
 
   protected readonly describirUso = describirUso;

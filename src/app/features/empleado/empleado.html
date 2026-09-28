@@ -43,7 +43,7 @@
           <article class="orden">
             <header>
               <p class="codigo">{{ o.codigo }}</p>
-              <h2 #tituloDelResultado tabindex="-1">{{ o.pelicula }}</h2>
+              <h2 #tituloDelResultado tabindex="-1">{{ o.pelicula ?? 'Ticket del candy bar' }}</h2>
             </header>
 
             @if (o.restriccion_edad > 0) {
@@ -56,6 +56,13 @@
                 Película con restricción de edad: pedí un documento. Si es menor, tiene que entrar
                 con un adulto.
               </p>
+              @if (o.con_acompanante) {
+                <!-- RN-04 revisada: se compró como menor que va con un adulto -->
+                <p class="edad">
+                  <span class="edad__rotulo">Menor</span>
+                  La compra se hizo para un menor que va con un adulto: tienen que entrar juntos.
+                </p>
+              }
             }
 
             <dl class="datos">

@@ -1,0 +1,124 @@
+<section class="contenedor pantalla">
+  <header class="cabecera">
+    <p class="sobretitulo">Sin entrada</p>
+    <h1>Candy bar</h1>
+    <p class="bajada">
+      Comprá pochoclos, bebidas y combos sin sacar una entrada. Te llevás un ticket con QR y lo
+      retirás en el candy bar del cine cuando quieras, dentro de los 7 días.
+    </p>
+
+    @if (orden(); as o) {
+      <app-temporizador [expiraAt]="o.expira_at" (vencido)="alVencer()" />
+    }
+  </header>
+
+  <ol class="pasos" aria-label="Pasos de la compra">
+    <li [attr.aria-current]="paso() === 'elegir' ? 'step' : null">1 · Tu pedido</li>
+    <li [attr.aria-current]="paso() === 'pago' ? 'step' : null">2 · Pago</li>
+  </ol>
+
+  @if (avisoDeVencimiento()) {
+    <app-mensaje tono="aviso">{{ avisoDeVencimiento() }}</app-mensaje>
+  }
+
+  @if (cargando()) {
+    <app-spinner etiqueta="Cargando el candy bar" />
+  } @else if (tienda(); as t) {
+    @switch (paso()) {
+      @case ('elegir') {
+        <app-tarjeta>
+          <form (submit)="continuar($event)" novalidate>
+            <h2>¿Qué vas a llevar?</h2>
+            <app-selector-candy
+              [catalogo]="t"
+              [butacas]="0"
+              [(productos)]="productos"
+              [(combos)]="combos"
+            />
+
+            <app-campo
+              etiqueta="Email"
+              tipo="email"
+              autocompletado="email"
+              ayuda="Queda como dato de contacto de tu compra. El ticket lo ves y lo descargás al terminar."
+              [requerido]="true"
+              [(valor)]="email"
+            />
+
+            @if (errorDeEleccion()) {
+              <app-mensaje tono="error">{{ errorDeEleccion() }}</app-mensaje>
+            }
+
+            <div class="acciones">
+              <app-boton tipo="submit" [cargando]="enviando()">Ver resumen</app-boton>
+            </div>
+          </form>
+        </app-tarjeta>
+      }
+
+      @case ('pago') {
+        @if (desglose(); as d) {
+          <app-tarjeta>
+            <div class="pago">
+              <h2>Resumen y pago</h2>
+              <app-desglose [desglose]="d" [mostrarPuntos]="haySesion()" />
+
+              <app-promociones-orden
+                [desglose]="d"
+                [saldos]="saldos()"
+                [haySesion]="haySesion()"
+                [recompensas]="t.recompensas"
+                [usarCredito]="usarCredito()"
+                [recompensaId]="recompensaId()"
+                [ajustando]="ajustando()"
+                [error]="errorDeAjuste()"
+                [(cupon)]="cupon"
+                (aplicar)="aplicarCupon()"
+                (usarCupon)="usarCupon($event)"
+                (quitarCupon)="quitarCupon()"
+                (alternarCredito)="alternarCredito($event)"
+                (elegirRecompensa)="elegirRecompensa($event)"
+              />
+
+              @if (total() > 0) {
+                <app-seleccion
+                  etiqueta="Medio de pago"
+                  marcador="Elegí un medio de pago"
+                  ayuda="Pago simulado: no se hace ningún cobro real."
+                  [opciones]="mediosDePago"
+                  [requerido]="true"
+                  [(valor)]="medio"
+                />
+              } @else {
+                <app-mensaje tono="exito">
+                  Tu crédito o tus puntos cubren toda la compra: no hay nada que pagar.
+                </app-mensaje>
+              }
+
+              <p class="ayuda">
+                Las compras del candy bar no se cancelan. El ticket vale 7 días desde el pago.
+              </p>
+
+              @if (errorDePago()) {
+                <app-mensaje tono="error">{{ errorDePago() }}</app-mensaje>
+              }
+
+              <div class="acciones">
+                <app-boton variante="borde" (presionado)="volverAElegir()">
+                  Cambiar el pedido
+                </app-boton>
+                <app-boton [cargando]="pagando()" (presionado)="pagar()">
+                  {{ total() > 0 ? 'Pagar ' + formatearPrecio(total()) : 'Confirmar compra' }}
+                </app-boton>
+              </div>
+            </div>
+          </app-tarjeta>
+        }
+      }
+    }
+  } @else {
+    <app-mensaje tono="error">
+      No pudimos cargar el candy bar. Probá de nuevo en un momento.
+    </app-mensaje>
+  }
+</section>

@@ -1,11 +1,18 @@
 import { EntradaComprada } from '../models/orden';
-import { datosDeLaEntrada, leyendaDeAcompanante, listarButacas, nombreDelPdf } from './entrada';
+import {
+  datosDeLaEntrada,
+  leyendaDeAcompanante,
+  listarButacas,
+  nombreDeLaCompra,
+  nombreDelPdf,
+} from './entrada';
 import { generarPdf } from './pdf';
 import { qrComoImagen } from './qr';
 
 function entrada(cambios: Partial<EntradaComprada> = {}): EntradaComprada {
   return {
     codigo: 'AB12CD34EF56GH78IJ90',
+    tipo: 'funcion',
     estado: 'pagada',
     email: 'a@b.com',
     subtotal: 15000,
@@ -16,6 +23,7 @@ function entrada(cambios: Partial<EntradaComprada> = {}): EntradaComprada {
     cancelada_at: null,
     entrada_validada_at: null,
     candy_entregado_at: null,
+    valido_hasta: null,
     tiene_candy: false,
     candy: [],
     pelicula: 'Mar de cenizas',
@@ -107,6 +115,45 @@ describe('datos de la entrada', () => {
 
   it('el nombre del archivo lleva el código en minúsculas', () => {
     expect(nombreDelPdf(entrada())).toBe('entrada-ab12cd34ef56gh78ij90.pdf');
+  });
+});
+
+describe('ticket del candy bar sin entrada (RF-34.1)', () => {
+  const ticket = () =>
+    entrada({
+      tipo: 'candy',
+      pelicula: null,
+      inicio: null,
+      formato: null,
+      idioma: null,
+      sala: null,
+      butacas: [],
+      tiene_candy: true,
+      candy: [{ nombre: 'Pochoclo grande', cantidad: 2, por_canje: false, incluye: [] }],
+      valido_hasta: '2026-10-12T15:00:00Z',
+      total: 9000,
+    });
+
+  it('no habla de película, sala ni butacas; dice qué retira y hasta cuándo', () => {
+    const datos = new Map(datosDeLaEntrada(ticket()).map((d) => [d.rotulo, sinNbsp(d.valor)]));
+
+    expect([...datos.keys()]).toEqual(['Candy bar', 'Retiralo hasta', 'Total']);
+    expect(datos.get('Candy bar')).toBe('2 × Pochoclo grande');
+    // 15:00 UTC es mediodía en el cine
+    expect(datos.get('Retiralo hasta')).toContain('12:00');
+  });
+
+  it('se llama ticket, y así se nombra el archivo', () => {
+    expect(nombreDeLaCompra(ticket())).toBe('Ticket del candy bar');
+    expect(nombreDelPdf(ticket())).toBe('ticket-candy-ab12cd34ef56gh78ij90.pdf');
+    expect(nombreDeLaCompra(entrada())).toBe('Entrada');
+  });
+
+  it('el PDF del ticket también se genera', async () => {
+    const qr = await qrComoImagen('AB12CD34EF56GH78IJ90');
+    const pdf = await generarPdf(ticket(), qr);
+
+    expect(pdf.type).toBe('application/pdf');
   });
 });
 

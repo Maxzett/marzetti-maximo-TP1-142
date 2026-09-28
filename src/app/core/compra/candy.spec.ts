@@ -2,6 +2,7 @@ import { Combo } from '../models/candy';
 import {
   agruparPorCategoria,
   cambiarCantidad,
+  catalogoSinEntradas,
   comoLineas,
   contenidoDelCombo,
   describirCupon,
@@ -184,5 +185,22 @@ describe('progresoDeCanje', () => {
 
   it('un saldo negativo cuenta como cero', () => {
     expect(progresoDeCanje(1000, -500)).toEqual({ alcanza: false, faltan: 1000, porcentaje: 0 });
+  });
+});
+
+describe('catalogoSinEntradas (RF-34.1)', () => {
+  it('saca los combos que traen entrada y el canje de una entrada', () => {
+    const catalogo = catalogoSinEntradas({
+      categorias: [],
+      productos: [],
+      combos: [conEntrada, pareja, soloCandy],
+      recompensas: [
+        { id: 'r1', nombre: 'Entrada', tipo: 'entrada', producto_id: null, costo_puntos: 65000 },
+        { id: 'r2', nombre: 'Gaseosa', tipo: 'producto', producto_id: 'p1', costo_puntos: 28000 },
+      ],
+    });
+
+    expect(catalogo.combos.map((c) => c.id)).toEqual(['candy']);
+    expect(catalogo.recompensas.map((r) => r.id)).toEqual(['r2']);
   });
 });

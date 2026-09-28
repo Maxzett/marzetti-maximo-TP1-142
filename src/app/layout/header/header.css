@@ -88,7 +88,9 @@
 
 .nav ul {
   display: flex;
-  gap: var(--e-5);
+  /* Con cuatro secciones, en el celular la lista pasa a dos renglones antes que partir un nombre */
+  flex-wrap: wrap;
+  gap: 0 var(--e-5);
 }
 
 .nav a {
@@ -101,6 +103,7 @@
   font-size: var(--t-mini);
   letter-spacing: 0.11em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .nav a:hover {

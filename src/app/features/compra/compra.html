@@ -205,101 +205,25 @@
             }
 
             <!--
-              Promociones (RF-32, RF-39, RF-46). Cada cambio se manda a la base, que devuelve el
-              desglose recalculado: nada de esto se calcula en la pantalla.
+              Promociones (RF-32, RF-39, RF-44, RF-46). Cada cambio se manda a la base, que
+              devuelve el desglose recalculado: nada de esto se calcula en la pantalla.
             -->
-            <section class="promos" aria-labelledby="titulo-promos">
-              <h3 id="titulo-promos">Cupón, crédito y puntos</h3>
-
-              @if (bienvenidaSugerida(); as bienvenida) {
-                <app-mensaje tono="exito">
-                  Tenés un cupón de bienvenida de {{ describirCupon(bienvenida) }} para tu primera
-                  compra.
-                  <app-boton
-                    variante="borde"
-                    [cargando]="ajustando()"
-                    (presionado)="usarCupon(bienvenida.codigo)"
-                  >
-                    Usar mi cupón
-                  </app-boton>
-                </app-mensaje>
-              }
-
-              @if (cuponPorEdadSugerido(); as porEdad) {
-                <!-- RF-44: el cupón para mayores de 50, a quien le corresponde -->
-                <app-mensaje tono="exito">
-                  Por ser mayor de {{ porEdad.edad_minima }} años tenés el cupón
-                  {{ porEdad.codigo }} de {{ describirCupon(porEdad) }} de descuento.
-                  <app-boton
-                    variante="borde"
-                    [cargando]="ajustando()"
-                    (presionado)="usarCupon(porEdad.codigo)"
-                  >
-                    Usar cupón {{ porEdad.codigo }}
-                  </app-boton>
-                </app-mensaje>
-              }
-
-              <div class="cupon">
-                <app-campo
-                  etiqueta="Código de cupón"
-                  marcador="Ej.: BIENVENIDA"
-                  ayuda="Si tenés un código de descuento, ingresalo y tocá Aplicar."
-                  [(valor)]="cupon"
-                />
-                <div class="cupon-acciones">
-                  <app-boton
-                    variante="borde"
-                    [cargando]="ajustando()"
-                    (presionado)="aplicarCupon()"
-                  >
-                    Aplicar
-                  </app-boton>
-                  @if (desglose()?.cupon) {
-                    <app-boton variante="fantasma" (presionado)="quitarCupon()">
-                      Quitar cupón
-                    </app-boton>
-                  }
-                </div>
-              </div>
-
-              @if (haySesion() && saldos(); as s) {
-                @if (s.credito > 0) {
-                  <label class="opcion">
-                    <input
-                      type="checkbox"
-                      [checked]="usarCredito()"
-                      [disabled]="ajustando()"
-                      (change)="alternarCredito($any($event.target).checked)"
-                    />
-                    Usar mi crédito ({{ formatearPrecio(s.credito) }} disponibles)
-                  </label>
-                }
-
-                @if (recompensasPosibles().length > 0) {
-                  <app-seleccion
-                    etiqueta="Canjear puntos"
-                    marcador="No canjear"
-                    [ayuda]="
-                      'Tenés ' +
-                      formatearPuntos(s.puntos) +
-                      ' puntos. El canje se descuenta al pagar.'
-                    "
-                    [opciones]="recompensasPosibles()"
-                    [valor]="recompensaId()"
-                    (valorChange)="elegirRecompensa($event)"
-                  />
-                }
-              } @else {
-                <p class="ayuda">
-                  Con una cuenta acumulás 1 punto por peso, canjeás recompensas y usás tu crédito.
-                </p>
-              }
-
-              @if (errorDeAjuste()) {
-                <app-mensaje tono="error">{{ errorDeAjuste() }}</app-mensaje>
-              }
-            </section>
+            <app-promociones-orden
+              [desglose]="desglose()"
+              [saldos]="saldos()"
+              [haySesion]="haySesion()"
+              [recompensas]="candyBar()?.recompensas ?? []"
+              [usarCredito]="usarCredito()"
+              [recompensaId]="recompensaId()"
+              [ajustando]="ajustando()"
+              [error]="errorDeAjuste()"
+              [(cupon)]="cupon"
+              (aplicar)="aplicarCupon()"
+              (usarCupon)="usarCupon($event)"
+              (quitarCupon)="quitarCupon()"
+              (alternarCredito)="alternarCredito($event)"
+              (elegirRecompensa)="elegirRecompensa($event)"
+            />
 
             @if (total() > 0) {
               <app-seleccion

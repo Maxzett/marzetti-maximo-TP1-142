@@ -45,8 +45,9 @@ export const ACCIONES_DEL_LOG: readonly { accion: string; nombre: string }[] = [
 
 const MOTIVOS: Record<Exclude<MotivoDeRechazo, 'no_existe'>, string> = {
   estado: 'la compra no está pagada',
+  sin_entrada: 'es un ticket del candy bar, sin entrada',
   sin_candy: 'la compra no incluye candy',
-  fuera_de_ventana: 'fuera del horario de la función',
+  fuera_de_ventana: 'fuera de horario o vencida',
   ya_usado: 'ya se había usado',
 };
 

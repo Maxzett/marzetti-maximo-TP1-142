@@ -1,0 +1,73 @@
+<section class="promos" aria-labelledby="titulo-promos">
+  <h3 id="titulo-promos">Cupón, crédito y puntos</h3>
+
+  @if (bienvenida(); as b) {
+    <app-mensaje tono="exito">
+      Tenés un cupón de bienvenida de {{ describirCupon(b) }} para tu primera compra.
+      <app-boton variante="borde" [cargando]="ajustando()" (presionado)="usarCupon.emit(b.codigo)">
+        Usar mi cupón
+      </app-boton>
+    </app-mensaje>
+  }
+
+  @if (porEdad(); as c) {
+    <!-- RF-44: el cupón para mayores de 50, a quien le corresponde -->
+    <app-mensaje tono="exito">
+      Por ser mayor de {{ c.edad_minima }} años tenés el cupón {{ c.codigo }} de
+      {{ describirCupon(c) }} de descuento.
+      <app-boton variante="borde" [cargando]="ajustando()" (presionado)="usarCupon.emit(c.codigo)">
+        Usar cupón {{ c.codigo }}
+      </app-boton>
+    </app-mensaje>
+  }
+
+  <div class="cupon">
+    <app-campo
+      etiqueta="Código de cupón"
+      marcador="Ej.: BIENVENIDA"
+      ayuda="Si tenés un código de descuento, ingresalo y tocá Aplicar."
+      [(valor)]="cupon"
+    />
+    <div class="cupon-acciones">
+      <app-boton variante="borde" [cargando]="ajustando()" (presionado)="aplicar.emit()">
+        Aplicar
+      </app-boton>
+      @if (desglose()?.cupon) {
+        <app-boton variante="fantasma" (presionado)="quitarCupon.emit()">Quitar cupón</app-boton>
+      }
+    </div>
+  </div>
+
+  @if (haySesion() && saldos(); as s) {
+    @if (s.credito > 0) {
+      <label class="opcion">
+        <input
+          type="checkbox"
+          [checked]="usarCredito()"
+          [disabled]="ajustando()"
+          (change)="alternarCredito.emit($any($event.target).checked)"
+        />
+        Usar mi crédito ({{ formatearPrecio(s.credito) }} disponibles)
+      </label>
+    }
+
+    @if (posibles().length > 0) {
+      <app-seleccion
+        etiqueta="Canjear puntos"
+        marcador="No canjear"
+        [ayuda]="'Tenés ' + formatearPuntos(s.puntos) + ' puntos. El canje se descuenta al pagar.'"
+        [opciones]="posibles()"
+        [valor]="recompensaId()"
+        (valorChange)="elegirRecompensa.emit($event)"
+      />
+    }
+  } @else {
+    <p class="ayuda">
+      Con una cuenta acumulás 1 punto por peso, canjeás recompensas y usás tu crédito.
+    </p>
+  }
+
+  @if (error()) {
+    <app-mensaje tono="error">{{ error() }}</app-mensaje>
+  }
+</section>

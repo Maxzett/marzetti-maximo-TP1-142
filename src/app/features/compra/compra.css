@@ -107,36 +107,15 @@ h3 {
   font-size: var(--t-rotulo);
 }
 
-.candy,
-.promos {
+.candy {
   display: grid;
   gap: var(--e-3);
   padding-block-start: var(--e-4);
   border-block-start: 1px solid var(--borde);
 }
 
-.candy .ayuda,
-.promos .ayuda {
+.candy .ayuda {
   margin: 0;
-}
-
-.cupon {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--e-3);
-}
-
-.cupon app-campo {
-  flex: 1 1 14rem;
-}
-
-.cupon-acciones {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e-2);
-  /* Baja los botones hasta el campo, no hasta su etiqueta */
-  padding-block-start: var(--e-5);
 }
 
 .opcion {

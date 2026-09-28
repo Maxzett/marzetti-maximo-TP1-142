@@ -37,6 +37,14 @@ export const routes: Routes = [
     title: 'Comprar entradas · Cine Emezeta',
   },
 
+  // Candy sin entrada (RF-34.1). Sin guard, igual que la compra de entradas (RF-26): el ticket
+  // se ve después en /entrada/:codigo, con el mismo QR.
+  {
+    path: 'candy',
+    loadComponent: () => import('./features/candy-bar/candy-bar').then((m) => m.CandyBar),
+    title: 'Candy bar · Cine Emezeta',
+  },
+
   // La entrada comprada (RF-27). Sin guard: se llega con el código de la orden, que no se puede
   // adivinar, y la compra es anónima (RF-26). QR y PDF se importan recién cuando hacen falta.
   {

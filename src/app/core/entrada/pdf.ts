@@ -1,5 +1,5 @@
 import { EntradaComprada } from '../models/orden';
-import { datosDeLaEntrada, leyendaDeAcompanante } from './entrada';
+import { datosDeLaEntrada, leyendaDeAcompanante, nombreDeLaCompra } from './entrada';
 
 /**
  * Genera el PDF de la entrada (RF-27) con los datos, el código QR y, si corresponde, la leyenda
@@ -26,7 +26,7 @@ export async function generarPdf(entrada: EntradaComprada, qr: string): Promise<
   y += 6;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text('Entrada', 45, y, { align: 'center' });
+  doc.text(nombreDeLaCompra(entrada), 45, y, { align: 'center' });
   y += 4;
   doc.setLineDashPattern([1, 1], 0);
   doc.line(margen, y, 90 - margen, y);
@@ -75,7 +75,11 @@ export async function generarPdf(entrada: EntradaComprada, qr: string): Promise<
   y += 5;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  doc.text('Mostrá este código en la puerta. Sirve una sola vez para entrar.', 45, y, {
+  const pie =
+    entrada.tipo === 'candy'
+      ? 'Mostrá este código en el candy bar. Sirve una sola vez para retirar.'
+      : 'Mostrá este código en la puerta. Sirve una sola vez para entrar.';
+  doc.text(pie, 45, y, {
     align: 'center',
     maxWidth: ancho,
   });

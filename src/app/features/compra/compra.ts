@@ -11,7 +11,7 @@ import {
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { describirEdad } from '../../core/catalogo/edad';
-import { Cantidades, comoLineas, describirCupon } from '../../core/compra/candy';
+import { Cantidades, comoLineas } from '../../core/compra/candy';
 import {
   esMenorParaLaFuncion,
   MINIMO_CON_ACOMPANANTE,
@@ -19,7 +19,7 @@ import {
 } from '../../core/compra/edad-compra';
 import { aplicarEvento, primerVencimiento } from '../../core/compra/estado-butacas';
 import { describirVersion } from '../../core/compra/agrupar-funciones';
-import { formatearPrecio, formatearPuntos } from '../../core/formato/precio';
+import { formatearPrecio } from '../../core/formato/precio';
 import { describirInicio, fechaLocal } from '../../core/funciones/programacion';
 import { CatalogoDeCandy } from '../../core/models/candy';
 import {
@@ -46,6 +46,7 @@ import { Campo } from '../../shared/campo/campo';
 import { Desglose } from '../../shared/desglose/desglose';
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
 import { Spinner } from '../../shared/spinner/spinner';
@@ -70,6 +71,7 @@ type Paso = 'butacas' | 'datos' | 'pago';
     Desglose,
     MapaSala,
     Mensaje,
+    PromocionesOrden,
     RouterLink,
     Seleccion,
     SelectorCandy,
@@ -96,7 +98,6 @@ export class Compra {
   readonly funcionId = input.required<string>();
 
   protected readonly formatearPrecio = formatearPrecio;
-  protected readonly formatearPuntos = formatearPuntos;
   protected readonly nombres = NOMBRE_DE_TIPO;
   protected readonly mediosDePago: readonly OpcionSeleccion[] = MEDIOS_DE_PAGO.map((m) => ({
     valor: m.valor,
@@ -175,33 +176,6 @@ export class Compra {
   protected readonly faltaElAcompanante = computed(
     () => this.menorConCuenta() && this.elegidas().length < MINIMO_CON_ACOMPANANTE,
   );
-
-  protected readonly describirCupon = describirCupon;
-
-  /** El cupón de bienvenida se ofrece mientras no haya otro aplicado (RF-39) */
-  protected readonly bienvenidaSugerida = computed(() =>
-    this.desglose()?.cupon ? null : (this.saldos()?.bienvenida ?? null),
-  );
-
-  /**
-   * El cupón por edad (RF-44), a quien lo puede usar: la cuenta no tiene otra forma de saber que
-   * existe. Si también hay bienvenida se ofrecen los dos y elige la persona: van de a uno.
-   */
-  protected readonly cuponPorEdadSugerido = computed(() =>
-    this.desglose()?.cupon ? null : (this.saldos()?.cupon_edad ?? null),
-  );
-
-  /** Solo se ofrecen las recompensas que alcanzan con los puntos de la cuenta (RF-46) */
-  protected readonly recompensasPosibles = computed<OpcionSeleccion[]>(() => {
-    const puntos = this.saldos()?.puntos ?? 0;
-
-    return (this.candyBar()?.recompensas ?? [])
-      .filter((r) => r.costo_puntos <= puntos)
-      .map((r) => ({
-        valor: r.id,
-        texto: `${r.nombre} · ${formatearPuntos(r.costo_puntos)} puntos`,
-      }));
-  });
 
   protected readonly total = computed(() => this.desglose()?.total ?? this.resumen()?.total ?? 0);
 

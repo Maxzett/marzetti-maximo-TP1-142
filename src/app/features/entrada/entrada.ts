@@ -39,6 +39,9 @@ export class Entrada {
     return entrada ? datosDeLaEntrada(entrada) : [];
   });
 
+  /** Un ticket del candy bar sin entrada (RF-34.1): mismo QR, otros datos */
+  protected readonly esCandy = computed(() => this.entrada()?.tipo === 'candy');
+
   protected readonly leyenda = computed(() => {
     const entrada = this.entrada();
     return entrada ? leyendaDeAcompanante(entrada) : '';
@@ -94,7 +97,11 @@ export class Entrada {
     this.entrada.set(entrada);
 
     if (entrada?.estado === 'pagada') {
-      this.titulo.setTitle(`Tu entrada · ${entrada.pelicula} · Cine Emezeta`);
+      this.titulo.setTitle(
+        entrada.tipo === 'candy'
+          ? 'Tu ticket del candy bar · Cine Emezeta'
+          : `Tu entrada · ${entrada.pelicula} · Cine Emezeta`,
+      );
 
       try {
         const { qrComoImagen } = await import('../../core/entrada/qr');

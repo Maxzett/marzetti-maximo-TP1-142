@@ -7,6 +7,7 @@ import { Entrada } from './entrada';
 function comprada(cambios: Partial<EntradaComprada> = {}): EntradaComprada {
   return {
     codigo: 'AB12CD34EF56GH78IJ90',
+    tipo: 'funcion',
     estado: 'pagada',
     email: 'a@b.com',
     subtotal: 15000,
@@ -17,6 +18,7 @@ function comprada(cambios: Partial<EntradaComprada> = {}): EntradaComprada {
     cancelada_at: null,
     entrada_validada_at: null,
     candy_entregado_at: null,
+    valido_hasta: null,
     tiene_candy: false,
     candy: [],
     pelicula: 'Mar de cenizas',
@@ -70,6 +72,30 @@ describe('Entrada', () => {
     expect(el(fixture).querySelector('img.qr')?.getAttribute('alt')).toContain(
       'AB12CD34EF56GH78IJ90',
     );
+  });
+
+  // RF-34.1: el ticket del candy bar es la misma pantalla, sin datos de función
+  it('un ticket del candy bar se presenta como tal, con lo que retira y hasta cuándo', async () => {
+    const fixture = await montar(
+      comprada({
+        tipo: 'candy',
+        pelicula: null,
+        inicio: null,
+        formato: null,
+        idioma: null,
+        sala: null,
+        butacas: [],
+        tiene_candy: true,
+        candy: [{ nombre: 'Pochoclo grande', cantidad: 1, por_canje: false, incluye: [] }],
+        valido_hasta: '2026-10-12T15:00:00Z',
+      }),
+    );
+
+    expect(el(fixture).querySelector('h1')?.textContent).toContain('Tu ticket del candy bar');
+    expect(texto(fixture)).toContain('1 × Pochoclo grande');
+    expect(texto(fixture)).toContain('Retiralo hasta');
+    expect(texto(fixture)).not.toContain('Sala');
+    expect(el(fixture).querySelector('a[href="/candy"]')).not.toBeNull();
   });
 
   it('una película con restricción lleva la leyenda de adulto acompañante', async () => {

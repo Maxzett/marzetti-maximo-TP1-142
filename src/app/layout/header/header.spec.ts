@@ -63,7 +63,7 @@ describe('Header', () => {
     const enlaces = (fixture: ComponentFixture<Header>) =>
       Array.from(fixture.nativeElement.querySelectorAll('nav a') as NodeListOf<HTMLAnchorElement>);
 
-    it('lleva a la cartelera, al catálogo completo y a Próximamente', async () => {
+    it('lleva a la cartelera, al catálogo, a Próximamente y al candy bar', async () => {
       const fixture = await montar(null);
 
       const destinos = enlaces(fixture).map((a) => [a.textContent?.trim(), a.getAttribute('href')]);
@@ -71,6 +71,7 @@ describe('Header', () => {
         ['Cartelera', '/'],
         ['Películas', '/peliculas'],
         ['Próximamente', '/proximamente'],
+        ['Candy bar', '/candy'],
       ]);
     });
 

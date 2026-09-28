@@ -40,13 +40,24 @@ export function describirCandy(candy: EntradaComprada['candy']): string {
  * muestra en una lista y el PDF los imprime línea por línea: una sola fuente para las dos.
  */
 export function datosDeLaEntrada(entrada: EntradaComprada): { rotulo: string; valor: string }[] {
+  // RF-34.1: el ticket del candy bar no tiene función, sala ni butacas; sí hasta cuándo vale
+  if (entrada.tipo === 'candy') {
+    return [
+      { rotulo: 'Candy bar', valor: describirCandy(entrada.candy) },
+      ...(entrada.valido_hasta
+        ? [{ rotulo: 'Retiralo hasta', valor: describirInicio(entrada.valido_hasta) }]
+        : []),
+      { rotulo: 'Total', valor: formatearPrecio(entrada.total) },
+    ];
+  }
+
   return [
-    { rotulo: 'Película', valor: entrada.pelicula },
+    { rotulo: 'Película', valor: entrada.pelicula ?? '' },
     {
       rotulo: 'Función',
-      valor: `${describirInicio(entrada.inicio)} · ${entrada.formato} · ${entrada.idioma}`,
+      valor: `${entrada.inicio ? describirInicio(entrada.inicio) : ''} · ${entrada.formato} · ${entrada.idioma}`,
     },
-    { rotulo: 'Sala', valor: entrada.sala },
+    { rotulo: 'Sala', valor: entrada.sala ?? '' },
     { rotulo: 'Butacas', valor: listarButacas(entrada.butacas) },
     ...entrada.butacas
       .filter((b) => b.tipo !== 'estandar')
@@ -60,6 +71,12 @@ export function datosDeLaEntrada(entrada: EntradaComprada): { rotulo: string; va
 }
 
 /** Nombre del archivo descargado: el código lo identifica y no lleva caracteres raros */
-export function nombreDelPdf(entrada: Pick<EntradaComprada, 'codigo'>): string {
-  return `entrada-${entrada.codigo.toLowerCase()}.pdf`;
+export function nombreDelPdf(entrada: Pick<EntradaComprada, 'codigo' | 'tipo'>): string {
+  const prefijo = entrada.tipo === 'candy' ? 'ticket-candy' : 'entrada';
+  return `${prefijo}-${entrada.codigo.toLowerCase()}.pdf`;
+}
+
+/** Cómo se llama lo que se compró: la pantalla y el PDF lo dicen igual */
+export function nombreDeLaCompra(entrada: Pick<EntradaComprada, 'tipo'>): string {
+  return entrada.tipo === 'candy' ? 'Ticket del candy bar' : 'Entrada';
 }

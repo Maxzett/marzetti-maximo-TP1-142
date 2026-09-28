@@ -10,7 +10,10 @@ export interface UsoDeTramo {
   usado_por: string | null;
 }
 
-/** De una hora antes del inicio al fin de la película (migración 0023) */
+/**
+ * De una hora antes del inicio al fin de la película (migración 0023). En un ticket de candy,
+ * del pago a los 7 días (0027), y nunca está "antes".
+ */
 export interface VentanaDeValidacion {
   desde: string;
   hasta: string;
@@ -20,16 +23,17 @@ export interface VentanaDeValidacion {
 /**
  * Lo que devuelve consultar_orden_personal: la misma entrada que ve el cliente, sin el mail
  * (al personal no le sirve), más el estado de cada tramo y la ventana en la que se puede validar.
- * `tramos.candy` es null si la compra no incluye candy: no hay tramo que consumir.
+ * `tramos.candy` es null si la compra no incluye candy, y `tramos.entrada` si es un ticket del
+ * candy bar sin entrada (0027): no hay tramo que consumir.
  */
 export interface OrdenParaPersonal extends Omit<EntradaComprada, 'email'> {
-  tramos: { entrada: UsoDeTramo; candy: UsoDeTramo | null };
+  tramos: { entrada: UsoDeTramo | null; candy: UsoDeTramo | null };
   ventana: VentanaDeValidacion;
 }
 
 /** Por qué la base rechazó una validación. Cada uno es un caso de negocio, no un error */
 export type MotivoDeRechazo =
-  'no_existe' | 'estado' | 'sin_candy' | 'fuera_de_ventana' | 'ya_usado';
+  'no_existe' | 'estado' | 'sin_entrada' | 'sin_candy' | 'fuera_de_ventana' | 'ya_usado';
 
 export type ConsultaDeOrden =
   { estado: 'encontrada'; orden: OrdenParaPersonal } | { estado: 'error'; mensaje: string };

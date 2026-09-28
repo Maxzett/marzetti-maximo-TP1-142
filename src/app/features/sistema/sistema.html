@@ -342,6 +342,14 @@
 
     <h3 class="titulo-caso">Desglose con cupón, crédito y canje</h3>
     <app-desglose [desglose]="desgloseDeMuestra" [mostrarPuntos]="true" />
+
+    <h3 class="titulo-caso">Cupón, crédito y puntos, antes de aplicar nada</h3>
+    <app-promociones-orden
+      [saldos]="saldosDeMuestra"
+      [haySesion]="true"
+      [recompensas]="recompensasDeMuestra"
+      [(cupon)]="cuponDeMuestra"
+    />
   </section>
 
   <section aria-labelledby="s-graficos">

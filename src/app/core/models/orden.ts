@@ -122,14 +122,15 @@ export interface DeclaracionDeEdad {
 export interface OrdenPropia {
   orden_id: string;
   codigo: string;
+  tipo: TipoDeOrden;
   estado: 'pagada' | 'cancelada';
   total: number;
   credito_aplicado: number;
   pagada_at: string | null;
   cancelada_at: string | null;
-  pelicula: string;
-  inicio: string;
-  sala: string;
+  pelicula: string | null;
+  inicio: string | null;
+  sala: string | null;
   entradas: number;
   tiene_candy: boolean;
   cancelable: boolean;
@@ -158,8 +159,16 @@ export interface ItemParaRetirar {
 }
 
 /** Lo que devuelve obtener_orden: todo lo que muestran la entrada en pantalla y el PDF */
+/**
+ * Una compra con entrada a una función, o un ticket del candy bar sin entrada (RF-34.1, 0027).
+ * Es el mismo QR y la misma pantalla: `tipo` dice cuál es, y en un ticket de candy los datos de
+ * la función vienen en null.
+ */
+export type TipoDeOrden = 'funcion' | 'candy';
+
 export interface EntradaComprada {
   codigo: string;
+  tipo: TipoDeOrden;
   estado: 'pendiente' | 'pagada' | 'cancelada' | 'expirada';
   email: string;
   subtotal: number;
@@ -170,15 +179,19 @@ export interface EntradaComprada {
   cancelada_at: string | null;
   entrada_validada_at: string | null;
   candy_entregado_at: string | null;
+  /** Hasta cuándo se retira el candy de un ticket sin entrada (7 días desde el pago); null con función */
+  valido_hasta: string | null;
   tiene_candy: boolean;
   candy: ItemParaRetirar[];
-  pelicula: string;
+  pelicula: string | null;
   restriccion_edad: 0 | 13 | 18;
   requiere_acompanante: boolean;
-  inicio: string;
-  formato: string;
-  idioma: string;
-  sala: string;
+  /** RN-04: el comprador es menor y va con un adulto (0026) */
+  con_acompanante?: boolean;
+  inicio: string | null;
+  formato: string | null;
+  idioma: string | null;
+  sala: string | null;
   butacas: ButacaDeOrden[];
 }
 
@@ -187,6 +200,16 @@ export type ResultadoDeReserva =
 
 export type ResultadoDeOrden =
   { estado: 'creada'; resumen: ResumenDeOrden } | { estado: 'error'; mensaje: string };
+
+/** La orden pendiente de una compra solo de candy (RF-34.1, 0027): 10 minutos para pagarla */
+export interface OrdenDeCandy {
+  orden_id: string;
+  codigo: string;
+  expira_at: string;
+}
+
+export type ResultadoDeOrdenDeCandy =
+  { estado: 'creada'; orden: OrdenDeCandy } | { estado: 'error'; mensaje: string };
 
 export type ResultadoDePago =
   | { estado: 'pagada'; codigo: string }
