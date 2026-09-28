@@ -113,3 +113,23 @@ export function describirCupon(cupon: Pick<CuponAplicado, 'tipo_descuento' | 'va
     ? `${cupon.valor} %`
     : `$${new Intl.NumberFormat('es-AR').format(cupon.valor)}`;
 }
+
+/** Cuánto le falta a una cuenta para un canje: lo que el perfil muestra como incentivo (RF-46) */
+export interface ProgresoDeCanje {
+  alcanza: boolean;
+  faltan: number;
+  /** De 0 a 100, para dibujar la barra; el texto dice lo mismo con palabras */
+  porcentaje: number;
+}
+
+export function progresoDeCanje(costo: number, puntos: number): ProgresoDeCanje {
+  // Un saldo negativo (una cancelación que anuló puntos ya gastados) no dibuja una barra negativa
+  const saldo = Math.max(0, puntos);
+  const alcanza = saldo >= costo;
+
+  return {
+    alcanza,
+    faltan: alcanza ? 0 : costo - saldo,
+    porcentaje: costo > 0 ? Math.min(100, Math.floor((saldo * 100) / costo)) : 100,
+  };
+}

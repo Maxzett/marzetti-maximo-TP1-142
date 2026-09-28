@@ -147,11 +147,26 @@ describe('Compra', () => {
     });
   });
 
+  // D-02 revisada: la declaración viaja como dos casillas, no como una fecha
+  it('crear la orden manda lo que firmó quien compra sin cuenta', async () => {
+    const falso = crearSupabaseFalso({ data: { orden_id: 'o1' } });
+    const servicio = crearServicio(falso);
+    await servicio.crearOrden('f1', 'a@b.com', { declaraEdad: false, acompanante: true });
+
+    expect(falso.client.rpc).toHaveBeenCalledWith('crear_orden', {
+      p_funcion: 'f1',
+      p_sesion: servicio.sesionId,
+      p_email: 'a@b.com',
+      p_declara_edad: false,
+      p_acompanante: true,
+    });
+  });
+
   it('no muestra un error inesperado de la base tal cual', async () => {
     const servicio = crearServicio(
       crearSupabaseFalso({ error: { code: 'XX000', message: 'internal stack trace' } }),
     );
-    const resultado = await servicio.crearOrden('f1', 'a@b.com', null);
+    const resultado = await servicio.crearOrden('f1', 'a@b.com');
 
     expect(resultado.estado).toBe('error');
     expect(JSON.stringify(resultado)).not.toContain('stack trace');

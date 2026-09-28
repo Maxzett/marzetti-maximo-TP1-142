@@ -7,6 +7,7 @@ type Respuesta = { data?: unknown; error?: { code?: string; message: string } | 
 function crearSupabaseFalso({ data = null, error = null }: Respuesta = {}) {
   const constructor = {
     select: () => constructor,
+    eq: () => constructor,
     order: () => constructor,
     overrideTypes: async () => ({ data, error }),
   };
@@ -63,6 +64,22 @@ describe('Cuenta', () => {
   it('lee el historial de compras y de canjes', async () => {
     const compras = crearServicio(crearSupabaseFalso({ data: [{ orden_id: 'o1' }] }));
     expect(await compras.ordenes()).toEqual([{ orden_id: 'o1' }]);
+  });
+
+  it('lee las recompensas activas de su tabla', async () => {
+    const recompensas = [
+      { id: 'r1', nombre: 'Gaseosa', tipo: 'producto', producto_id: 'p1', costo_puntos: 28000 },
+    ];
+    const falso = crearSupabaseFalso({ data: recompensas });
+
+    expect(await crearServicio(falso).recompensas()).toEqual(recompensas);
+    expect(falso.client.from).toHaveBeenCalledWith('recompensas');
+  });
+
+  it('si no puede leer las recompensas devuelve null', async () => {
+    const servicio = crearServicio(crearSupabaseFalso({ error: { message: 'boom' } }));
+
+    expect(await servicio.recompensas()).toBeNull();
   });
 
   it('cancelar devuelve el crédito acreditado', async () => {

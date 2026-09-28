@@ -103,6 +103,51 @@ h3 {
   border-block-end: 1px solid var(--borde);
 }
 
+.recompensas {
+  display: grid;
+  gap: var(--e-3);
+  margin: var(--e-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recompensa-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--e-1) var(--e-3);
+  margin: 0;
+}
+
+.recompensa-titulo .detalle {
+  margin: 0;
+}
+
+.barra {
+  display: block;
+  block-size: 0.5rem;
+  margin-block: var(--e-1);
+  overflow: hidden;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+}
+
+.barra-avance {
+  display: block;
+  block-size: 100%;
+  background: var(--acento);
+}
+
+.recompensa-estado {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.recompensa--alcanza .recompensa-estado {
+  color: var(--acento);
+}
+
 .detalle {
   margin: var(--e-1) 0 0;
   color: var(--texto-tenue);
@@ -157,4 +202,12 @@ h3 {
 .acciones {
   justify-content: flex-end;
   margin-block-start: var(--e-4);
+}
+
+/* Alto contraste: el sistema descarta los fondos, y la barra quedaría vacía */
+@media (forced-colors: active) {
+  .barra-avance {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
 }

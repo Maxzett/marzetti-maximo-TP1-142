@@ -69,10 +69,48 @@
             </app-mensaje>
           }
 
+          @if (s.cupon_edad; as c) {
+            <!-- RF-44: el cupón para mayores de 50, a quien le corresponde -->
+            <app-mensaje tono="exito">
+              Por ser mayor de {{ c.edad_minima }} años tenés el cupón {{ c.codigo }} de
+              {{ describirCupon(c) }} de descuento. Lo podés usar en el último paso del pago.
+            </app-mensaje>
+          }
+
           <p class="nota">
             Ganás 1 punto por cada peso que pagás. El crédito sale de compras canceladas y se usa
             junto con otros medios de pago.
           </p>
+
+          <!-- RF-46: lo que se puede canjear, con lo que le falta para cada cosa -->
+          <h3>Qué podés canjear</h3>
+          @if (recompensas() === null) {
+            <app-mensaje tono="aviso">No pudimos traer las recompensas.</app-mensaje>
+          } @else if (canjesPosibles().length === 0) {
+            <p class="pendiente">Por ahora no hay recompensas para canjear.</p>
+          } @else {
+            <ul class="recompensas">
+              @for (r of canjesPosibles(); track r.id) {
+                <li class="recompensa" [class.recompensa--alcanza]="r.alcanza">
+                  <p class="recompensa-titulo">
+                    <span>{{ r.nombre }}</span>
+                    <span class="detalle">{{ formatearPuntos(r.costo_puntos) }} puntos</span>
+                  </p>
+                  <!-- La barra es decorativa: el texto de abajo dice lo mismo (RNF-10) -->
+                  <span class="barra" aria-hidden="true">
+                    <span class="barra-avance" [style.inline-size.%]="r.porcentaje"></span>
+                  </span>
+                  <p class="recompensa-estado">
+                    @if (r.alcanza) {
+                      ✓ Te alcanza: canjeala al pagar tu próxima compra.
+                    } @else {
+                      Te faltan {{ formatearPuntos(r.faltan) }} puntos.
+                    }
+                  </p>
+                </li>
+              }
+            </ul>
+          }
 
           <h3>Tus canjes</h3>
           @if (canjes(); as historial) {

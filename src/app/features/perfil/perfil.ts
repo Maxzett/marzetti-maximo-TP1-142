@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { describirCupon } from '../../core/compra/candy';
+import { describirCupon, progresoDeCanje } from '../../core/compra/candy';
 import { formatearPrecio, formatearPuntos } from '../../core/formato/precio';
 import { describirInicio } from '../../core/funciones/programacion';
+import { Recompensa } from '../../core/models/candy';
 import { Canje, OrdenPropia, Saldos } from '../../core/models/orden';
 import { PerfilSensible } from '../../core/models/perfil';
 import { Auth } from '../../core/services/auth';
@@ -55,7 +56,21 @@ export class Perfil {
   protected readonly saldos = signal<Saldos | null>(null);
   protected readonly canjes = signal<Canje[] | null>(null);
   protected readonly ordenes = signal<OrdenPropia[] | null>(null);
+  protected readonly recompensas = signal<Recompensa[] | null>(null);
   protected readonly cargandoCuenta = signal(true);
+
+  /**
+   * Qué puede canjear con lo que tiene y cuánto le falta para lo demás. Está para generar el
+   * incentivo de comprar: ver que a una gaseosa le faltan 3.000 puntos dice más que el saldo solo.
+   */
+  protected readonly canjesPosibles = computed(() => {
+    const puntos = this.saldos()?.puntos ?? 0;
+
+    return (this.recompensas() ?? []).map((recompensa) => ({
+      ...recompensa,
+      ...progresoDeCanje(recompensa.costo_puntos, puntos),
+    }));
+  });
 
   /** La compra que se está por cancelar: mientras haya una, el diálogo de confirmación está abierto */
   protected readonly aCancelar = signal<OrdenPropia | null>(null);
@@ -76,15 +91,17 @@ export class Perfil {
   }
 
   private async cargarCuenta(): Promise<void> {
-    const [saldos, canjes, ordenes] = await Promise.all([
+    const [saldos, canjes, ordenes, recompensas] = await Promise.all([
       this.cuenta.saldos(),
       this.cuenta.canjes(),
       this.cuenta.ordenes(),
+      this.cuenta.recompensas(),
     ]);
 
     this.saldos.set(saldos);
     this.canjes.set(canjes);
     this.ordenes.set(ordenes);
+    this.recompensas.set(recompensas);
     this.cargandoCuenta.set(false);
   }
 

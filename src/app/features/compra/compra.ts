@@ -12,7 +12,11 @@ import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { describirEdad } from '../../core/catalogo/edad';
 import { Cantidades, comoLineas, describirCupon } from '../../core/compra/candy';
-import { edadALaFecha, puedeComprar } from '../../core/compra/edad-compra';
+import {
+  esMenorParaLaFuncion,
+  MINIMO_CON_ACOMPANANTE,
+  motivoDeEdad,
+} from '../../core/compra/edad-compra';
 import { aplicarEvento, primerVencimiento } from '../../core/compra/estado-butacas';
 import { describirVersion } from '../../core/compra/agrupar-funciones';
 import { formatearPrecio, formatearPuntos } from '../../core/formato/precio';
@@ -44,8 +48,6 @@ import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
-import { hoyIso } from '../../shared/selector-fecha/fechas';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { Spinner } from '../../shared/spinner/spinner';
 import { Tarjeta } from '../../shared/tarjeta/tarjeta';
 import { Temporizador } from '../../shared/temporizador/temporizador';
@@ -54,8 +56,8 @@ type Paso = 'butacas' | 'datos' | 'pago';
 
 /**
  * Compra de entradas de una función (RF-24 a RF-29): elegir butacas en el mapa, dejar el mail
- * (y la fecha de nacimiento si la película tiene restricción y no hay cuenta), revisar el
- * resumen y pagar. No exige cuenta (RF-26).
+ * (y, si la película tiene restricción y no hay cuenta, firmar la declaración de edad), revisar
+ * el resumen y pagar. No exige cuenta (RF-26).
  *
  * Esta pantalla NO decide nada de lo que importa: cada reserva, la edad, el precio y el pago
  * los resuelven funciones de la base. Lo que hace acá es adelantar avisos (la edad, el aviso
@@ -71,7 +73,6 @@ type Paso = 'butacas' | 'datos' | 'pago';
     RouterLink,
     Seleccion,
     SelectorCandy,
-    SelectorFecha,
     Spinner,
     Tarjeta,
     Temporizador,
@@ -101,7 +102,6 @@ export class Compra {
     valor: m.valor,
     texto: m.nombre,
   }));
-  protected readonly hoy = hoyIso();
   protected readonly haySesion = this.auth.haySesion;
 
   protected readonly cargando = signal(true);
@@ -118,7 +118,10 @@ export class Compra {
   protected readonly avisoDeVencimiento = signal('');
 
   protected readonly email = signal('');
-  protected readonly nacimiento = signal('');
+  // D-02 revisada: sin cuenta, la edad se declara con casillas y no con una fecha
+  protected readonly declaraEdad = signal(false);
+  protected readonly acompanante = signal(false);
+  protected readonly minimoConAcompanante = MINIMO_CON_ACOMPANANTE;
   protected readonly errorDeDatos = signal('');
   protected readonly enviando = signal(false);
 
@@ -150,11 +153,42 @@ export class Compra {
   /** Sin cuenta no hay fecha de nacimiento registrada: se declara (D-02) */
   protected readonly debeDeclararEdad = computed(() => this.restriccion() > 0 && !this.haySesion());
 
+  /**
+   * RN-04 revisada, con cuenta: si no llega a la edad el día de la función, va con un adulto y
+   * necesita 2 entradas. Se sabe desde el primer paso, así que se avisa en el mapa y no al final.
+   */
+  protected readonly menorConCuenta = computed(() => {
+    const funcion = this.funcion();
+
+    return (
+      this.haySesion() &&
+      funcion !== null &&
+      esMenorParaLaFuncion(
+        this.restriccion(),
+        this.auth.perfil()?.fecha_nacimiento ?? null,
+        fechaLocal(funcion.inicio),
+      )
+    );
+  });
+
+  /** Si todavía faltan butacas para ir con un adulto: frena el "Continuar" del mapa */
+  protected readonly faltaElAcompanante = computed(
+    () => this.menorConCuenta() && this.elegidas().length < MINIMO_CON_ACOMPANANTE,
+  );
+
   protected readonly describirCupon = describirCupon;
 
   /** El cupón de bienvenida se ofrece mientras no haya otro aplicado (RF-39) */
   protected readonly bienvenidaSugerida = computed(() =>
     this.desglose()?.cupon ? null : (this.saldos()?.bienvenida ?? null),
+  );
+
+  /**
+   * El cupón por edad (RF-44), a quien lo puede usar: la cuenta no tiene otra forma de saber que
+   * existe. Si también hay bienvenida se ofrecen los dos y elige la persona: van de a uno.
+   */
+  protected readonly cuponPorEdadSugerido = computed(() =>
+    this.desglose()?.cupon ? null : (this.saldos()?.cupon_edad ?? null),
   );
 
   /** Solo se ofrecen las recompensas que alcanzan con los puntos de la cuenta (RF-46) */
@@ -277,11 +311,10 @@ export class Compra {
     this.enviando.set(true);
     this.errorDeDatos.set('');
 
-    const resultado = await this.servicio.crearOrden(
-      this.funcionId(),
-      this.email().trim(),
-      this.debeDeclararEdad() ? this.nacimiento() : null,
-    );
+    const resultado = await this.servicio.crearOrden(this.funcionId(), this.email().trim(), {
+      declaraEdad: this.debeDeclararEdad() && this.declaraEdad(),
+      acompanante: this.debeDeclararEdad() && !this.declaraEdad() && this.acompanante(),
+    });
 
     if (resultado.estado === 'creada') {
       // La orden es nueva: arranca sin cupón, sin crédito y sin canje, solo con el candy elegido
@@ -318,26 +351,30 @@ export class Compra {
       return 'Ingresá un email válido: queda como dato de contacto de tu compra.';
     }
 
-    const funcion = this.funcion();
+    const motivo = motivoDeEdad(this.restriccion(), this.elegidas().length, this.menor());
 
-    if (this.restriccion() > 0 && funcion) {
-      if (this.debeDeclararEdad() && !this.nacimiento()) {
-        return 'Esta película tiene restricción de edad: declará tu fecha de nacimiento.';
-      }
+    if (motivo === 'sin_declarar') {
+      return `Esta película es para mayores de ${this.restriccion()} años: declará tu edad o indicá que vas con un adulto.`;
+    }
 
-      const nacimiento = this.haySesion()
-        ? (this.auth.perfil()?.fecha_nacimiento ?? null)
-        : this.nacimiento();
-
-      if (!puedeComprar(this.restriccion(), nacimiento, fechaLocal(funcion.inicio))) {
-        const edad = nacimiento ? edadALaFecha(nacimiento, fechaLocal(funcion.inicio)) : null;
-        return edad === null
-          ? 'No pudimos verificar tu edad.'
-          : `No podés comprar entradas para esta película: es para mayores de ${this.restriccion()} años.`;
-      }
+    if (motivo === 'minimo_dos') {
+      return `Si vas con un adulto, elegí al menos ${MINIMO_CON_ACOMPANANTE} butacas: la tuya y la de quien te acompaña.`;
     }
 
     return '';
+  }
+
+  /** Si va con un adulto: con cuenta por la fecha registrada, sin cuenta por lo que firmó */
+  private menor(): boolean | null {
+    if (!this.debeDeclararEdad()) {
+      return this.menorConCuenta();
+    }
+
+    if (this.declaraEdad()) {
+      return false;
+    }
+
+    return this.acompanante() ? true : null;
   }
 
   // ── Paso 3: pago ─────────────────────────────────────────────────────────
@@ -395,7 +432,7 @@ export class Compra {
     return this.ajustar(() => undefined);
   }
 
-  protected usarBienvenida(codigo: string): Promise<void> {
+  protected usarCupon(codigo: string): Promise<void> {
     return this.ajustar(() => this.cupon.set(codigo));
   }
 

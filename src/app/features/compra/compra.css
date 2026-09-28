@@ -151,3 +151,18 @@ h3 {
   block-size: 1.25rem;
   accent-color: var(--acento);
 }
+
+.declaracion {
+  display: grid;
+  gap: var(--e-1);
+  margin: var(--e-4) 0 0;
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+}
+
+.declaracion legend {
+  padding-inline: var(--e-1);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+}

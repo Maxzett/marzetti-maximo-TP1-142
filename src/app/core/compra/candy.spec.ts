@@ -8,6 +8,7 @@ import {
   entradasCubiertas,
   entradasDelCombo,
   MAXIMO_POR_LINEA,
+  progresoDeCanje,
   unidadesQueEntran,
 } from './candy';
 
@@ -161,5 +162,27 @@ describe('textos', () => {
     expect(describirCupon({ tipo_descuento: 'monto', valor: 1500 }).replace(/\s/g, '')).toBe(
       '$1.500',
     );
+  });
+});
+
+describe('progresoDeCanje', () => {
+  it('con puntos de sobra alcanza y no falta nada', () => {
+    expect(progresoDeCanje(28000, 30000)).toEqual({ alcanza: true, faltan: 0, porcentaje: 100 });
+  });
+
+  it('con el costo justo también alcanza', () => {
+    expect(progresoDeCanje(28000, 28000).alcanza).toBe(true);
+  });
+
+  it('dice cuántos faltan y el avance redondeado hacia abajo', () => {
+    expect(progresoDeCanje(65000, 21700)).toEqual({
+      alcanza: false,
+      faltan: 43300,
+      porcentaje: 33,
+    });
+  });
+
+  it('un saldo negativo cuenta como cero', () => {
+    expect(progresoDeCanje(1000, -500)).toEqual({ alcanza: false, faltan: 1000, porcentaje: 0 });
   });
 });

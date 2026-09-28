@@ -66,31 +66,9 @@ begin;
 rollback;
 
 
--- ── BLOQUE 4 · Anónimo menor de 18 en una película +18 ──────────────────────
--- Espera: ERROR 22023 "No podés comprar entradas para esta película..."
-
-begin;
-  set local role anon;
-  select public.retener_butaca('FUNCION_18',
-    (select b.id from public.butacas b join public.funciones f on f.sala_id = b.sala_id
-      where f.id = 'FUNCION_18' and b.tipo = 'estandar' order by b.fila, b.numero limit 1),
-    'sesion-aaaaaaaaaaaaaaaa');
-  select public.crear_orden('FUNCION_18', 'sesion-aaaaaaaaaaaaaaaa', 'prueba@ejemplo.com',
-    (current_date - interval '15 years')::date);
-rollback;
-
-
--- ── BLOQUE 5 · Anónimo sin declarar fecha en una película +18 ───────────────
--- Espera: ERROR 22023 "Esta película tiene restricción de edad: declará tu fecha..."
-
-begin;
-  set local role anon;
-  select public.retener_butaca('FUNCION_18',
-    (select b.id from public.butacas b join public.funciones f on f.sala_id = b.sala_id
-      where f.id = 'FUNCION_18' and b.tipo = 'estandar' order by b.fila, b.numero limit 1),
-    'sesion-aaaaaaaaaaaaaaaa');
-  select public.crear_orden('FUNCION_18', 'sesion-aaaaaaaaaaaaaaaa', 'prueba@ejemplo.com', null);
-rollback;
+-- ── BLOQUES 4 y 5 · Restricción de edad ────────────────────────────────────
+-- Reemplazados por supabase/pruebas/edad.sql desde la 0026: la compra anónima ya no declara
+-- una fecha de nacimiento sino que firma una casilla, y el menor puede comprar con un adulto.
 
 
 -- ── BLOQUE 6 · Pagar la orden de otra sesión ────────────────────────────────

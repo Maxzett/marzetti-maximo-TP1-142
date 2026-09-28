@@ -5,7 +5,7 @@ import {
   funcionesEnHora,
   horasDelDia,
 } from './agrupar-funciones';
-import { edadALaFecha, puedeComprar } from './edad-compra';
+import { edadALaFecha, esMenorParaLaFuncion, motivoDeEdad } from './edad-compra';
 import { sesionDeCompra } from './sesion';
 import { EstadoDeButaca } from '../models/orden';
 import { Funcion } from '../models/sala';
@@ -106,18 +106,31 @@ describe('edad para comprar', () => {
     expect(edadALaFecha('2013-10-06', '2026-10-05')).toBe(12);
   });
 
-  it('sin restricción se puede comprar sin declarar nada', () => {
-    expect(puedeComprar(0, null, '2026-10-05')).toBe(true);
+  it('sin restricción nadie es menor ni tiene que declarar nada', () => {
+    expect(esMenorParaLaFuncion(0, null, '2026-10-05')).toBe(false);
+    expect(motivoDeEdad(0, 1, null)).toBeNull();
   });
 
-  it('con restricción hace falta una fecha y que alcance la edad', () => {
-    expect(puedeComprar(18, null, '2026-10-05')).toBe(false);
-    expect(puedeComprar(18, '2010-01-01', '2026-10-05')).toBe(false);
-    expect(puedeComprar(18, '2008-10-05', '2026-10-05')).toBe(true);
+  it('con cuenta, es menor quien no llega a la edad el día de la función', () => {
+    expect(esMenorParaLaFuncion(18, '2010-01-01', '2026-10-05')).toBe(true);
+    expect(esMenorParaLaFuncion(18, '2008-10-05', '2026-10-05')).toBe(false);
   });
 
-  it('una fecha inválida no habilita la compra', () => {
-    expect(puedeComprar(13, 'nunca', '2026-10-05')).toBe(false);
+  it('sin una fecha válida se lo trata como menor', () => {
+    expect(esMenorParaLaFuncion(13, null, '2026-10-05')).toBe(true);
+    expect(esMenorParaLaFuncion(13, 'nunca', '2026-10-05')).toBe(true);
+  });
+
+  // RN-04 revisada: el menor compra si va con un adulto, con 2 entradas como mínimo
+  it('el menor necesita al menos 2 entradas; con 2 puede seguir', () => {
+    expect(motivoDeEdad(13, 1, true)).toBe('minimo_dos');
+    expect(motivoDeEdad(13, 2, true)).toBeNull();
+    expect(motivoDeEdad(18, 1, false)).toBeNull();
+  });
+
+  // D-02 revisada: sin cuenta, tiene que firmar alguna de las dos casillas
+  it('sin cuenta y sin ninguna casilla firmada no puede seguir', () => {
+    expect(motivoDeEdad(18, 4, null)).toBe('sin_declarar');
   });
 });
 

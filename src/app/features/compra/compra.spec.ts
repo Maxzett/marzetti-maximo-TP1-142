@@ -106,6 +106,8 @@ interface Opciones {
   funcion?: Funcion | null;
   restriccion?: 0 | 13 | 18;
   haySesion?: boolean;
+  /** Fecha de nacimiento de la cuenta con sesión */
+  nacimiento?: string;
   retener?: ReturnType<typeof vi.fn>;
   crearOrden?: ResultadoDeOrden;
   pago?: ResultadoDePago;
@@ -156,7 +158,14 @@ async function montar(opciones: Opciones = {}) {
       { provide: Cuenta, useValue: { saldos: vi.fn(async () => opciones.saldos ?? null) } },
       {
         provide: Auth,
-        useValue: { haySesion: signal(opciones.haySesion ?? false), perfil: signal(null) },
+        useValue: {
+          haySesion: signal(opciones.haySesion ?? false),
+          perfil: signal(
+            opciones.nacimiento
+              ? { email: 'ana@b.com', fecha_nacimiento: opciones.nacimiento }
+              : null,
+          ),
+        },
       },
     ],
   });
@@ -268,26 +277,103 @@ describe('Compra', () => {
       expect(texto(fixture)).toContain('acompañado por un adulto');
     });
 
-    it('sin cuenta pide declarar la fecha de nacimiento', async () => {
+    const casillas = (f: ComponentFixture<Compra>) =>
+      [...el(f).querySelectorAll('.declaracion input[type="checkbox"]')] as HTMLInputElement[];
+
+    function tildar(f: ComponentFixture<Compra>, casilla: HTMLInputElement): Promise<void> {
+      casilla.checked = true;
+      casilla.dispatchEvent(new Event('change'));
+      return refrescar(f);
+    }
+
+    async function enviar(f: ComponentFixture<Compra>): Promise<void> {
+      f.componentInstance['email'].set('a@b.com');
+      el(f).querySelector('form')!.dispatchEvent(new Event('submit'));
+      await refrescar(f);
+    }
+
+    // D-02 revisada: una casilla en lugar del calendario
+    it('sin cuenta pide firmar la edad con una casilla, no con una fecha', async () => {
       const { fixture } = await hastaLosDatos({ restriccion: 18 });
-      expect(el(fixture).querySelector('app-selector-fecha')).not.toBeNull();
-    });
 
-    it('con cuenta no la pide: usa la registrada', async () => {
-      const { fixture } = await hastaLosDatos({ restriccion: 18, haySesion: true });
       expect(el(fixture).querySelector('app-selector-fecha')).toBeNull();
+      expect(casillas(fixture)).toHaveLength(2);
+      expect(texto(fixture)).toContain('Declaro tener 18 años o más');
     });
 
-    it('un menor es rechazado sin ir a la base', async () => {
-      const { fixture, servicio } = await hastaLosDatos({ restriccion: 18 });
-      fixture.componentInstance['email'].set('a@b.com');
-      fixture.componentInstance['nacimiento'].set('2015-01-01');
+    it('al firmar la edad desaparece la casilla del acompañante', async () => {
+      const { fixture } = await hastaLosDatos({ restriccion: 13 });
+      await tildar(fixture, casillas(fixture)[0]);
 
-      el(fixture).querySelector('form')!.dispatchEvent(new Event('submit'));
+      expect(casillas(fixture)).toHaveLength(1);
+    });
+
+    it('con cuenta no pide declarar nada: usa la fecha registrada', async () => {
+      const { fixture } = await hastaLosDatos({
+        restriccion: 18,
+        haySesion: true,
+        nacimiento: '1990-01-01',
+      });
+      expect(el(fixture).querySelector('.declaracion')).toBeNull();
+    });
+
+    it('sin ninguna casilla firmada no va a la base', async () => {
+      const { fixture, servicio } = await hastaLosDatos({ restriccion: 18 });
+      await enviar(fixture);
+
+      expect(texto(fixture)).toContain('declará tu edad o indicá que vas con un adulto');
+      expect(servicio.crearOrden).not.toHaveBeenCalled();
+    });
+
+    it('acompañado con una sola butaca pide al menos 2', async () => {
+      const { fixture, servicio } = await hastaLosDatos({ restriccion: 13 });
+      await tildar(fixture, casillas(fixture)[1]);
+      await enviar(fixture);
+
+      expect(texto(fixture)).toContain('elegí al menos 2 butacas');
+      expect(servicio.crearOrden).not.toHaveBeenCalled();
+    });
+
+    it('con la edad firmada manda la declaración a la base', async () => {
+      const { fixture, servicio } = await hastaLosDatos({
+        restriccion: 13,
+        crearOrden: { estado: 'error', mensaje: 'x' },
+      });
+      await tildar(fixture, casillas(fixture)[0]);
+      await enviar(fixture);
+
+      expect(servicio.crearOrden).toHaveBeenCalledWith('f1', 'a@b.com', {
+        declaraEdad: true,
+        acompanante: false,
+      });
+    });
+
+    // RN-04 revisada: la cuenta menor se entera en el mapa, no al final
+    it('con cuenta y menor avisa en el mapa y no deja seguir con una sola butaca', async () => {
+      const { fixture } = await montar({
+        restriccion: 13,
+        haySesion: true,
+        nacimiento: '2020-01-01',
+      });
+      (el(fixture).querySelector('button.celda') as HTMLButtonElement).click();
       await refrescar(fixture);
 
-      expect(texto(fixture)).toContain('es para mayores de 18 años');
-      expect(servicio.crearOrden).not.toHaveBeenCalled();
+      expect(texto(fixture)).toContain('tenés que ir con un adulto');
+      expect(botonDeTexto(fixture, 'Continuar').disabled).toBe(true);
+
+      (el(fixture).querySelectorAll('button.celda')[1] as HTMLButtonElement).click();
+      await refrescar(fixture);
+      expect(botonDeTexto(fixture, 'Continuar').disabled).toBe(false);
+    });
+
+    it('con cuenta y mayor no avisa nada', async () => {
+      const { fixture } = await montar({
+        restriccion: 13,
+        haySesion: true,
+        nacimiento: '1990-01-01',
+      });
+
+      expect(texto(fixture)).not.toContain('tenés que ir con un adulto');
     });
 
     it('un email inválido se avisa antes de ir a la base', async () => {
@@ -449,6 +535,34 @@ describe('Compra', () => {
 
       expect(texto(fixture)).toContain('cupón de bienvenida de 20 %');
       expect(botonDeTexto(fixture, 'Usar mi cupón')).toBeDefined();
+    });
+
+    // RF-44: el cupón por edad no se ve en ningún lado si la cuenta no se entera de que existe
+    it('a una cuenta mayor de 50 le ofrece su cupón y lo aplica con un toque', async () => {
+      const { fixture, servicio } = await hastaElPago({
+        haySesion: true,
+        saldos: {
+          puntos: 0,
+          credito: 0,
+          bienvenida: null,
+          cupon_edad: {
+            codigo: 'PLATINO50',
+            tipo_descuento: 'porcentaje',
+            valor: 25,
+            edad_minima: 50,
+          },
+        },
+      });
+
+      expect(texto(fixture)).toContain('Por ser mayor de 50 años tenés el cupón PLATINO50 de 25 %');
+
+      botonDeTexto(fixture, 'Usar cupón PLATINO50').click();
+      await refrescar(fixture);
+
+      expect(servicio.configurarOrden).toHaveBeenLastCalledWith(
+        'o1',
+        expect.objectContaining({ cupon: 'PLATINO50' }),
+      );
     });
 
     it('el crédito solo se ofrece si hay saldo, y las recompensas solo si alcanzan los puntos', async () => {

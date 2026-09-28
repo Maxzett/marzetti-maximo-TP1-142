@@ -88,8 +88,19 @@
             </app-mensaje>
           }
 
+          @if (menorConCuenta()) {
+            <!-- RN-04 revisada: se avisa acá, no al final, para que elija las dos butacas juntas -->
+            <app-mensaje tono="aviso">
+              Como sos menor de {{ restriccion() }} años, tenés que ir con un adulto: elegí al menos
+              {{ minimoConAcompanante }} butacas, la tuya y la de quien te acompaña.
+            </app-mensaje>
+          }
+
           <div class="acciones">
-            <app-boton [deshabilitado]="elegidas().length === 0" (presionado)="continuar()">
+            <app-boton
+              [deshabilitado]="elegidas().length === 0 || faltaElAcompanante()"
+              (presionado)="continuar()"
+            >
               Continuar
             </app-boton>
           </div>
@@ -111,20 +122,39 @@
 
             @if (debeDeclararEdad()) {
               <!--
-                D-02: sin cuenta no hay fecha de nacimiento registrada, y esta película tiene
-                restricción. La declaración queda guardada con la orden.
+                D-02 revisada: sin cuenta no hay fecha de nacimiento registrada, y esta película
+                tiene restricción. Se firma una casilla; quien no puede firmarla, firma la segunda
+                y va con un adulto (RN-04). Lo firmado queda guardado con la orden.
               -->
-              <app-selector-fecha
-                etiqueta="Tu fecha de nacimiento"
-                vistaInicial="anios"
-                minimo="1920-01-01"
-                [maximo]="hoy"
-                [(valor)]="nacimiento"
-              />
-              <p class="ayuda">
-                Es para verificar que cumplís la edad de la película. Queda registrada con tu
-                compra.
-              </p>
+              <fieldset class="declaracion">
+                <legend>Declaración de edad</legend>
+                <label class="opcion">
+                  <input
+                    type="checkbox"
+                    [checked]="declaraEdad()"
+                    (change)="declaraEdad.set($any($event.target).checked)"
+                  />
+                  Declaro tener {{ restriccion() }} años o más.
+                </label>
+                @if (!declaraEdad()) {
+                  <label class="opcion">
+                    <input
+                      type="checkbox"
+                      [checked]="acompanante()"
+                      (change)="acompanante.set($any($event.target).checked)"
+                    />
+                    Soy menor de {{ restriccion() }} años y voy acompañado por un adulto.
+                  </label>
+                  <p class="ayuda">
+                    Si vas con un adulto, la compra tiene que incluir al menos
+                    {{ minimoConAcompanante }} entradas: la tuya y la de quien te acompaña.
+                  </p>
+                }
+                <p class="ayuda">
+                  Queda registrado con tu compra. En la entrada al cine te pueden pedir un
+                  documento.
+                </p>
+              </fieldset>
             }
 
             @if (candyBar(); as tienda) {
@@ -188,9 +218,24 @@
                   <app-boton
                     variante="borde"
                     [cargando]="ajustando()"
-                    (presionado)="usarBienvenida(bienvenida.codigo)"
+                    (presionado)="usarCupon(bienvenida.codigo)"
                   >
                     Usar mi cupón
+                  </app-boton>
+                </app-mensaje>
+              }
+
+              @if (cuponPorEdadSugerido(); as porEdad) {
+                <!-- RF-44: el cupón para mayores de 50, a quien le corresponde -->
+                <app-mensaje tono="exito">
+                  Por ser mayor de {{ porEdad.edad_minima }} años tenés el cupón
+                  {{ porEdad.codigo }} de {{ describirCupon(porEdad) }} de descuento.
+                  <app-boton
+                    variante="borde"
+                    [cargando]="ajustando()"
+                    (presionado)="usarCupon(porEdad.codigo)"
+                  >
+                    Usar cupón {{ porEdad.codigo }}
                   </app-boton>
                 </app-mensaje>
               }

@@ -25,6 +25,7 @@ import { Peliculas } from './features/peliculas/peliculas';
 const catalogo = {
   cargarCartelera: vi.fn(async () => []),
   cargarTodas: vi.fn(async () => []),
+  cargarProximas: vi.fn(async () => []),
   cargarPelicula: vi.fn(async () => null),
   cargarPuntajes: vi.fn(async () => new Map()),
   masVendidas: vi.fn(async () => []),

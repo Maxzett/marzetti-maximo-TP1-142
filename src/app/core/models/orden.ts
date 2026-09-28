@@ -39,6 +39,8 @@ export interface ResumenDeOrden {
   tiene_vip: boolean;
   /** RF-29: la entrada de una película con restricción lleva la leyenda de adulto acompañante */
   requiere_acompanante: boolean;
+  /** RN-04: el comprador no tiene la edad de la película y va con un adulto (0026) */
+  con_acompanante?: boolean;
   items: (ButacaDeOrden & { butaca_id: string })[];
 }
 
@@ -96,6 +98,24 @@ export interface Saldos {
   credito: number;
   /** El cupón de bienvenida que todavía se puede usar (RF-39), o null */
   bienvenida: CuponAplicado | null;
+  /**
+   * El cupón por edad que la cuenta puede usar (RF-44), o null. Opcional porque llegó con la
+   * 0026: una base sin esa migración no lo manda.
+   */
+  cupon_edad?: CuponPorEdad | null;
+}
+
+/** RF-44: un cupón dirigido a quienes superan cierta edad */
+export interface CuponPorEdad extends CuponAplicado {
+  edad_minima: number;
+}
+
+/** D-02 revisada: lo que firma, con casillas, quien compra sin cuenta una película con restricción */
+export interface DeclaracionDeEdad {
+  /** "Tengo 13/18 años o más" */
+  declaraEdad: boolean;
+  /** "Voy acompañado por un adulto": exige 2 entradas o más (RN-04) */
+  acompanante: boolean;
 }
 
 /** Una compra propia del historial, con lo que hace falta para decidir si se puede cancelar */

@@ -9,7 +9,7 @@ import { Supabase } from './supabase';
  * contraseña, así que se traducen los que el usuario puede provocar.
  */
 const MENSAJES: Record<string, string> = {
-  'Invalid login credentials': 'El mail o la contraseña no coinciden.',
+  'Invalid login credentials': 'Las credenciales son inválidas.',
   'Email not confirmed': 'Todavía no confirmaste tu mail.',
   'User already registered': 'Ya existe una cuenta con ese mail.',
   'Password should be at least 6 characters': 'La contraseña necesita al menos 6 caracteres.',

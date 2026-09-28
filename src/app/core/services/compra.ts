@@ -3,6 +3,7 @@ import { mensajeDeError } from '../admin/mensaje-de-error';
 import { estadosDesdeFilas, MapaDeEstados } from '../compra/estado-butacas';
 import { sesionDeCompra } from '../compra/sesion';
 import {
+  DeclaracionDeEdad,
   DesgloseDeOrden,
   EntradaComprada,
   EventoDeButaca,
@@ -81,18 +82,20 @@ export class Compra {
 
   /**
    * Convierte las reservas en una orden pendiente con los precios congelados. Con restricción
-   * de edad y sin cuenta hay que pasar la fecha de nacimiento declarada (D-02).
+   * de edad y sin cuenta hay que pasar lo que firmó (D-02): que tiene la edad, o que va con un
+   * adulto. Con cuenta la base usa la fecha registrada y la declaración se ignora.
    */
   async crearOrden(
     funcionId: string,
     email: string,
-    fechaNacimiento: string | null,
+    declaracion: DeclaracionDeEdad = { declaraEdad: false, acompanante: false },
   ): Promise<ResultadoDeOrden> {
     const { data, error } = await this.supabase.client.rpc('crear_orden', {
       p_funcion: funcionId,
       p_sesion: this.sesionId,
       p_email: email,
-      p_fecha_nacimiento: fechaNacimiento,
+      p_declara_edad: declaracion.declaraEdad,
+      p_acompanante: declaracion.acompanante,
     });
 
     if (error) {

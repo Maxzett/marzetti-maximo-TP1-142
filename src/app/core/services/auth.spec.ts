@@ -151,7 +151,7 @@ describe('Auth', () => {
     const auth = crearServicio(falso);
 
     await expect(auth.ingresar('ana@ejemplo.com', 'mal')).resolves.toBe(
-      'El mail o la contraseña no coinciden.',
+      'Las credenciales son inválidas.',
     );
   });
 

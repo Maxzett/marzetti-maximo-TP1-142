@@ -1,5 +1,6 @@
 import { inject, Service } from '@angular/core';
 import { mensajeDeError } from '../admin/mensaje-de-error';
+import { Recompensa } from '../models/candy';
 import { Canje, OrdenPropia, ResultadoDeCancelacion, Saldos } from '../models/orden';
 import { PeliculaVista } from '../models/pelicula';
 import { Supabase } from './supabase';
@@ -47,6 +48,21 @@ export class Cuenta {
       .select('id, costo_puntos, creado_at, recompensas(nombre)')
       .order('creado_at', { ascending: false })
       .overrideTypes<Canje[], { merge: false }>();
+
+    return error ? null : data;
+  }
+
+  /**
+   * Lo que se puede canjear hoy, de la más barata a la más cara. Es la misma lectura pública que
+   * usa la compra, pero sola: el perfil no necesita el catálogo entero del candy para mostrarla.
+   */
+  async recompensas(): Promise<Recompensa[] | null> {
+    const { data, error } = await this.supabase.client
+      .from('recompensas')
+      .select('id, nombre, tipo, producto_id, costo_puntos')
+      .eq('activa', true)
+      .order('costo_puntos')
+      .overrideTypes<Recompensa[], { merge: false }>();
 
     return error ? null : data;
   }

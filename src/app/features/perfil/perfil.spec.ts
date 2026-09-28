@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { Recompensa } from '../../core/models/candy';
 import { Canje, OrdenPropia, ResultadoDeCancelacion, Saldos } from '../../core/models/orden';
 import { Perfil as ModeloPerfil, PerfilSensible } from '../../core/models/perfil';
 import { Auth } from '../../core/services/auth';
@@ -50,6 +51,7 @@ interface Cuentas {
   saldos?: Saldos | null;
   canjes?: Canje[] | null;
   ordenes?: OrdenPropia[] | null;
+  recompensas?: Recompensa[] | null;
   cancelar?: ResultadoDeCancelacion;
 }
 
@@ -84,6 +86,9 @@ async function montar(
           saldos: vi.fn(async () => (cuenta.saldos === undefined ? SALDOS : cuenta.saldos)),
           canjes: vi.fn(async () => (cuenta.canjes === undefined ? [] : cuenta.canjes)),
           ordenes: vi.fn(async () => (cuenta.ordenes === undefined ? [] : cuenta.ordenes)),
+          recompensas: vi.fn(async () =>
+            cuenta.recompensas === undefined ? [] : cuenta.recompensas,
+          ),
           cancelar: vi.fn(async () => cuenta.cancelar ?? { estado: 'cancelada', credito: 15000 }),
         },
       },
@@ -189,6 +194,22 @@ describe('Perfil', () => {
       expect(texto(fixture)).toContain('cupón de bienvenida de 20 %');
     });
 
+    it('a una cuenta mayor de 50 le avisa del cupón por edad (RF-44)', async () => {
+      const fixture = await montar(PERFIL, SENSIBLES, {
+        saldos: {
+          ...SALDOS,
+          cupon_edad: {
+            codigo: 'PLATINO50',
+            tipo_descuento: 'porcentaje',
+            valor: 25,
+            edad_minima: 50,
+          },
+        },
+      });
+
+      expect(texto(fixture)).toContain('Por ser mayor de 50 años tenés el cupón PLATINO50');
+    });
+
     it('sin cupón disponible no lo menciona', async () => {
       const fixture = await montar(PERFIL, SENSIBLES);
 
@@ -209,6 +230,32 @@ describe('Perfil', () => {
 
       expect(texto(fixture)).toContain('Pochoclo grande gratis');
       expect(texto(fixture)).toContain('150 puntos');
+    });
+
+    // RF-46: ver qué le alcanza y cuánto le falta es el incentivo para volver a comprar
+    it('lista lo que puede canjear, con lo que le alcanza y lo que le falta', async () => {
+      const fixture = await montar(PERFIL, SENSIBLES, {
+        saldos: { ...SALDOS, puntos: 30000 },
+        recompensas: [
+          { id: 'r1', nombre: 'Gaseosa', tipo: 'producto', producto_id: 'p1', costo_puntos: 28000 },
+          { id: 'r2', nombre: 'Entrada', tipo: 'entrada', producto_id: null, costo_puntos: 65000 },
+        ],
+      });
+      const items = [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll('.recompensa'),
+      ] as HTMLElement[];
+
+      expect(items).toHaveLength(2);
+      expect(items[0].textContent).toContain('Te alcanza');
+      expect(items[1].textContent?.replace(/ /g, ' ')).toContain('Te faltan 35.000 puntos');
+      // La barra no se anuncia: el texto ya dice el avance
+      expect(items[1].querySelector('.barra')?.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('si no pudo leer las recompensas lo dice', async () => {
+      const fixture = await montar(PERFIL, SENSIBLES, { recompensas: null });
+
+      expect(texto(fixture)).toContain('No pudimos traer las recompensas');
     });
 
     it('sin canjes lo dice', async () => {

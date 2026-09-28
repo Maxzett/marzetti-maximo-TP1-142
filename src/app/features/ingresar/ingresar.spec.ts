@@ -84,8 +84,8 @@ describe('Ingresar', () => {
     expect(navegar).toHaveBeenCalledWith('/perfil/entradas');
   });
 
-  it('muestra el mensaje traducido cuando las credenciales no coinciden y no navega', async () => {
-    ingresar.mockResolvedValue('El mail o la contraseña no coinciden.');
+  it('muestra el mensaje traducido cuando las credenciales son inválidas y no navega', async () => {
+    ingresar.mockResolvedValue('Las credenciales son inválidas.');
 
     await escribir(0, 'ana@ejemplo.com');
     await escribir(1, 'mal');
@@ -93,7 +93,7 @@ describe('Ingresar', () => {
 
     const mensaje = fixture.nativeElement.querySelector('app-mensaje') as HTMLElement;
 
-    expect(mensaje.textContent).toContain('El mail o la contraseña no coinciden.');
+    expect(mensaje.textContent).toContain('Las credenciales son inválidas.');
     expect(navegar).not.toHaveBeenCalled();
   });
 });

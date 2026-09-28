@@ -7,7 +7,7 @@
 | **Cliente** | Establecimiento de cine (edificio único, múltiples salas) |
 | **Fuente** | Intercambio de 10 emails con el cliente (01/01/2020 – 10/03/2020) |
 | **Fecha de entrega** | 1 de octubre de 2026 |
-| **Versión del documento** | 1.1 — 07/09/2026 |
+| **Versión del documento** | 1.2 — 28/09/2026 |
 
 ---
 
@@ -56,6 +56,7 @@ El diseño de la interfaz, el esquema físico de base de datos y las decisiones 
 | **E8** | 03/03/2020 | Programa de fidelización por puntos, canjes configurables, historial, combos a precio fijo |
 | **E9** | 08/03/2020 | Sección Próximamente, alertas de disponibilidad, preventa con precio especial, sección Mis Películas |
 | **E10** | 10/03/2020 | Cancelación con crédito en cuenta, butacas VIP, exportación de reportes, gráficos, log de actividad |
+| **R1** | 28/09/2026 | Revisión del avance: compra de candy sin entrada, recompensas a la vista en el perfil, mensaje de inicio de sesión, aviso del cupón por edad, declaración de edad con casilla, menor con adulto acompañante, selectores de fecha y hora sin calendario, rediseño de la cartelera |
 
 ---
 
@@ -132,8 +133,9 @@ El diseño de la interfaz, el esquema físico de base de datos y las decisiones 
 | ID | Requerimiento | Origen |
 |---|---|---|
 | **RF-33** | El administrador crea productos del candy bar y los organiza en **categorías**. | E4 |
-| **RF-34** | Los productos se compran **junto con la entrada**, en la misma operación. | E4 |
-| **RF-35** | El retiro de los productos se realiza con **el mismo QR** de la entrada. | E4 |
+| **RF-34** | Los productos se compran **junto con la entrada**, en la misma operación, o **solos** (RF-34.1). | E4, R1 |
+| **RF-34.1** | Existe una pantalla de **candy bar** para comprar productos **sin entrada**. La compra emite un **ticket con QR** para retirarlos, válido durante **7 días**, y no se cancela. | R1 |
+| **RF-35** | El retiro de los productos se realiza con **el mismo QR** de la entrada, o con el del ticket de candy. | E4, R1 |
 | **RF-36** | El administrador crea **combos** (entrada + pochoclos + bebida) a un **precio fijo configurable**. | E8 |
 | **RF-37** | Los combos aparecen **destacados** en la página de compra. | E8 |
 
@@ -143,8 +145,10 @@ El diseño de la interfaz, el esquema físico de base de datos y las decisiones 
 |---|---|---|
 | **RF-38** | El registro solicita **email, nombre, apellido, fecha de nacimiento, tipo de sangre, color de ojos y cantidad de días de vacaciones por año**. | E1, D-04 |
 | **RF-38.1** | Los datos personales sensibles del perfil son **visibles únicamente para su propio titular**. Ningún otro rol, incluido el administrador, accede a ellos. | D-04 |
+| **RF-38.2** | Un inicio de sesión fallido informa que **las credenciales son inválidas**, sin decir cuál de los dos datos falló. | R1 |
 | **RF-39** | El usuario registrado recibe un **cupón de descuento para su primera compra**. | E1 |
 | **RF-40** | El perfil muestra el saldo de **puntos**, el **historial de canjes** y el **crédito** disponible. | E8, E10 |
+| **RF-40.1** | El perfil muestra **qué recompensas se pueden canjear**, cuánto cuesta cada una y **cuántos puntos faltan** para las que todavía no alcanzan. | R1 |
 | **RF-41** | Existe una sección **Mis Películas** con el historial visual de lo que el usuario vio: póster, fecha y su propia calificación. | E9 |
 | **RF-42** | El usuario puede activar una **alerta** para ser notificado cuando las entradas de una película de Próximamente salgan a la venta. | E9 |
 
@@ -168,6 +172,7 @@ Los tres últimos campos se almacenan pero no participan de ninguna regla de neg
 |---|---|---|
 | **RF-43** | El **porcentaje** del cupón de bienvenida es configurable por el administrador (valor inicial: 20%). | E1, E4 |
 | **RF-44** | El administrador puede crear cupones dirigidos **solo a usuarios mayores de 50 años**. | E4 |
+| **RF-44.1** | A la cuenta que cumple la edad de un cupón por edad vigente, el sistema le **avisa que lo puede usar**: en el perfil y al pagar una compra. | R1 |
 | **RF-45** | Cada compra de un usuario registrado acumula **1 punto por peso gastado**. | E8 |
 | **RF-46** | Los puntos se canjean por **entradas gratis** o por **productos del candy bar**. | E8 |
 | **RF-47** | El administrador configura **cuántos puntos cuesta cada recompensa** (por ejemplo, entrada 500, pochoclo grande 150). | E8 |
@@ -226,7 +231,9 @@ Una butaca de una función determinada no puede pertenecer a más de una orden p
 
 ### RN-04 — Restricción de edad
 
-Para una función cuya película tiene restricción de 13 o 18 años, la compra se rechaza si la edad del comprador a la fecha de la función es menor que la restricción. Toda entrada emitida para esas películas lleva impresa la leyenda de adulto acompañante (RF-29).
+Para una función cuya película tiene restricción de 13 o 18 años, un comprador cuya edad a la fecha de la función es menor que la restricción **solo puede comprar si va acompañado por un adulto**, y eso se exige como **un mínimo de 2 entradas en la misma compra** (la suya y la del adulto). Con cuenta, la edad sale de la fecha de nacimiento registrada; sin cuenta, de la declaración (D-02). Toda entrada emitida para esas películas lleva impresa la leyenda de adulto acompañante (RF-29).
+
+> Revisada en la v1.2 (R1). Hasta la v1.1 la compra de un menor se rechazaba sin excepción.
 
 ### RN-05 — El QR se consume una sola vez, por tramo
 
@@ -282,7 +289,7 @@ Provienen de la consigna de la cátedra y de los pedidos explícitos de usabilid
 | **RNF-05** | Aplicación **desplegada y accesible por una URL pública funcional**. | Consigna |
 | **RNF-06** | Código publicado en **GitHub**, con **README** que documente arquitectura y decisiones técnicas. | Consigna |
 | **RNF-07** | Las interfaces deben ser **fáciles de navegar y entender**, tanto para clientes como para empleados. | E7 |
-| **RNF-08** | El ingreso de **fechas y horas** debe resolverse con un selector propio que **no requiera scroll extenso** ni búsqueda tediosa. El cliente rechazó explícitamente los selectores nativos de tipo rueda. | E7 |
+| **RNF-08** | El ingreso de **fechas y horas** no requiere scroll extenso ni búsqueda tediosa, y **no usa calendarios ni ruedas**: donde las opciones son fijas (el día y el horario de una función) se eligen de una lista de botones; donde la fecha es libre, se escribe en un campo con formato (DD/MM/AAAA, HH:MM). El cliente rechazó explícitamente los selectores nativos de tipo rueda (E7), y la revisión R1 pidió dejar los calendarios. | E7, R1 |
 | **RNF-09** | La seguridad de acceso a datos se aplica **del lado del servidor**. Los controles del cliente son ayudas de interfaz, no mecanismos de seguridad. | Buenas prácticas |
 | **RNF-10** | La diferenciación visual de tipos de butaca no puede depender **exclusivamente del color** (accesibilidad). | E6, buenas prácticas |
 | **RNF-11** | Los datos personales sensibles del perfil (tipo de sangre, color de ojos, días de vacaciones) se protegen con políticas de acceso del lado del servidor que los restringen a su titular, y quedan excluidos de reportes, exportaciones y logs. | D-04 |
@@ -307,7 +314,9 @@ El pliego presenta ambigüedades, contradicciones y omisiones. Cada una se resue
 
 **Contradicción.** El pliego permite comprar sin registro (E1) y a la vez exige impedir la compra de entradas restringidas a menores de 13 o 18 años (E6). Sin cuenta no hay fecha de nacimiento registrada.
 
-**Resolución.** Cuando la función pertenece a una película con restricción de edad, el checkout anónimo solicita una **declaración de fecha de nacimiento** y aplica RN-04 sobre ese valor. La entrada emitida incluye la leyenda de adulto acompañante.
+**Resolución.** Cuando la función pertenece a una película con restricción de edad, el checkout anónimo pide **firmar una casilla**: "Declaro tener 13 (o 18) años o más". Quien no puede firmarla firma la segunda, "Soy menor y voy acompañado por un adulto", y RN-04 le exige al menos 2 entradas. Si no firma ninguna, no puede seguir. Lo firmado queda guardado con la orden, y la entrada incluye la leyenda de adulto acompañante.
+
+> Revisada en la v1.2 (R1). Hasta la v1.1 se declaraba la fecha de nacimiento con un selector de fecha; la revisión pidió reemplazarlo por una casilla.
 
 **Fundamento.** Es el mecanismo estándar de la industria y el único compatible con ambos requerimientos. El control efectivo de la edad ocurre en el acceso físico a la sala, momento en que el empleado valida el QR; el sistema documenta la restricción y deja constancia de la declaración.
 
@@ -445,8 +454,9 @@ LogActividad ── (actor, acción, entidad, timestamp)
 | **E8** | RF-36, RF-37, RF-40, RF-45, RF-46, RF-47, RF-48, RN-07 |
 | **E9** | RF-08, RF-41, RF-42, RF-49, RF-50, RN-10 |
 | **E10** | RF-15, RF-17, RF-30, RF-31, RF-32, RF-58, RF-59, RF-60, RF-61, RN-06, RN-11, RN-12 |
+| **R1** | RF-34, RF-34.1, RF-35, RF-38.2, RF-40.1, RF-44.1, RN-04, RNF-08, D-02 |
 
-**Totales:** 62 requerimientos funcionales · 12 reglas de negocio · 11 requerimientos no funcionales · 8 decisiones de interpretación · 3 exclusiones de alcance.
+**Totales:** 62 requerimientos funcionales (más 4 ampliaciones de la revisión R1: RF-34.1, RF-38.2, RF-40.1 y RF-44.1) · 12 reglas de negocio · 11 requerimientos no funcionales · 8 decisiones de interpretación · 3 exclusiones de alcance.
 
 ---
 
@@ -456,3 +466,4 @@ LogActividad ── (actor, acción, entidad, timestamp)
 |---|---|---|
 | 1.0 | 06/09/2026 | Versión inicial, consolidando los 10 emails del cliente |
 | 1.1 | 07/09/2026 | **D-04 resuelta por consulta al cliente**: se respetan todos los campos de registro del email original. RF-38 actualizado con el detalle de los siete campos; se agregan RF-38.1 y RNF-11 para restringir el acceso a los datos sensibles a su titular |
+| 1.2 | 28/09/2026 | **Revisión del avance (R1)**. Se agregan RF-34.1 (compra de candy sin entrada, con ticket y QR), RF-38.2 (mensaje de credenciales inválidas), RF-40.1 (recompensas canjeables en el perfil) y RF-44.1 (aviso del cupón por edad). Cambian **RN-04** (un menor compra con adulto acompañante y al menos 2 entradas, en vez de rechazarse), **D-02** (la edad se declara con una casilla, no con una fecha), **RNF-08** (sin calendarios: botones de opciones o campos con formato), y RF-34 y RF-35 para incluir el ticket de candy. El rediseño visual de la cartelera no cambia requerimientos |
