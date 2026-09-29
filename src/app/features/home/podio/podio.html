@@ -1,0 +1,113 @@
+<ol class="podio">
+  @for (item of items(); track item.pelicula.id) {
+    @let pelicula = item.pelicula;
+    @let puntaje = puntajes().get(pelicula.id);
+    @let horas = horasDe(pelicula);
+
+    @if (item.puesto === 1) {
+      <li class="primero">
+        <article class="entrada">
+          <div class="entrada__cuerpo">
+            <app-poster
+              class="entrada__poster"
+              [titulo]="pelicula.titulo"
+              [url]="pelicula.poster_url"
+              [decorativo]="true"
+              [llenar]="true"
+            />
+
+            <!--
+              Cabecera y sinopsis son hermanos del póster y no un bloque: en el celular la sinopsis
+              baja a todo el ancho debajo del póster, y en escritorio queda al lado, abajo del título
+            -->
+            <div class="entrada__cabecera">
+              <p class="insignia">
+                <span class="insignia__numero"><span class="solo-lectores">Puesto </span>1</span>
+                La más vendida
+              </p>
+
+              <h3 class="entrada__titulo titulo">
+                <a [routerLink]="['/peliculas', pelicula.id]">{{ pelicula.titulo }}</a>
+              </h3>
+
+              <p class="datos">{{ datos(pelicula) }}</p>
+
+              <div class="calificacion">
+                <app-estrellas
+                  [valor]="puntaje?.promedio ?? 0"
+                  [cantidad]="puntaje?.cantidad ?? 0"
+                />
+                <app-sello-edad [edad]="pelicula.restriccion_edad" />
+              </div>
+            </div>
+
+            @if (pelicula.sinopsis) {
+              <p class="sinopsis">{{ pelicula.sinopsis }}</p>
+            }
+          </div>
+
+          <!-- El troquel: línea punteada y dos muescas, como una entrada de papel -->
+          <div class="troquel" aria-hidden="true"></div>
+
+          <div class="talon">
+            <div class="talon__funciones">
+              <p class="talon__rotulo">Funciones de hoy</p>
+              @if (horas === null) {
+                <p class="talon__nota">Horarios en la ficha de la película</p>
+              } @else if (horas.length > 0) {
+                <ul class="talon__horas">
+                  @for (hora of horas; track hora) {
+                    <li>{{ hora }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="talon__nota">No quedan funciones hoy</p>
+              }
+            </div>
+            <span class="boton boton--primario talon__comprar" aria-hidden="true">Comprar</span>
+          </div>
+        </article>
+      </li>
+    } @else {
+      <li>
+        <article class="ficha">
+          <app-poster
+            class="ficha__poster"
+            [titulo]="pelicula.titulo"
+            [url]="pelicula.poster_url"
+            [decorativo]="true"
+          />
+
+          <div class="ficha__datos">
+            <p class="insignia insignia--contorno">
+              <span class="insignia__numero"
+                ><span class="solo-lectores">Puesto </span>{{ item.puesto }}</span
+              >
+            </p>
+
+            <h3 class="ficha__titulo titulo">
+              <a [routerLink]="['/peliculas', pelicula.id]">{{ pelicula.titulo }}</a>
+            </h3>
+
+            <p class="datos">{{ datos(pelicula) }}</p>
+
+            <div class="calificacion">
+              <app-sello-edad [edad]="pelicula.restriccion_edad" />
+              <app-estrellas [valor]="puntaje?.promedio ?? 0" [cantidad]="puntaje ? null : 0" />
+            </div>
+
+            @if (horas !== null) {
+              <p class="ficha__hoy">
+                @if (horas.length > 0) {
+                  Hoy {{ horas.join(' · ') }}
+                } @else {
+                  No quedan funciones hoy
+                }
+              </p>
+            }
+          </div>
+        </article>
+      </li>
+    }
+  }
+</ol>

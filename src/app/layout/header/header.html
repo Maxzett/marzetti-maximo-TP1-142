@@ -9,23 +9,19 @@
 
     <nav class="nav" aria-label="Principal">
       <ul>
-        <!-- exact: sin esto "Cartelera" quedaría activo en todas las rutas, porque todas empiezan con "/" -->
+        <!--
+          La ruta tiene que ser exacta: sin eso "Cartelera" quedaría activo en todas las pantallas,
+          porque todas empiezan con "/". Los parámetros no cuentan: con el buscador filtrando
+          (/?q=...) se sigue estando en la cartelera. El enlace vuelve a / a secas, que es lo que
+          reinicia los filtros.
+        -->
         <li>
           <a
             routerLink="/"
             routerLinkActive="activo"
-            [routerLinkActiveOptions]="{ exact: true }"
+            [routerLinkActiveOptions]="cartelera"
             ariaCurrentWhenActive="page"
             >Cartelera</a
-          >
-        </li>
-        <!--
-          Sin exact: la ficha de una película (/peliculas/:id) también es "Películas".
-          El enlace vuelve a /peliculas a secas, que es lo que reinicia los filtros del buscador.
-        -->
-        <li>
-          <a routerLink="/peliculas" routerLinkActive="activo" ariaCurrentWhenActive="page"
-            >Películas</a
           >
         </li>
         <li>

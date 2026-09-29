@@ -2,7 +2,7 @@
   @if (cargando()) {
     <app-spinner etiqueta="Cargando la película" />
   } @else if (pelicula(); as datos) {
-    <a class="volver" routerLink="/peliculas">← Todas las películas</a>
+    <a class="volver" routerLink="/">← La cartelera</a>
 
     <article class="ficha">
       <app-poster class="poster" [titulo]="datos.titulo" [url]="datos.poster_url" />
@@ -168,6 +168,6 @@
     </app-dialogo>
   } @else {
     <app-mensaje tono="aviso">No pudimos encontrar esta película.</app-mensaje>
-    <p class="volver-solo"><a routerLink="/peliculas">Volver a las películas</a></p>
+    <p class="volver-solo"><a routerLink="/">Volver a la cartelera</a></p>
   }
 </section>

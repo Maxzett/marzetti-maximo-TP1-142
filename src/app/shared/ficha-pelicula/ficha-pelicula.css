@@ -2,47 +2,68 @@
 :host {
   position: relative;
   display: grid;
-  border-radius: var(--r-medio);
+  border-radius: var(--r-chico);
 }
 
 /* El anillo del foco va en la ficha entera: el enlace es solo el título, y un aro alrededor
-   de una línea de texto no dice que lo enfocado es la tarjeta */
+   de una línea de texto no dice que lo enfocado es la ficha */
 :host:has(a:focus-visible) {
   outline: 3px solid var(--acento);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 .ficha {
   display: flex;
   flex-direction: column;
-  gap: var(--e-3);
-  height: 100%;
-}
-
-.puesto {
-  color: var(--acento);
-  font-family: var(--fuente-display);
-  font-size: var(--t-titulo);
-  letter-spacing: 0.06em;
-  line-height: 1;
-}
-
-.cuerpo {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
   gap: var(--e-2);
 }
 
-/* Dos líneas siempre reservadas y un tope de dos: un título largo no estira la tarjeta, y uno
+.cartel {
+  position: relative;
+  margin-bottom: var(--e-1);
+  border-radius: var(--r-chico);
+  box-shadow: var(--sombra-ficha);
+  transition: transform 160ms ease;
+}
+
+/* El póster sube un poco al pasar: la ficha entera responde, no solo el título */
+:host:hover .cartel {
+  transform: translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartel {
+    transition: none;
+  }
+}
+
+.destacada {
+  position: absolute;
+  top: var(--e-2);
+  left: 0;
+  padding: var(--e-1) var(--e-2);
+  border-radius: 0 var(--r-chico) var(--r-chico) 0;
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Dos líneas siempre reservadas y un tope de dos: un título largo no estira la ficha, y uno
    corto no la deja más baja. El título completo está en el atributo title del enlace */
 .titulo {
   display: -webkit-box;
-  min-block-size: 2.4em;
+  min-block-size: 2.2em;
   overflow: hidden;
   font-family: var(--fuente-titulo);
-  font-size: var(--t-rotulo);
-  line-height: 1.2;
+  font-size: clamp(1rem, 2.4vw, var(--t-rotulo));
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -64,43 +85,16 @@
   text-underline-offset: 3px;
 }
 
-.meta {
-  display: flex;
-  align-items: center;
-  gap: var(--e-3);
+.datos {
   color: var(--texto-tenue);
   font-size: var(--t-mini);
+  letter-spacing: 0.02em;
 }
 
-.edad {
-  padding: 0 var(--e-2);
-  border: 1px solid var(--borde-fuerte);
-  border-radius: var(--r-chico);
-  font-family: var(--fuente-titulo);
-  letter-spacing: 0.08em;
-}
-
-/* El rojo refuerza el +18, pero el "+18" está escrito: no se depende del color (RNF-10) */
-.edad--mayores {
-  border-color: var(--rojo-claro);
-  color: var(--rojo-claro);
-}
-
-.generos {
+.calificacion {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--e-1) var(--e-3);
-  color: var(--texto-tenue);
-  font-size: var(--t-mini);
-}
-
-/* Los géneros van separados por un punto medio, dibujado y no escrito en el texto */
-.generos li + li::before {
-  content: '·';
-  margin-right: var(--e-3);
-}
-
-.ventas {
-  color: var(--texto-tenue);
-  font-size: var(--t-mini);
+  align-items: center;
+  gap: var(--e-2);
+  --estrella-lado: 0.8125rem;
 }

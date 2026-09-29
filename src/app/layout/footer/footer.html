@@ -3,14 +3,32 @@
 
   <div class="contenido contenedor">
     <div class="bloques">
-      <div>
+      <div class="casa">
         <p class="marca">Emezeta</p>
+        <address class="sala">
+          Av. Rivadavia 4820, CABA<br />
+          Boletería de 14 a 23 h
+        </address>
       </div>
 
-      <address class="sala">
-        Av. Rivadavia 4820, CABA<br />
-        Boletería de 14 a 23 h
-      </address>
+      <!-- Solo pantallas que existen: un pie con enlaces a páginas vacías es peor que uno corto -->
+      <nav class="enlaces" aria-label="Pie de página">
+        <div>
+          <h2 class="enlaces__titulo">La sala</h2>
+          <ul>
+            <li><a routerLink="/">Cartelera</a></li>
+            <li><a routerLink="/proximamente">Próximamente</a></li>
+            <li><a routerLink="/candy">Candy bar</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="enlaces__titulo">Tu cuenta</h2>
+          <ul>
+            <li><a routerLink="/perfil">Puntos, crédito y compras</a></li>
+            <li><a routerLink="/mis-peliculas">Mis películas</a></li>
+          </ul>
+        </div>
+      </nav>
     </div>
 
     <p class="nota">

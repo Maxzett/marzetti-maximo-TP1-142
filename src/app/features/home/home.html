@@ -1,69 +1,126 @@
-<section class="contenedor pantalla">
-  <h1>Cartelera</h1>
-  <p class="bajada">Lo que más se vio y lo que no te podés perder esta semana.</p>
+<!-- La marca ya se lee en el header: el h1 nombra la pantalla para el lector de pantalla -->
+<h1 class="solo-lectores">Cartelera del Cine Emezeta</h1>
 
-  @if (cargando()) {
+@if (cargando()) {
+  <div class="contenedor pantalla">
     <app-spinner etiqueta="Cargando la cartelera" />
-  } @else if (fallo()) {
+  </div>
+} @else if (fallo()) {
+  <div class="contenedor pantalla">
     <app-mensaje tono="error">
       No pudimos cargar la cartelera.
       <button class="boton boton--fantasma" type="button" (click)="cargar()">Reintentar</button>
     </app-mensaje>
-  } @else if (top().length === 0 && destacadas().length === 0) {
-    <app-mensaje tono="aviso">Todavía no hay películas en cartelera.</app-mensaje>
-  } @else {
-    @if (top().length > 0) {
-      <section class="bloque" aria-labelledby="titulo-top">
-        <h2 id="titulo-top">Las 3 más vendidas</h2>
-        <ul class="grilla">
-          @for (item of top(); track item.pelicula.id) {
-            <li>
-              <app-ficha-pelicula
-                [pelicula]="item.pelicula"
-                [puntaje]="puntajes().get(item.pelicula.id) ?? null"
-                [entradas]="item.entradas"
-                [puesto]="item.puesto"
-              />
-            </li>
-          }
-        </ul>
-      </section>
-    }
+  </div>
+} @else {
+  @if (top().length > 0) {
+    <section class="contenedor seccion seccion--primera" aria-labelledby="titulo-top">
+      <header class="cabecera">
+        <div>
+          <p class="sobretitulo">Por entradas vendidas</p>
+          <h2 id="titulo-top">Las 3 más vendidas</h2>
+        </div>
+        <p class="bajada">El ranking se arma con las compras y cambia con cada función.</p>
+      </header>
 
-    @if (destacadas().length > 0) {
-      <section class="bloque" aria-labelledby="titulo-destacadas">
-        <h2 id="titulo-destacadas">En cartelera</h2>
-        <ul class="grilla">
-          @for (pelicula of destacadas(); track pelicula.id) {
-            <li>
-              <app-ficha-pelicula
-                [pelicula]="pelicula"
-                [puntaje]="puntajes().get(pelicula.id) ?? null"
-              />
-            </li>
-          }
-        </ul>
-      </section>
-    }
-
-    @if (proximas().length > 0) {
-      <section class="bloque" aria-labelledby="titulo-proximas">
-        <h2 id="titulo-proximas">Próximamente</h2>
-        <ul class="grilla">
-          @for (pelicula of proximas(); track pelicula.id) {
-            <li>
-              <app-ficha-proxima [pelicula]="pelicula" />
-            </li>
-          }
-        </ul>
-        <p class="mas">
-          <a routerLink="/proximamente">Todos los estrenos y avisos de venta →</a>
-        </p>
-      </section>
-    }
-
-    <p class="todas">
-      <a class="boton boton--borde" routerLink="/peliculas">Ver todas y buscar</a>
-    </p>
+      <app-podio [items]="top()" [puntajes]="puntajes()" [horarios]="horarios()" />
+    </section>
   }
-</section>
+
+  <section class="contenedor seccion" id="cartelera" aria-labelledby="titulo-cartelera">
+    <!-- novalidate y sin submit: la búsqueda es instantánea, Enter no tiene nada que enviar -->
+    <form class="buscador" role="search" novalidate (submit)="$event.preventDefault()">
+      <app-campo
+        etiqueta="Buscar por nombre"
+        tipo="search"
+        marcador="Ej.: glicinas, tren, neón…"
+        autocompletado="off"
+        [valor]="busqueda()"
+        (valorChange)="alBuscar($event)"
+      />
+
+      @if (generosDisponibles().length > 0) {
+        <fieldset class="generos">
+          <legend>
+            Género
+            <span class="generos__ayuda">— la película tiene que tener todos los que elijas</span>
+          </legend>
+          <div class="chips">
+            @for (genero of generosDisponibles(); track genero.slug) {
+              <app-chip
+                [activo]="seleccionados().includes(genero.slug)"
+                (activoChange)="alternarGenero(genero.slug, $event)"
+              >
+                {{ genero.nombre }}
+              </app-chip>
+            }
+          </div>
+        </fieldset>
+      }
+
+      <div class="estado">
+        <!-- role="status" es una región viva educada: anuncia el resultado sin cortar lo que se lee -->
+        <p class="resumen" role="status">{{ resumen() }}</p>
+        @if (hayFiltros()) {
+          <button class="boton boton--borde limpiar" type="button" (click)="limpiar()">
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    </form>
+
+    <header class="cabecera cabecera--grilla">
+      <h2 id="titulo-cartelera">En cartelera</h2>
+      <!--
+        La leyenda explica las formas, y las formas son para la vista: cada sello de la grilla ya
+        se lee completo por su cuenta ("Mayores de 13 años"), así que acá se oculta entera
+      -->
+      <p class="leyenda" aria-hidden="true">
+        <span class="leyenda__item"><app-sello-edad [edad]="0" /> sin restricción</span>
+        <span class="leyenda__item"><app-sello-edad [edad]="13" /> desde 13 años</span>
+        <span class="leyenda__item"><app-sello-edad [edad]="18" /> solo mayores</span>
+      </p>
+    </header>
+
+    @if (resultados().length > 0) {
+      <ul class="grilla">
+        @for (pelicula of resultados(); track pelicula.id) {
+          <li>
+            <app-ficha-pelicula
+              [pelicula]="pelicula"
+              [puntaje]="puntajes().get(pelicula.id) ?? null"
+            />
+          </li>
+        }
+      </ul>
+    } @else if (hayFiltros()) {
+      <app-mensaje tono="aviso">
+        Ninguna película coincide con lo que buscás.
+        <button class="boton boton--fantasma" type="button" (click)="limpiar()">
+          Limpiar filtros
+        </button>
+      </app-mensaje>
+    } @else {
+      <app-mensaje tono="aviso">Todavía no hay películas en cartelera.</app-mensaje>
+    }
+  </section>
+
+  @if (proximas().length > 0) {
+    <section class="franja" id="proximamente" aria-labelledby="titulo-proximas">
+      <div class="contenedor">
+        <header class="cabecera">
+          <div>
+            <p class="sobretitulo">Estrenos de las próximas semanas</p>
+            <h2 id="titulo-proximas">Próximamente</h2>
+          </div>
+          <p class="bajada">
+            Activá el aviso y te avisamos en cuanto abra la venta.
+            <a routerLink="/proximamente">Todos los estrenos →</a>
+          </p>
+        </header>
+
+        <app-estrenos [peliculas]="proximas()" />
+      </div>
+    </section>
+  }
+}

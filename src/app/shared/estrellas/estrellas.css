@@ -20,8 +20,9 @@ svg {
 .pista {
   position: relative;
   display: inline-block;
-  /* Una sola medida para las cinco estrellas: cambiarla acá cambia el tamaño de todas */
-  --lado: 1rem;
+  /* Una sola medida para las cinco estrellas. Quien lo usa la achica con --estrella-lado,
+     que cruza el encapsulamiento de estilos porque las variables CSS se heredan */
+  --lado: var(--estrella-lado, 1rem);
 }
 
 .fila {

@@ -17,10 +17,7 @@
       }
 
       <p class="meta">
-        <span class="edad" [class.edad--mayores]="pelicula().restriccion_edad === 18">
-          <span aria-hidden="true">{{ edad().corto }}</span>
-          <span class="solo-lectores">{{ edad().largo }}</span>
-        </span>
+        <app-sello-edad [edad]="pelicula().restriccion_edad" />
         <span>{{ pelicula().duracion_minutos }} min</span>
       </p>
 

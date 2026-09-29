@@ -72,7 +72,7 @@
             @if (esCandy()) {
               <a class="boton boton--borde" routerLink="/candy">Volver al candy bar</a>
             } @else {
-              <a class="boton boton--borde" routerLink="/peliculas">Ver más películas</a>
+              <a class="boton boton--borde" routerLink="/">Ver la cartelera</a>
             }
             <app-boton
               [cargando]="descargando()"
@@ -88,7 +88,7 @@
         <app-mensaje tono="aviso">
           Esta compra todavía no fue pagada, así que no hay entrada para mostrar.
         </app-mensaje>
-        <p><a routerLink="/peliculas">Volver a las películas</a></p>
+        <p><a routerLink="/">Volver a la cartelera</a></p>
       }
       @default {
         <app-mensaje tono="error">
@@ -96,13 +96,13 @@
             e.estado === 'cancelada' ? 'fue cancelada' : 'la reserva venció'
           }}).
         </app-mensaje>
-        <p><a routerLink="/peliculas">Volver a las películas</a></p>
+        <p><a routerLink="/">Volver a la cartelera</a></p>
       }
     }
   } @else {
     <app-mensaje tono="error">
       No encontramos esa entrada. Revisá que el código esté completo.
     </app-mensaje>
-    <p><a routerLink="/peliculas">Ver las películas</a></p>
+    <p><a routerLink="/">Ver la cartelera</a></p>
   }
 </section>

@@ -1,42 +1,25 @@
-<app-tarjeta [destacada]="puesto() !== null">
-  <article class="ficha">
-    @if (puesto() !== null) {
-      <p class="puesto">N.º {{ puesto() }}</p>
-    }
-
+<article class="ficha">
+  <div class="cartel">
     <!-- El título está escrito abajo, en el enlace: el póster es decoración -->
     <app-poster [titulo]="pelicula().titulo" [url]="pelicula().poster_url" [decorativo]="true" />
 
-    <div class="cuerpo">
-      <h3 class="titulo">
-        <a [routerLink]="['/peliculas', pelicula().id]" [title]="pelicula().titulo">{{
-          pelicula().titulo
-        }}</a>
-      </h3>
+    <!-- RF-07: la destacó el administrador. Es texto, no una estrella de color -->
+    @if (pelicula().destacada) {
+      <p class="destacada">Destacada</p>
+    }
+  </div>
 
-      <p class="meta">
-        <span class="edad" [class.edad--mayores]="pelicula().restriccion_edad === 18">
-          <span aria-hidden="true">{{ edad().corto }}</span>
-          <span class="solo-lectores">{{ edad().largo }}</span>
-        </span>
-        <span>{{ pelicula().duracion_minutos }} min</span>
-      </p>
+  <h3 class="titulo">
+    <a [routerLink]="['/peliculas', pelicula().id]" [title]="pelicula().titulo">{{
+      pelicula().titulo
+    }}</a>
+  </h3>
 
-      @if (pelicula().generos.length > 0) {
-        <ul class="generos" aria-label="Géneros">
-          @for (genero of pelicula().generos; track genero.id) {
-            <li>{{ genero.nombre }}</li>
-          }
-        </ul>
-      }
+  <p class="datos">{{ datos() }}</p>
 
-      <app-estrellas [valor]="puntaje()?.promedio ?? 0" [cantidad]="puntaje()?.cantidad ?? 0" />
-
-      @if (entradas() > 0) {
-        <p class="ventas">
-          {{ entradas() }} {{ entradas() === 1 ? 'entrada vendida' : 'entradas vendidas' }}
-        </p>
-      }
-    </div>
-  </article>
-</app-tarjeta>
+  <div class="calificacion">
+    <app-sello-edad [edad]="pelicula().restriccion_edad" />
+    <!-- Con puntaje se oculta el "(N)": en la grilla alcanza con el promedio -->
+    <app-estrellas [valor]="puntaje()?.promedio ?? 0" [cantidad]="puntaje() ? null : 0" />
+  </div>
+</article>

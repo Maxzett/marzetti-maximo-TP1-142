@@ -1,11 +1,11 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { describirEdad } from '../../core/catalogo/edad';
 import { estadoDeVenta } from '../../core/catalogo/venta';
 import { formatearPrecio } from '../../core/formato/precio';
 import { Pelicula } from '../../core/models/pelicula';
 import { formatearDiaYMes, hoyIso } from '../selector-fecha/fechas';
 import { Poster } from '../poster/poster';
+import { SelloEdad } from '../sello-edad/sello-edad';
 import { Tarjeta } from '../tarjeta/tarjeta';
 
 /**
@@ -17,7 +17,7 @@ import { Tarjeta } from '../tarjeta/tarjeta';
  * tarjeta. Lo que se proyecta adentro (el botón de alerta) queda por encima del enlace.
  */
 @Component({
-  imports: [Poster, RouterLink, Tarjeta],
+  imports: [Poster, RouterLink, SelloEdad, Tarjeta],
   selector: 'app-ficha-proxima',
   styleUrl: './ficha-proxima.css',
   templateUrl: './ficha-proxima.html',
@@ -27,7 +27,6 @@ export class FichaProxima {
   /** 'AAAA-MM-DD'. Es input para que un test o el catálogo vivo puedan fijar el día */
   readonly hoy = input(hoyIso());
 
-  protected readonly edad = computed(() => describirEdad(this.pelicula().restriccion_edad));
   protected readonly venta = computed(() => estadoDeVenta(this.pelicula(), this.hoy()));
 
   protected readonly estreno = computed(() => {

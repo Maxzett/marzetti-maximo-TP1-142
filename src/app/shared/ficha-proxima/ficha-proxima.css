@@ -76,19 +76,6 @@
   font-size: var(--t-mini);
 }
 
-.edad {
-  padding: 0 var(--e-2);
-  border: 1px solid var(--borde-fuerte);
-  border-radius: var(--r-chico);
-  font-family: var(--fuente-titulo);
-  letter-spacing: 0.08em;
-}
-
-.edad--mayores {
-  border-color: var(--rojo-claro);
-  color: var(--rojo-claro);
-}
-
 /* Bombilla apagada (○) o encendida (●): la forma dice lo mismo que el color (RNF-10) */
 .venta {
   display: flex;

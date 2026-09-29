@@ -1,0 +1,377 @@
+:host {
+  display: block;
+}
+
+/* Celular: una columna. Escritorio: la entrada a la izquierda y los otros dos apilados al lado */
+.podio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e-3);
+}
+
+/* Escritorio mediano: la entrada a todo el ancho y los otros dos lado a lado debajo. Al lado
+   de la entrada quedarían tan angostos que la estirarían, y el póster se recortaría de más */
+@media (min-width: 64rem) {
+  .podio {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--e-5);
+  }
+
+  .primero {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Escritorio ancho: la entrada a la izquierda y los otros dos apilados al lado */
+@media (min-width: 80rem) {
+  .podio {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  .primero {
+    grid-column: auto;
+    grid-row: span 2;
+  }
+}
+
+/* minmax(0, 1fr) y no auto: la tarjeta toma el ancho de su columna y no el de su contenido.
+   Con auto, el póster que llena el alto empujaba el ancho mínimo y la entrada se desbordaba */
+.podio > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---- Lo común a los tres puestos ---- */
+
+.entrada,
+.ficha {
+  /* Anclaje del enlace estirado del título */
+  position: relative;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  box-shadow: var(--sombra-ficha);
+}
+
+.entrada:has(a:focus-visible),
+.ficha:has(a:focus-visible) {
+  outline: 3px solid var(--acento);
+  outline-offset: 3px;
+}
+
+.titulo a {
+  color: var(--texto);
+}
+
+.titulo a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.entrada:hover .titulo a,
+.ficha:hover .titulo a {
+  color: var(--bombilla);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.insignia {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.insignia__numero {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1.5px solid var(--acento);
+  border-radius: var(--r-chico);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-family: var(--fuente-display);
+  font-size: 1.125rem;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* El segundo y el tercero: la misma insignia, hueca. El número está escrito en los tres */
+.insignia--contorno .insignia__numero {
+  width: 1.625rem;
+  height: 1.625rem;
+  background: transparent;
+  color: var(--acento);
+  font-size: 1rem;
+}
+
+.datos {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  letter-spacing: 0.02em;
+}
+
+.calificacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2) var(--e-3);
+}
+
+/* ---- Puesto 1: la entrada ---- */
+
+.entrada {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-color: var(--borde-fuerte);
+}
+
+/*
+ * El póster es el que manda: su alto fija el de la tarjeta, y el texto se acomoda al lado.
+ * Celular: póster y cabecera lado a lado, la sinopsis a todo el ancho debajo, así no queda un
+ * hueco bajo la imagen cuando el texto es largo. Escritorio: póster en toda la altura y, a su
+ * lado, la cabecera arriba y la sinopsis ocupando lo que queda.
+ */
+.entrada__cuerpo {
+  display: grid;
+  flex: 1;
+  grid-template-areas:
+    'poster cabecera'
+    'sinopsis sinopsis';
+  grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  gap: var(--e-4);
+  min-width: 0;
+  padding: var(--e-4);
+}
+
+/*
+ * stretch en los dos ejes: el póster llega hasta abajo de la tarjeta aunque el texto de al lado
+ * sea más alto, y toma el ancho de su columna. El justify-self explícito hace falta porque en
+ * una grilla un elemento con aspect-ratio no se estira a lo ancho por defecto: sacaría el
+ * ancho del alto y se metería en el espacio que lo separa del texto.
+ */
+.entrada__poster {
+  grid-area: poster;
+  align-self: stretch;
+  justify-self: stretch;
+  border-radius: var(--r-chico);
+  box-shadow: 0 18px 36px -18px #000;
+}
+
+.entrada__cabecera {
+  display: flex;
+  grid-area: cabecera;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+}
+
+.entrada__titulo {
+  font-family: var(--fuente-display);
+  font-size: clamp(1.625rem, 3.2vw, 2.75rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.015em;
+  overflow-wrap: anywhere;
+}
+
+.sinopsis {
+  display: -webkit-box;
+  grid-area: sinopsis;
+  overflow: hidden;
+  color: var(--texto-tenue);
+  font-size: var(--t-cuerpo);
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+
+/*
+ * El troquel. En el celular es horizontal, entre el cuerpo y el talón; en escritorio, vertical.
+ * Las muescas son círculos del color del fondo de la página montados sobre el borde de la
+ * tarjeta: parecen mordidas en el papel.
+ */
+.troquel {
+  --muesca: 1.25rem;
+  position: relative;
+  margin-inline: var(--e-4);
+  border-top: 2px dashed var(--borde-fuerte);
+}
+
+.troquel::before,
+.troquel::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--muesca) / -2 - 1px);
+  width: var(--muesca);
+  height: var(--muesca);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 50%;
+  background: var(--fondo);
+}
+
+/* El borde de la tarjeta está a --e-4 del troquel: la muesca se centra sobre ese borde */
+.troquel::before {
+  left: calc(-1 * var(--e-4) - var(--muesca) / 2 - 1px);
+}
+
+.troquel::after {
+  right: calc(-1 * var(--e-4) - var(--muesca) / 2 - 1px);
+}
+
+.talon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  padding: var(--e-4);
+}
+
+.talon__rotulo {
+  margin-bottom: var(--e-1);
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.talon__horas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-1) var(--e-3);
+  font-family: var(--fuente-titulo);
+  font-size: 1.1875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.talon__nota {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.talon__comprar {
+  flex: none;
+}
+
+@media (min-width: 64rem) {
+  .entrada {
+    flex-direction: row;
+  }
+
+  .entrada__cuerpo {
+    grid-template-areas:
+      'poster cabecera'
+      'poster sinopsis';
+    /* El ancho del póster de la maqueta (~250 px, 375 de alto): define la altura de la tarjeta */
+    grid-template-columns: min(15.5rem, 48%) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    gap: var(--e-4) var(--e-5);
+    padding: var(--e-5);
+  }
+
+  /* En escritorio la sinopsis llena el alto que deja el póster, sin pasarse */
+  .sinopsis {
+    -webkit-line-clamp: 7;
+    line-clamp: 7;
+  }
+
+  .troquel {
+    margin: var(--e-5) 0;
+    border-top: 0;
+    border-left: 2px dashed var(--borde-fuerte);
+  }
+
+  .troquel::before,
+  .troquel::after {
+    left: calc(var(--muesca) / -2 - 1px);
+    right: auto;
+  }
+
+  .troquel::before {
+    top: calc(-1 * var(--e-5) - var(--muesca) / 2 - 1px);
+  }
+
+  .troquel::after {
+    top: auto;
+    bottom: calc(-1 * var(--e-5) - var(--muesca) / 2 - 1px);
+  }
+
+  .talon {
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    width: 11.5rem;
+    padding: var(--e-5) var(--e-4);
+  }
+
+  .talon__horas {
+    flex-direction: column;
+  }
+
+  .talon__comprar {
+    width: 100%;
+  }
+}
+
+/* ---- Puestos 2 y 3 ---- */
+
+.ficha {
+  display: flex;
+  gap: var(--e-4);
+  height: 100%;
+  padding: var(--e-4);
+}
+
+.ficha__poster {
+  flex: none;
+  width: clamp(5.25rem, 26%, 7rem);
+  align-self: flex-start;
+}
+
+.ficha__datos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+  --estrella-lado: 0.8125rem;
+}
+
+.ficha__titulo {
+  font-family: var(--fuente-titulo);
+  font-size: clamp(1rem, 2vw, 1.375rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+}
+
+.ficha__hoy {
+  margin-top: auto;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 64rem) {
+  .ficha__poster {
+    width: 6rem;
+  }
+}

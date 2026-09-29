@@ -31,6 +31,7 @@ describe('Sistema', () => {
       'app-poster',
       'app-estrellas',
       'app-ficha-pelicula',
+      'app-sello-edad',
       'app-grafico-barras',
       'app-promociones-orden',
     ];

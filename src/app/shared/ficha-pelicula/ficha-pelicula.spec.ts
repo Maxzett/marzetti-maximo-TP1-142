@@ -40,14 +40,14 @@ describe('FichaPelicula', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('muestra el título, la duración y los géneros', async () => {
+  it('muestra el título, los géneros y la duración en horas', async () => {
     await crear();
     const texto = raiz().textContent ?? '';
 
     expect(texto).toContain('Mar de cenizas');
-    expect(texto).toContain('131 min');
-    expect(texto).toContain('Acción');
-    expect(texto).toContain('Ciencia ficción');
+    expect(raiz().querySelector('.datos')?.textContent).toBe(
+      'Acción · Ciencia ficción · 2 h 11 min',
+    );
   });
 
   it('el título es un enlace al detalle de la película', async () => {
@@ -70,25 +70,23 @@ describe('FichaPelicula', () => {
     expect(poster?.getAttribute('aria-hidden')).toBe('true');
   });
 
-  describe('restricción de edad', () => {
-    it('escribe la edad y la dice completa para el lector de pantalla', async () => {
+  it('lleva el sello de su restricción de edad', async () => {
+    await crear();
+
+    expect(raiz().querySelector('app-sello-edad .sello--13')).not.toBeNull();
+  });
+
+  describe('destacada (RF-07)', () => {
+    it('si el administrador la destacó, lo dice con texto', async () => {
       await crear();
 
-      expect(raiz().querySelector('.edad')?.textContent).toContain('+13');
-      expect(raiz().querySelector('.edad .solo-lectores')?.textContent).toBe('Mayores de 13 años');
+      expect(raiz().querySelector('.destacada')?.textContent).toBe('Destacada');
     });
 
-    it('sin restricción dice ATP', async () => {
-      await crear({}, { ...PELICULA, restriccion_edad: 0 });
+    it('si no, no hay rótulo', async () => {
+      await crear({}, { ...PELICULA, destacada: false });
 
-      expect(raiz().querySelector('.edad')?.textContent).toContain('ATP');
-      expect(raiz().querySelector('.edad--mayores')).toBeNull();
-    });
-
-    it('+18 lleva la variante roja, además del texto', async () => {
-      await crear({}, { ...PELICULA, restriccion_edad: 18 });
-
-      expect(raiz().querySelector('.edad--mayores')?.textContent).toContain('+18');
+      expect(raiz().querySelector('.destacada')).toBeNull();
     });
   });
 
@@ -99,46 +97,19 @@ describe('FichaPelicula', () => {
       expect(raiz().textContent).toContain('Sin reseñas');
     });
 
-    it('con puntaje muestra el promedio y la cantidad', async () => {
+    it('con puntaje muestra el promedio, sin la cantidad', async () => {
       const puntaje: Puntaje = { pelicula_id: 'abc-123', promedio: 4.5, cantidad: 8 };
       await crear({ puntaje });
 
       expect(raiz().textContent).toContain('4,5');
-      expect(raiz().textContent).toContain('(8)');
+      expect(raiz().textContent).not.toContain('(8)');
     });
   });
 
-  describe('ranking', () => {
-    it('sin puesto no muestra ninguna posición', async () => {
-      await crear();
+  // El top de ventas vive en el podio de la portada: la ficha no muestra cifras de venta
+  it('no dice nada de ventas ni de puestos', async () => {
+    await crear();
 
-      expect(raiz().querySelector('.puesto')).toBeNull();
-    });
-
-    it('con puesto lo muestra y destaca la tarjeta', async () => {
-      await crear({ puesto: 2 });
-
-      expect(raiz().querySelector('.puesto')?.textContent).toContain('N.º 2');
-      expect(raiz().querySelector('.tarjeta--destacada')).not.toBeNull();
-    });
-
-    // El top tiene películas con 0 ventas hasta la F6: no se afirma algo que no pasó
-    it('con cero entradas no dice nada de ventas', async () => {
-      await crear({ entradas: 0 });
-
-      expect(raiz().querySelector('.ventas')).toBeNull();
-    });
-
-    it('con entradas vendidas las muestra, en plural', async () => {
-      await crear({ entradas: 12 });
-
-      expect(raiz().querySelector('.ventas')?.textContent).toContain('12 entradas vendidas');
-    });
-
-    it('con una sola entrada usa el singular', async () => {
-      await crear({ entradas: 1 });
-
-      expect(raiz().querySelector('.ventas')?.textContent).toContain('1 entrada vendida');
-    });
+    expect(raiz().textContent).not.toMatch(/vendid|N.º/);
   });
 });

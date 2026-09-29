@@ -208,7 +208,7 @@ describe('PeliculaDetalle', () => {
       await crear({ pelicula: null });
 
       expect(texto()).toContain('No pudimos encontrar esta película');
-      expect(raiz().querySelector('a[href="/peliculas"]')).not.toBeNull();
+      expect(raiz().querySelector('.volver-solo a')?.getAttribute('href')).toBe('/');
       // Sin película no tiene sentido ir a buscar sus reseñas
       expect(resenas.deLaPelicula).not.toHaveBeenCalled();
     });

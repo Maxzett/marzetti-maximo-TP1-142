@@ -6,14 +6,14 @@ import { NotFound } from './features/not-found/not-found';
 export const routes: Routes = [
   { path: '', component: Home, title: 'Cine Emezeta' },
 
-  // El catálogo y la ficha se cargan aparte de la portada, con el mismo criterio que las
-  // pantallas de cuenta. Son públicos: la compra anónima (RF-26) también los recorre.
-  // El id llega al componente como input() por withComponentInputBinding.
-  {
-    path: 'peliculas',
-    loadComponent: () => import('./features/peliculas/peliculas').then((m) => m.Peliculas),
-    title: 'Películas · Cine Emezeta',
-  },
+  // El buscador vive en la portada desde la revisión R1. /peliculas queda como redirección para
+  // los enlaces viejos: Angular conserva ?q y ?genero al redirigir, así un filtro compartido
+  // sigue funcionando.
+  { path: 'peliculas', pathMatch: 'full', redirectTo: '' },
+
+  // La ficha se carga aparte de la portada, con el mismo criterio que las pantallas de cuenta.
+  // Es pública: la compra anónima (RF-26) también la recorre. El id llega al componente como
+  // input() por withComponentInputBinding.
   {
     path: 'peliculas/:id',
     loadComponent: () =>

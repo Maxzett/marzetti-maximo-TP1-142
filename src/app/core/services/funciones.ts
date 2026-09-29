@@ -1,5 +1,7 @@
 import { inject, Service } from '@angular/core';
+import { sumarDias } from '../../shared/selector-fecha/fechas';
 import { mensajeDeError } from '../admin/mensaje-de-error';
+import { fechaLocal, instanteDeFuncion } from '../funciones/programacion';
 import {
   ConflictoDeSala,
   DatosModificacion,
@@ -87,6 +89,35 @@ export class Funciones {
       .order('inicio')
       .limit(MAXIMO_DE_FUNCIONES)
       .overrideTypes<Funcion[], { merge: false }>();
+
+    return error ? null : data;
+  }
+
+  /**
+   * Lo que queda de hoy para unas pocas películas: el talón del top 3 de la portada. Pide
+   * solo película e inicio, y solo hasta la medianoche del cine: no son las 500 filas de
+   * cargarProgramacion(). La medianoche es la de Buenos Aires aunque el navegador esté en otra
+   * zona, porque "hoy" en la cartelera es el día del cine. Null si la lectura falló.
+   */
+  async cargarDeHoy(
+    peliculaIds: readonly string[],
+  ): Promise<Pick<Funcion, 'pelicula_id' | 'inicio'>[] | null> {
+    if (peliculaIds.length === 0) {
+      return [];
+    }
+
+    const ahora = new Date().toISOString();
+    const manana = sumarDias(fechaLocal(ahora), 1);
+
+    const { data, error } = await this.supabase.client
+      .from('funciones')
+      .select('pelicula_id, inicio')
+      .eq('activa', true)
+      .in('pelicula_id', [...peliculaIds])
+      .gte('inicio', ahora)
+      .lt('inicio', instanteDeFuncion(manana, '00:00'))
+      .order('inicio')
+      .overrideTypes<Pick<Funcion, 'pelicula_id' | 'inicio'>[], { merge: false }>();
 
     return error ? null : data;
   }

@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+.estrenos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e-3);
+}
+
+@media (min-width: 40rem) {
+  .estrenos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--e-4);
+  }
+}
+
+@media (min-width: 64rem) {
+  .estrenos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--e-5);
+  }
+}
+
+.estreno {
+  /* Anclaje del enlace estirado del título */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--fondo);
+}
+
+.estreno:has(.titulo a:focus-visible) {
+  outline: 3px solid var(--acento);
+  outline-offset: 3px;
+}
+
+.estreno__cabeza {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+/* El taco de calendario: día, número grande y mes, como la hoja de un almanaque */
+.taco {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  width: 3.5rem;
+  padding-block: var(--e-2);
+  border: 1px solid var(--acento-hondo);
+  border-radius: var(--r-chico);
+  font-family: var(--fuente-titulo);
+  text-transform: uppercase;
+}
+
+.taco__dia,
+.taco__mes {
+  color: var(--texto-tenue);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+.taco__numero {
+  color: var(--acento);
+  font-family: var(--fuente-display);
+  font-size: 1.625rem;
+  line-height: 1;
+}
+
+.estreno__nombre {
+  min-width: 0;
+}
+
+.titulo {
+  font-family: var(--fuente-titulo);
+  font-size: clamp(1rem, 1.6vw, 1.1875rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+}
+
+.titulo a {
+  color: var(--texto);
+}
+
+.titulo a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.estreno:hover .titulo a {
+  color: var(--bombilla);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.datos {
+  margin-top: var(--e-1);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.sinopsis {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.estreno__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-3);
+  margin-top: auto;
+}
+
+.estreno__pie app-boton-alerta {
+  flex: 1;
+}
+
+.venta {
+  color: var(--acento);
+  font-size: var(--t-mini);
+  font-weight: 600;
+}

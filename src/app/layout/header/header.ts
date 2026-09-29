@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { IsActiveMatchOptions, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Alertas } from '../../core/services/alertas';
 import { Auth } from '../../core/services/auth';
 
@@ -22,6 +22,14 @@ export class Header {
   protected readonly esAdmin = this.auth.esAdmin;
 
   protected readonly avisosNuevos = computed(() => this.alertas.nuevas().length);
+
+  /** "Cartelera" está activo en / con o sin filtros del buscador (ver el comentario del html) */
+  protected readonly cartelera: IsActiveMatchOptions = {
+    paths: 'exact',
+    queryParams: 'ignored',
+    fragment: 'ignored',
+    matrixParams: 'ignored',
+  };
 
   protected async salir(): Promise<void> {
     await this.auth.salir();

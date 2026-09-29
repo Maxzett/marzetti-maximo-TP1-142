@@ -11,6 +11,19 @@
   border-radius: var(--r-chico);
 }
 
+/* Modo llenar: el ancho lo pone el contenedor y el alto se estira; la proporción queda como
+   alto mínimo. min-width: 0 evita que el alto estirado agrande el ancho por la proporción */
+:host(.llena) {
+  min-width: 0;
+  aspect-ratio: 2 / 3;
+}
+
+:host(.llena) .imagen,
+:host(.llena) .tipografico {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
 .imagen {
   object-fit: cover;
   background: var(--superficie-alta);
@@ -59,12 +72,26 @@
 .titulo {
   color: var(--bombilla);
   font-family: var(--fuente-display);
-  /* 14cqw: cada letra escala con el ancho del póster; el clamp evita extremos ilegibles */
-  font-size: clamp(1.25rem, 14cqw, 2.5rem);
+  /* 14cqw: cada letra escala con el ancho del póster; el clamp evita extremos ilegibles. El
+     mínimo es chico porque el podio de la portada usa pósters de ~90 px: con uno mayor el
+     título no entraba y quedaba cortado */
+  font-size: clamp(0.8125rem, 14cqw, 2.5rem);
   line-height: 1.05;
   letter-spacing: 0.03em;
   text-shadow: var(--neon-marquesina);
   text-transform: uppercase;
   text-wrap: balance;
   overflow-wrap: anywhere;
+}
+
+/* En un póster angosto (el podio de la portada) el sello le quita lugar al título, que es lo
+   que importa: se oculta. Se mide contra el ancho del póster, no de la pantalla */
+@container (max-width: 8rem) {
+  .sello {
+    display: none;
+  }
+
+  .cuerpo {
+    padding: var(--e-2);
+  }
 }

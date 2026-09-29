@@ -1,0 +1,40 @@
+<ul class="estrenos">
+  @for (pelicula of peliculas(); track pelicula.id) {
+    @let fecha = taco(pelicula);
+    @let aLaVenta = venta(pelicula);
+
+    <li class="estreno">
+      <div class="estreno__cabeza">
+        @if (fecha) {
+          <p class="taco">
+            <span class="taco__dia" aria-hidden="true">{{ fecha.dia }}</span>
+            <span class="taco__numero" aria-hidden="true">{{ fecha.numero }}</span>
+            <span class="taco__mes" aria-hidden="true">{{ fecha.mes }}</span>
+            <span class="solo-lectores">Se estrena el {{ fecha.completa }}</span>
+          </p>
+        }
+
+        <div class="estreno__nombre">
+          <h3 class="titulo">
+            <a [routerLink]="['/peliculas', pelicula.id]">{{ pelicula.titulo }}</a>
+          </h3>
+          <p class="datos">{{ datos(pelicula) }}</p>
+        </div>
+      </div>
+
+      @if (pelicula.sinopsis) {
+        <p class="sinopsis">{{ pelicula.sinopsis }}</p>
+      }
+
+      <div class="estreno__pie">
+        <app-sello-edad [edad]="pelicula.restriccion_edad" />
+        @if (aLaVenta) {
+          <!-- Bombilla encendida: la forma dice lo mismo que el color (RNF-10) -->
+          <p class="venta"><span aria-hidden="true">●</span> {{ aLaVenta }}</p>
+        } @else {
+          <app-boton-alerta [pelicula]="pelicula" />
+        }
+      </div>
+    </li>
+  }
+</ul>

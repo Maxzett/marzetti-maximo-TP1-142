@@ -11,6 +11,7 @@ import { Component, input } from '@angular/core';
 @Component({
   imports: [],
   selector: 'app-poster',
+  host: { '[class.llena]': 'llenar()' },
   styleUrl: './poster.css',
   templateUrl: './poster.html',
 })
@@ -23,4 +24,10 @@ export class Poster {
    * es decoración: leerlo de nuevo haría que un lector de pantalla repita el nombre dos veces.
    */
   readonly decorativo = input(false);
+  /**
+   * Ocupa todo el alto que le dé quien lo usa, sin bajar de la proporción 2:3: una imagen
+   * más angosta que eso se recorta con object-fit en vez de deformarse. Lo usa el primer puesto
+   * de la portada, donde el póster tiene que llegar al borde de la tarjeta.
+   */
+  readonly llenar = input(false);
 }

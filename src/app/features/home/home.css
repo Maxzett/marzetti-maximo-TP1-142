@@ -2,50 +2,196 @@
   padding-block: var(--e-7);
 }
 
-h1 {
+.seccion {
+  padding-top: var(--e-7);
+}
+
+.seccion--primera {
+  padding-top: var(--e-6);
+}
+
+/* Sin estrenos, la grilla es lo último antes del pie y necesita su aire */
+.seccion:last-child {
+  padding-bottom: var(--e-7);
+}
+
+/* ---- Cabecera de cada sección: sobretítulo ámbar, título de marquesina y bajada al costado ---- */
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e-2) var(--e-5);
+  margin-bottom: var(--e-5);
+}
+
+.sobretitulo {
+  margin-bottom: var(--e-2);
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+h2 {
   font-family: var(--fuente-display);
-  font-size: var(--t-marquesina);
-  line-height: 0.94;
+  font-size: var(--t-display);
+  font-weight: 400;
+  line-height: 0.92;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
 .bajada {
-  margin-top: var(--e-2);
+  max-width: 22rem;
   color: var(--texto-tenue);
-  font-size: var(--t-cuerpo-lg);
+  font-size: var(--t-mini);
+  line-height: 1.55;
 }
 
-.bloque {
+/* ---- Buscador ---- */
+
+.buscador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-4);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+/* En escritorio el campo y los géneros van lado a lado: apilados, el campo de texto se
+   estiraría a todo el ancho y el panel quedaría con un vacío enorme */
+@media (min-width: 48rem) {
+  .buscador {
+    display: grid;
+    grid-template-columns: minmax(16rem, 21rem) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--e-4) var(--e-6);
+    padding: var(--e-5) var(--e-5) var(--e-4);
+  }
+
+  .estado {
+    grid-column: 1 / -1;
+  }
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  margin-bottom: var(--e-2);
+  padding: 0;
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.generos__ayuda {
+  color: var(--texto-tenue);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-mini);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2) var(--e-4);
+  min-height: var(--toque-min);
+  padding-top: var(--e-3);
+  border-top: 1px dashed var(--borde);
+}
+
+.resumen {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---- Grilla ---- */
+
+.cabecera--grilla {
   margin-top: var(--e-7);
 }
 
-h2 {
-  padding-bottom: var(--e-2);
-  border-bottom: 1px dashed var(--borde-fuerte);
-  font-family: var(--fuente-display);
-  font-size: var(--t-titulo);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2) var(--e-4);
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.leyenda__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
 }
 
 .grilla {
   display: grid;
-  gap: var(--e-4);
-  margin-top: var(--e-5);
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-5) var(--e-3);
 }
 
+@media (min-width: 40rem) {
+  .grilla {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--e-6) var(--e-5);
+  }
+}
+
+@media (min-width: 64rem) {
+  .grilla {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--e-6) 1.75rem;
+  }
+}
+
+/* El li se estira al alto de la fila y la ficha lo llena: todas miden lo mismo */
 .grilla > li {
   display: grid;
 }
 
-.todas {
-  margin-top: var(--e-7);
-  text-align: center;
+app-mensaje {
+  display: block;
+  margin-top: var(--e-4);
 }
 
-.mas {
-  margin-top: var(--e-4);
-  text-align: right;
+/* ---- Próximamente: una franja de lado a lado, sobre superficie ---- */
+
+.franja {
+  margin-top: var(--e-8);
+  padding-block: var(--e-6) var(--e-7);
+  border-block: 1px solid var(--borde);
+  background: var(--superficie);
+}
+
+.franja .bajada a {
+  display: inline-block;
+  margin-top: var(--e-1);
+  white-space: nowrap;
 }

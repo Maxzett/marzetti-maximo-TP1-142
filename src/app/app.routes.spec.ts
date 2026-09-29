@@ -10,9 +10,9 @@ import { Gestion } from './core/services/gestion';
 import { Reportes } from './core/services/reportes';
 import { Resenas } from './core/services/resenas';
 import { Salas } from './core/services/salas';
+import { Home } from './features/home/home';
 import { NotFound } from './features/not-found/not-found';
 import { PeliculaDetalle } from './features/pelicula-detalle/pelicula-detalle';
-import { Peliculas } from './features/peliculas/peliculas';
 
 /**
  * Doble de Auth: los guards solo consultan haySesion() y rol(). Los dos últimos
@@ -39,7 +39,13 @@ function configurar(haySesion: boolean, rol: RolUsuario | null = null): void {
       { provide: Catalogo, useValue: catalogo },
       { provide: Resenas, useValue: { deLaPelicula: async () => [] } },
       // El panel de administración pide sus datos al crearse: el test de rutas no sale a la red
-      { provide: Funciones, useValue: { cargarProgramacion: vi.fn(async () => []) } },
+      {
+        provide: Funciones,
+        useValue: {
+          cargarProgramacion: vi.fn(async () => []),
+          cargarDeHoy: vi.fn(async () => []),
+        },
+      },
       {
         provide: Reportes,
         useValue: {
@@ -128,14 +134,15 @@ describe('routes', () => {
   describe('el catálogo', () => {
     afterEach(() => vi.clearAllMocks());
 
-    it('/peliculas se abre sin sesión', async () => {
+    // El buscador pasó a la portada en la revisión R1: un enlace viejo con filtros sigue andando
+    it('/peliculas redirige a la portada y conserva los filtros', async () => {
       configurar(false);
 
       const harness = await RouterTestingHarness.create();
-      const componente = await harness.navigateByUrl('/peliculas', Peliculas);
+      const componente = await harness.navigateByUrl('/peliculas?q=mar&genero=accion', Home);
 
-      expect(componente).toBeInstanceOf(Peliculas);
-      expect(TestBed.inject(Router).url).toBe('/peliculas');
+      expect(componente).toBeInstanceOf(Home);
+      expect(TestBed.inject(Router).url).toBe('/?q=mar&genero=accion');
     });
 
     it('/peliculas/:id se abre sin sesión y recibe el id como input()', async () => {

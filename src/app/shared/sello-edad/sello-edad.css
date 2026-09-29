@@ -1,0 +1,40 @@
+:host {
+  display: inline-flex;
+  flex: none;
+}
+
+/* ATP: píldora sobre superficie alta, la forma "sin restricción" */
+.sello {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 1.4375rem;
+  padding-inline: var(--e-2);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+  background: var(--superficie-alta);
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* +13: rótulo de esquina viva con la punta superior derecha cortada */
+.sello--13 {
+  border: 2px solid var(--acento);
+  border-radius: 0;
+  background: transparent;
+  color: var(--acento);
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 0 100%);
+}
+
+/* +18: borde doble en el rojo que se puede leer (5,2:1 sobre fondo) */
+.sello--18 {
+  border: 3px double var(--rojo-claro);
+  border-radius: 0;
+  background: transparent;
+  color: var(--rojo-claro);
+}

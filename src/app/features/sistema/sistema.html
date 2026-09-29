@@ -189,14 +189,25 @@
       />
     </div>
 
+    <h3 class="titulo-caso">Sello de edad</h3>
+    <div class="fila">
+      <app-sello-edad [edad]="0" />
+      <app-sello-edad [edad]="13" />
+      <app-sello-edad [edad]="18" />
+    </div>
+    <p class="pie">
+      Cada calificación tiene su forma, no solo su color (RNF-10): ATP es una píldora, +13 un rótulo
+      con la esquina cortada y +18 un recuadro de borde doble. Con el alto contraste de Windows, que
+      reemplaza la paleta, se siguen distinguiendo. El lector de pantalla oye la frase completa
+      ("Mayores de 13 años"), no la sigla.
+    </p>
+
     <h3 class="titulo-caso">Ficha de película</h3>
     <ul class="fila fila--fichas">
       <li>
         <app-ficha-pelicula
           [pelicula]="peliculasDeMuestra[0]"
           [puntaje]="{ pelicula_id: 'muestra-1', promedio: 4.5, cantidad: 12 }"
-          [puesto]="1"
-          [entradas]="240"
         />
       </li>
       <li>
@@ -206,7 +217,7 @@
     <p class="pie">
       Un solo enlace, en el título, estirado sobre toda la tarjeta con <code>::after</code>: un
       enlace que envolviera el póster y las estrellas haría que el lector de pantalla los leyera
-      como nombre del enlace. La edad va escrita (+13, +18, ATP), no solo pintada.
+      como nombre del enlace. Las destacadas por el administrador (RF-07) llevan el rótulo escrito.
     </p>
 
     <h3 class="titulo-caso">Ficha de Próximamente</h3>

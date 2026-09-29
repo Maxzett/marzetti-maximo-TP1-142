@@ -19,6 +19,8 @@ function crearSupabaseFalso({ filas = [], rpc = null, error = null }: Respuestas
     select: vi.fn(() => cadena),
     eq: vi.fn(() => cadena),
     gte: vi.fn(() => cadena),
+    lt: vi.fn(() => cadena),
+    in: vi.fn(() => cadena),
     order: vi.fn(() => cadena),
     limit: vi.fn(() => cadena),
     overrideTypes: vi.fn(async () => ({ data: error ? null : filas, error })),
@@ -99,6 +101,37 @@ describe('Funciones', () => {
       const servicio = crearServicio(crearSupabaseFalso({ filas: [] }));
 
       expect(await servicio.cargarProgramacion()).toEqual([]);
+    });
+  });
+
+  describe('cargarDeHoy', () => {
+    it('pide solo película e inicio de las películas dadas, desde ahora hasta la medianoche del cine', async () => {
+      vi.useFakeTimers();
+      // 22:30 en Buenos Aires del 29/09: en UTC ya es 30/09, pero hoy sigue siendo el 29 en el cine
+      vi.setSystemTime(new Date('2026-09-30T01:30:00Z'));
+      const falso = crearSupabaseFalso();
+
+      await crearServicio(falso).cargarDeHoy(['p1', 'p2']);
+      vi.useRealTimers();
+
+      expect(falso.cadena.select).toHaveBeenCalledWith('pelicula_id, inicio');
+      expect(falso.cadena.eq).toHaveBeenCalledWith('activa', true);
+      expect(falso.cadena.in).toHaveBeenCalledWith('pelicula_id', ['p1', 'p2']);
+      expect(falso.cadena.gte).toHaveBeenCalledWith('inicio', '2026-09-30T01:30:00.000Z');
+      expect(falso.cadena.lt).toHaveBeenCalledWith('inicio', '2026-09-30T00:00:00-03:00');
+    });
+
+    it('sin películas no va a la red', async () => {
+      const falso = crearSupabaseFalso();
+
+      expect(await crearServicio(falso).cargarDeHoy([])).toEqual([]);
+      expect(falso.client.from).not.toHaveBeenCalled();
+    });
+
+    it('devuelve null si la base falla', async () => {
+      const servicio = crearServicio(crearSupabaseFalso({ error: { message: 'falló' } }));
+
+      expect(await servicio.cargarDeHoy(['p1'])).toBeNull();
     });
   });
 

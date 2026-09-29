@@ -24,6 +24,7 @@ import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
 import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
+import { SelloEdad } from '../../shared/sello-edad/sello-edad';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
@@ -56,6 +57,7 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     PromocionesOrden,
     Seleccion,
     SelectorCandy,
+    SelloEdad,
     Spinner,
     Tarjeta,
     Temporizador,

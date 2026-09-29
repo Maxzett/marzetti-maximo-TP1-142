@@ -63,13 +63,12 @@ describe('Header', () => {
     const enlaces = (fixture: ComponentFixture<Header>) =>
       Array.from(fixture.nativeElement.querySelectorAll('nav a') as NodeListOf<HTMLAnchorElement>);
 
-    it('lleva a la cartelera, al catálogo, a Próximamente y al candy bar', async () => {
+    it('lleva a la cartelera, a Próximamente y al candy bar', async () => {
       const fixture = await montar(null);
 
       const destinos = enlaces(fixture).map((a) => [a.textContent?.trim(), a.getAttribute('href')]);
       expect(destinos).toEqual([
         ['Cartelera', '/'],
-        ['Películas', '/peliculas'],
         ['Próximamente', '/proximamente'],
         ['Candy bar', '/candy'],
       ]);
@@ -78,7 +77,7 @@ describe('Header', () => {
     it('funciona igual con la sesión abierta', async () => {
       const fixture = await montar('cliente');
 
-      expect(enlaces(fixture).map((a) => a.getAttribute('href'))).toContain('/peliculas');
+      expect(enlaces(fixture).map((a) => a.getAttribute('href'))).toContain('/proximamente');
     });
   });
 
