@@ -63,6 +63,8 @@ export class Ingresar {
       return;
     }
 
-    await this.router.navigateByUrl(this.volverA() || '/perfil');
+    // Sin destino pendiente, a la cartelera: se entra al cine a elegir una película, y el
+    // perfil sigue a un clic en el header. Si un guard lo mandó acá, vuelve a lo que pidió.
+    await this.router.navigateByUrl(this.volverA() || '/');
   }
 }

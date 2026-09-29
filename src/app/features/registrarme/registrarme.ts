@@ -158,6 +158,7 @@ export class Registrarme {
       return;
     }
 
-    await this.router.navigateByUrl('/perfil');
+    // Recién registrado, a la cartelera: mismo destino que al ingresar
+    await this.router.navigateByUrl('/');
   }
 }

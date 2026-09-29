@@ -127,7 +127,7 @@ describe('routes', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/registrarme');
 
-    expect(TestBed.inject(Router).url).toBe('/perfil');
+    expect(TestBed.inject(Router).url).toBe('/');
   });
 
   // El catálogo es público: la compra anónima (RF-26) también lo recorre

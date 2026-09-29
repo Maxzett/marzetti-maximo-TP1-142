@@ -19,6 +19,15 @@ describe('Boton', () => {
     expect(boton().className).toContain('boton--borde');
   });
 
+  it('suma la clase compacta solo cuando se la pide', async () => {
+    expect(boton().className).not.toContain('boton--compacto');
+
+    fixture.componentRef.setInput('compacto', true);
+    await fixture.whenStable();
+
+    expect(boton().className).toContain('boton--compacto');
+  });
+
   it('emite presionado al hacer clic', async () => {
     let veces = 0;
     fixture.componentInstance.presionado.subscribe(() => veces++);

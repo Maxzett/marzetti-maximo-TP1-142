@@ -69,12 +69,12 @@ describe('guards de sesión', () => {
       expect(correr(soloInvitados, '/ingresar')).toBe(true);
     });
 
-    it('saca de /ingresar a quien ya entró', () => {
+    it('saca de /ingresar a quien ya entró, a la cartelera', () => {
       configurar(true, 'cliente');
 
       const resultado = correr(soloInvitados, '/ingresar');
 
-      expect(TestBed.inject(Router).serializeUrl(resultado as UrlTree)).toBe('/perfil');
+      expect(TestBed.inject(Router).serializeUrl(resultado as UrlTree)).toBe('/');
     });
   });
 

@@ -27,12 +27,15 @@ export const sesionIniciada: CanActivateFn = (_ruta, estado) => {
   return router.createUrlTree(['/ingresar'], { queryParams: { volverA: estado.url } });
 };
 
-/** Lo contrario: /ingresar y /registrarme no tienen sentido con la sesión abierta. */
+/**
+ * Lo contrario: /ingresar y /registrarme no tienen sentido con la sesión abierta. Manda a la
+ * cartelera, el mismo destino que tiene quien acaba de ingresar o registrarse.
+ */
 export const soloInvitados: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
 
-  return auth.haySesion() ? router.createUrlTree(['/perfil']) : true;
+  return auth.haySesion() ? router.createUrlTree(['/']) : true;
 };
 
 /**

@@ -332,6 +332,16 @@ svg {
 }
 
 /*
+ * Para dos botones que comparten una fila angosta (las acciones de una compra en el perfil):
+ * menos relleno lateral y menos espaciado entre letras, así "Cancelar compra" entra al lado de
+ * "Ver entrada" en una tarjeta de 17rem sin partirse. El alto mínimo de toque no cambia.
+ */
+.boton--compacto {
+  padding-inline: var(--e-2);
+  letter-spacing: 0.05em;
+}
+
+/*
  * ---- Caja de compra ----
  * Compra y candy bar arman igual cada paso: lo que se elige en una columna ancha y, al costado,
  * el resumen con el botón para avanzar. Global y no en cada componente por el mismo motivo que

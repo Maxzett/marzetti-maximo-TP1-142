@@ -66,12 +66,12 @@ describe('Ingresar', () => {
     expect(ingresar).toHaveBeenCalledWith('ana@ejemplo.com', 'secreta123');
   });
 
-  it('lleva al perfil cuando el ingreso sale bien', async () => {
+  it('lleva a la cartelera cuando el ingreso sale bien', async () => {
     await escribir(0, 'ana@ejemplo.com');
     await escribir(1, 'secreta123');
     await enviar();
 
-    expect(navegar).toHaveBeenCalledWith('/perfil');
+    expect(navegar).toHaveBeenCalledWith('/');
   });
 
   // El guard sesionIniciada guarda el destino en volverA para devolver a la pantalla pedida

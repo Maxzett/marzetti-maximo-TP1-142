@@ -166,7 +166,7 @@ describe('Registrarme', () => {
       colorOjos: 'verdes',
       diasVacaciones: 21,
     });
-    expect(navegar).toHaveBeenCalledWith('/perfil');
+    expect(navegar).toHaveBeenCalledWith('/');
   });
 
   it('muestra el error de la base sin navegar', async () => {

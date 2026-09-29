@@ -1,221 +1,250 @@
 <section class="contenedor pantalla">
   @if (perfil(); as datos) {
-    <p class="sobretitulo">{{ nombreDelRol() }}</p>
-    <h1>{{ datos.nombre }} {{ datos.apellido }}</h1>
-    <p class="bajada">{{ datos.email }}</p>
+    <!--
+      La cabecera junta los datos de la cuenta con los saldos. Antes el nombre y el mail
+      aparecían dos veces (título y tarjeta "Tus datos"), y los saldos, que es lo que más se
+      viene a mirar, estaban en la mitad de una tarjeta larga.
+    -->
+    <header class="cabecera">
+      <div class="identidad">
+        <p class="sobretitulo">{{ nombreDelRol() }}</p>
+        <h1>{{ datos.nombre }} {{ datos.apellido }}</h1>
+        <p class="bajada">{{ datos.email }}</p>
+        <p class="nacimiento">Fecha de nacimiento: {{ cumpleanios() }}</p>
+      </div>
 
-    <div class="grilla">
-      <app-tarjeta>
-        <h2>Tus datos</h2>
-        <dl>
-          <dt>Nombre</dt>
-          <dd>{{ datos.nombre }} {{ datos.apellido }}</dd>
-          <dt>Mail</dt>
-          <dd>{{ datos.email }}</dd>
-          <dt>Fecha de nacimiento</dt>
-          <dd>{{ cumpleanios() }}</dd>
+      <!-- RF-40: puntos y crédito, como las cifras de los reportes -->
+      @if (saldos(); as s) {
+        <dl class="saldos">
+          <div class="saldo">
+            <dt>Puntos</dt>
+            <dd>{{ formatearPuntos(s.puntos) }}</dd>
+          </div>
+          <div class="saldo">
+            <dt>Crédito</dt>
+            <dd>{{ formatearPrecio(s.credito) }}</dd>
+          </div>
         </dl>
-      </app-tarjeta>
+      }
+    </header>
 
-      <!--
+    <!--
+      Dos columnas desde 64rem, cada tarjeta a la altura de su contenido. Antes era una grilla
+      de tres tarjetas por fila: las cortas se estiraban a la altura de la más larga y quedaban
+      casi vacías, y la última fila tenía una sola tarjeta en un tercio del ancho.
+    -->
+    <div class="columnas">
+      <div class="columna">
+        <!--
         RF-38.1 / RNF-11: el bloque que solo ve su titular. No es una promesa de la
         interfaz: la tabla perfiles_sensibles tiene una única política RLS, la del
         dueño de la fila, y no existe ninguna para el administrador. Si esta misma
         consulta la hace el admin, la base le devuelve una lista vacía.
       -->
-      <app-tarjeta [destacada]="true">
-        <h2>Solo para vos</h2>
+        <app-tarjeta [destacada]="true">
+          <h2>Solo para vos</h2>
 
-        @if (cargandoSensibles()) {
-          <app-spinner etiqueta="Cargando tus datos" />
-        } @else if (sensibles(); as privados) {
-          <dl>
-            <dt>Tipo de sangre</dt>
-            <dd>{{ privados.tipo_sangre }}</dd>
-            <dt>Color de ojos</dt>
-            <dd class="capitalizado">{{ privados.color_ojos }}</dd>
-            <dt>Días de vacaciones por año</dt>
-            <dd>{{ privados.dias_vacaciones }}</dd>
-          </dl>
+          @if (cargandoSensibles()) {
+            <app-spinner etiqueta="Cargando tus datos" />
+          } @else if (sensibles(); as privados) {
+            <dl>
+              <dt>Tipo de sangre</dt>
+              <dd>{{ privados.tipo_sangre }}</dd>
+              <dt>Color de ojos</dt>
+              <dd class="capitalizado">{{ privados.color_ojos }}</dd>
+              <dt>Días de vacaciones por año</dt>
+              <dd>{{ privados.dias_vacaciones }}</dd>
+            </dl>
 
-          <p class="nota">
-            Estos tres datos no los ve nadie más: ni los empleados ni la administración del cine.
-            Tampoco aparecen en reportes ni en exportaciones.
-          </p>
-        } @else {
-          <app-mensaje tono="aviso">No pudimos traer estos datos.</app-mensaje>
-        }
-      </app-tarjeta>
-
-      <!-- RF-40: puntos, crédito y el historial de canjes -->
-      <app-tarjeta>
-        <h2>Puntos y crédito</h2>
-
-        @if (cargandoCuenta()) {
-          <app-spinner etiqueta="Cargando tus puntos y tu crédito" />
-        } @else if (saldos(); as s) {
-          <dl class="saldos">
-            <dt>Puntos</dt>
-            <dd class="cifra">{{ formatearPuntos(s.puntos) }}</dd>
-            <dt>Crédito</dt>
-            <dd class="cifra">{{ formatearPrecio(s.credito) }}</dd>
-          </dl>
-
-          @if (s.bienvenida; as b) {
-            <!-- RF-39: el cupón de la primera compra, mientras no se haya usado -->
-            <app-mensaje tono="exito">
-              Tenés un cupón de bienvenida de {{ describirCupon(b) }} para tu primera compra. Lo
-              podés usar en el último paso del pago.
-            </app-mensaje>
-          }
-
-          @if (s.cupon_edad; as c) {
-            <!-- RF-44: el cupón para mayores de 50, a quien le corresponde -->
-            <app-mensaje tono="exito">
-              Por ser mayor de {{ c.edad_minima }} años tenés el cupón {{ c.codigo }} de
-              {{ describirCupon(c) }} de descuento. Lo podés usar en el último paso del pago.
-            </app-mensaje>
-          }
-
-          <p class="nota">
-            Ganás 1 punto por cada peso que pagás. El crédito sale de compras canceladas y se usa
-            junto con otros medios de pago.
-          </p>
-
-          <!-- RF-46: lo que se puede canjear, con lo que le falta para cada cosa -->
-          <h3>Qué podés canjear</h3>
-          @if (recompensas() === null) {
-            <app-mensaje tono="aviso">No pudimos traer las recompensas.</app-mensaje>
-          } @else if (canjesPosibles().length === 0) {
-            <p class="pendiente">Por ahora no hay recompensas para canjear.</p>
+            <p class="nota">
+              Estos tres datos no los ve nadie más: ni los empleados ni la administración del cine.
+              Tampoco aparecen en reportes ni en exportaciones.
+            </p>
           } @else {
-            <ul class="recompensas">
-              @for (r of canjesPosibles(); track r.id) {
-                <li class="recompensa" [class.recompensa--alcanza]="r.alcanza">
-                  <p class="recompensa-titulo">
-                    <span>{{ r.nombre }}</span>
-                    <span class="detalle">{{ formatearPuntos(r.costo_puntos) }} puntos</span>
-                  </p>
-                  <!-- La barra es decorativa: el texto de abajo dice lo mismo (RNF-10) -->
-                  <span class="barra" aria-hidden="true">
-                    <span class="barra-avance" [style.inline-size.%]="r.porcentaje"></span>
-                  </span>
-                  <p class="recompensa-estado">
-                    @if (r.alcanza && r.tipo === 'producto') {
-                      <!-- RF-34.1: un producto se canjea también sin sacar una entrada -->
-                      ✓ Te alcanza: canjeala en el
-                      <a routerLink="/candy">candy bar</a> o al comprar tu entrada.
-                    } @else if (r.alcanza) {
-                      ✓ Te alcanza: canjeala al comprar tu próxima entrada.
-                    } @else {
-                      Te faltan {{ formatearPuntos(r.faltan) }} puntos.
-                    }
-                  </p>
-                </li>
+            <app-mensaje tono="aviso">No pudimos traer estos datos.</app-mensaje>
+          }
+        </app-tarjeta>
+
+        <!-- RF-40: puntos, crédito y el historial de canjes -->
+        <app-tarjeta>
+          <h2>Puntos y crédito</h2>
+
+          @if (cargandoCuenta()) {
+            <app-spinner etiqueta="Cargando tus puntos y tu crédito" />
+          } @else if (saldos(); as s) {
+            <!-- Las cifras están en la cabecera; acá, lo que se puede hacer con ellas -->
+            @if (s.bienvenida; as b) {
+              <!-- RF-39: el cupón de la primera compra, mientras no se haya usado -->
+              <app-mensaje tono="exito">
+                Tenés un cupón de bienvenida de {{ describirCupon(b) }} para tu primera compra. Lo
+                podés usar en el último paso del pago.
+              </app-mensaje>
+            }
+
+            @if (s.cupon_edad; as c) {
+              <!-- RF-44: el cupón para mayores de 50, a quien le corresponde -->
+              <app-mensaje tono="exito">
+                Por ser mayor de {{ c.edad_minima }} años tenés el cupón {{ c.codigo }} de
+                {{ describirCupon(c) }} de descuento. Lo podés usar en el último paso del pago.
+              </app-mensaje>
+            }
+
+            <p class="nota">
+              Ganás 1 punto por cada peso que pagás. El crédito sale de compras canceladas y se usa
+              junto con otros medios de pago.
+            </p>
+
+            <!-- RF-46: lo que se puede canjear, con lo que le falta para cada cosa -->
+            <h3>Qué podés canjear</h3>
+            @if (recompensas() === null) {
+              <app-mensaje tono="aviso">No pudimos traer las recompensas.</app-mensaje>
+            } @else if (canjesPosibles().length === 0) {
+              <p class="pendiente">Por ahora no hay recompensas para canjear.</p>
+            } @else {
+              <ul class="recompensas">
+                @for (r of canjesPosibles(); track r.id) {
+                  <li class="recompensa" [class.recompensa--alcanza]="r.alcanza">
+                    <p class="recompensa-titulo">
+                      <span>{{ r.nombre }}</span>
+                      <span class="detalle">{{ formatearPuntos(r.costo_puntos) }} puntos</span>
+                    </p>
+                    <!-- La barra es decorativa: el texto de abajo dice lo mismo (RNF-10) -->
+                    <span class="barra" aria-hidden="true">
+                      <span class="barra-avance" [style.inline-size.%]="r.porcentaje"></span>
+                    </span>
+                    <p class="recompensa-estado">
+                      @if (r.alcanza && r.tipo === 'producto') {
+                        <!-- RF-34.1: un producto se canjea también sin sacar una entrada -->
+                        ✓ Te alcanza: canjeala en el
+                        <a routerLink="/candy">candy bar</a> o al comprar tu entrada.
+                      } @else if (r.alcanza) {
+                        ✓ Te alcanza: canjeala al comprar tu próxima entrada.
+                      } @else {
+                        Te faltan {{ formatearPuntos(r.faltan) }} puntos.
+                      }
+                    </p>
+                  </li>
+                }
+              </ul>
+            }
+
+            <h3>Tus canjes</h3>
+            @if (canjes(); as historial) {
+              @if (historial.length === 0) {
+                <p class="pendiente">Todavía no canjeaste puntos.</p>
+              } @else {
+                <ul class="historial">
+                  @for (canje of historial; track canje.id) {
+                    <li>
+                      <span>{{ canje.recompensas?.nombre ?? 'Recompensa' }}</span>
+                      <span class="detalle">{{ formatearPuntos(canje.costo_puntos) }} puntos</span>
+                    </li>
+                  }
+                </ul>
               }
-            </ul>
+            } @else {
+              <app-mensaje tono="aviso">No pudimos traer tus canjes.</app-mensaje>
+            }
+          } @else {
+            <app-mensaje tono="aviso">No pudimos traer tus puntos y tu crédito.</app-mensaje>
+          }
+        </app-tarjeta>
+      </div>
+
+      <div class="columna">
+        <!-- RF-30, RF-31: cancelar hasta 2 horas antes, con crédito y no con dinero -->
+        <app-tarjeta>
+          <h2>Mis compras</h2>
+
+          @if (avisoDeCancelacion()) {
+            <app-mensaje tono="exito">{{ avisoDeCancelacion() }}</app-mensaje>
           }
 
-          <h3>Tus canjes</h3>
-          @if (canjes(); as historial) {
-            @if (historial.length === 0) {
-              <p class="pendiente">Todavía no canjeaste puntos.</p>
+          @if (cargandoCuenta()) {
+            <app-spinner etiqueta="Cargando tus compras" />
+          } @else if (ordenes(); as compras) {
+            @if (compras.length === 0) {
+              <p class="pendiente">
+                Todavía no compraste entradas. <a routerLink="/">Ver la cartelera</a>
+              </p>
             } @else {
-              <ul class="historial">
-                @for (canje of historial; track canje.id) {
-                  <li>
-                    <span>{{ canje.recompensas?.nombre ?? 'Recompensa' }}</span>
-                    <span class="detalle">{{ formatearPuntos(canje.costo_puntos) }} puntos</span>
+              <ul class="compras">
+                @for (compra of compras; track compra.orden_id) {
+                  <li class="compra">
+                    <div class="compra-datos">
+                      <p class="compra-titulo">
+                        {{ compra.pelicula ?? 'Candy bar' }}
+                        <!-- El estado va escrito: nunca solo un color (RNF-10) -->
+                        <span
+                          class="estado"
+                          [class.estado--cancelada]="compra.estado === 'cancelada'"
+                        >
+                          {{ compra.estado === 'cancelada' ? 'Cancelada' : 'Pagada' }}
+                        </span>
+                      </p>
+                      <p class="detalle">
+                        @if (compra.inicio) {
+                          {{ describirInicio(compra.inicio) }} · {{ compra.sala }} ·
+                          {{ compra.entradas }}
+                          {{ compra.entradas === 1 ? 'entrada' : 'entradas' }}
+                          @if (compra.tiene_candy) {
+                            · con candy bar
+                          }
+                        } @else if (compra.pagada_at) {
+                          <!-- RF-34.1: una compra solo de candy no tiene función: se fecha por el pago -->
+                          Ticket del candy bar · comprado el {{ describirInicio(compra.pagada_at) }}
+                        }
+                        · {{ formatearPrecio(compra.total) }}
+                      </p>
+                      @if (compra.estado === 'pagada' && !compra.cancelable) {
+                        <p class="detalle">
+                          No se puede cancelar: {{ compra.motivo_no_cancelable }}
+                        </p>
+                      }
+                    </div>
+
+                    @if (compra.estado === 'pagada') {
+                      <div class="compra-acciones">
+                        <a
+                          class="boton boton--borde boton--compacto"
+                          [routerLink]="['/entrada', compra.codigo]"
+                        >
+                          {{ compra.tipo === 'candy' ? 'Ver ticket' : 'Ver entrada' }}
+                        </a>
+                        @if (compra.cancelable) {
+                          <app-boton
+                            variante="fantasma"
+                            [compacto]="true"
+                            [anchoCompleto]="true"
+                            (presionado)="pedirCancelacion(compra)"
+                          >
+                            Cancelar compra
+                          </app-boton>
+                        }
+                      </div>
+                    }
                   </li>
                 }
               </ul>
             }
           } @else {
-            <app-mensaje tono="aviso">No pudimos traer tus canjes.</app-mensaje>
+            <app-mensaje tono="aviso">No pudimos traer tus compras.</app-mensaje>
           }
-        } @else {
-          <app-mensaje tono="aviso">No pudimos traer tus puntos y tu crédito.</app-mensaje>
-        }
-      </app-tarjeta>
-
-      <!-- RF-30, RF-31: cancelar hasta 2 horas antes, con crédito y no con dinero -->
-      <app-tarjeta class="ancha">
-        <h2>Mis compras</h2>
-
-        @if (avisoDeCancelacion()) {
-          <app-mensaje tono="exito">{{ avisoDeCancelacion() }}</app-mensaje>
-        }
-
-        @if (cargandoCuenta()) {
-          <app-spinner etiqueta="Cargando tus compras" />
-        } @else if (ordenes(); as compras) {
-          @if (compras.length === 0) {
-            <p class="pendiente">
-              Todavía no compraste entradas. <a routerLink="/">Ver la cartelera</a>
-            </p>
-          } @else {
-            <ul class="compras">
-              @for (compra of compras; track compra.orden_id) {
-                <li class="compra">
-                  <div class="compra-datos">
-                    <p class="compra-titulo">
-                      {{ compra.pelicula ?? 'Candy bar' }}
-                      <!-- El estado va escrito: nunca solo un color (RNF-10) -->
-                      <span
-                        class="estado"
-                        [class.estado--cancelada]="compra.estado === 'cancelada'"
-                      >
-                        {{ compra.estado === 'cancelada' ? 'Cancelada' : 'Pagada' }}
-                      </span>
-                    </p>
-                    <p class="detalle">
-                      @if (compra.inicio) {
-                        {{ describirInicio(compra.inicio) }} · {{ compra.sala }} ·
-                        {{ compra.entradas }}
-                        {{ compra.entradas === 1 ? 'entrada' : 'entradas' }}
-                        @if (compra.tiene_candy) {
-                          · con candy bar
-                        }
-                      } @else if (compra.pagada_at) {
-                        <!-- RF-34.1: una compra solo de candy no tiene función: se fecha por el pago -->
-                        Ticket del candy bar · comprado el {{ describirInicio(compra.pagada_at) }}
-                      }
-                      · {{ formatearPrecio(compra.total) }}
-                    </p>
-                    @if (compra.estado === 'pagada' && !compra.cancelable) {
-                      <p class="detalle">No se puede cancelar: {{ compra.motivo_no_cancelable }}</p>
-                    }
-                  </div>
-
-                  @if (compra.estado === 'pagada') {
-                    <div class="compra-acciones">
-                      <a class="boton boton--borde" [routerLink]="['/entrada', compra.codigo]">
-                        {{ compra.tipo === 'candy' ? 'Ver ticket' : 'Ver entrada' }}
-                      </a>
-                      @if (compra.cancelable) {
-                        <app-boton variante="fantasma" (presionado)="pedirCancelacion(compra)">
-                          Cancelar compra
-                        </app-boton>
-                      }
-                    </div>
-                  }
-                </li>
-              }
-            </ul>
-          }
-        } @else {
-          <app-mensaje tono="aviso">No pudimos traer tus compras.</app-mensaje>
-        }
-      </app-tarjeta>
-      <app-tarjeta>
-        <h2>Mis Películas</h2>
+        </app-tarjeta>
         <!-- RF-41: el historial visual tiene su propia pantalla, con los pósters a buen tamaño -->
-        <p class="pendiente">
-          Todo lo que viniste a ver, con tu calificación de cada una. Aparece cuando el personal
-          valida tu entrada en la sala.
-        </p>
-        <a class="boton boton--borde" routerLink="/mis-peliculas">Ver mis películas</a>
-      </app-tarjeta>
+        <app-tarjeta>
+          <div class="franja">
+            <div>
+              <h2>Mis Películas</h2>
+              <p class="nota">
+                Todo lo que viniste a ver, con tu calificación de cada una. Aparece cuando el
+                personal valida tu entrada en la sala.
+              </p>
+            </div>
+            <a class="boton boton--borde" routerLink="/mis-peliculas">Ver mis películas</a>
+          </div>
+        </app-tarjeta>
+      </div>
     </div>
 
     <app-dialogo

@@ -21,10 +21,17 @@ export class Boton {
   /** Mientras carga queda inerte pero conserva el texto, así el botón no cambia de ancho */
   readonly cargando = input(false);
   readonly anchoCompleto = input(false);
+  /** Menos relleno, para compartir una fila angosta con otro botón (ver .boton--compacto) */
+  readonly compacto = input(false);
   readonly presionado = output<void>();
 
   protected readonly clases = computed(() =>
-    ['boton', `boton--${this.variante()}`, this.anchoCompleto() ? 'boton--ancho' : '']
+    [
+      'boton',
+      `boton--${this.variante()}`,
+      this.anchoCompleto() ? 'boton--ancho' : '',
+      this.compacto() ? 'boton--compacto' : '',
+    ]
       .filter(Boolean)
       .join(' '),
   );
