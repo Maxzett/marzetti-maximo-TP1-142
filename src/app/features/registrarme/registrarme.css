@@ -26,8 +26,8 @@ h1 {
 fieldset {
   display: flex;
   flex-direction: column;
-  gap: var(--e-4);
-  padding: var(--e-4);
+  gap: var(--e-campos);
+  padding: var(--e-5) var(--e-4);
   border: 1px solid var(--borde);
   border-radius: var(--r-medio);
   background: var(--superficie);
@@ -37,7 +37,7 @@ legend {
   padding-inline: var(--e-2);
   color: var(--acento);
   font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
+  font-size: var(--t-chico);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -59,7 +59,7 @@ legend {
 
 .ayuda,
 .error {
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
   line-height: 1.4;
 }
 

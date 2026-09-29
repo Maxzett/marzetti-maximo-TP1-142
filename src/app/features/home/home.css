@@ -92,7 +92,7 @@ legend {
   padding: 0;
   color: var(--acento);
   font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
+  font-size: var(--t-chico);
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;

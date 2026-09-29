@@ -13,7 +13,7 @@ h3 {
 .ayuda {
   margin: 0;
   color: var(--texto-tenue);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
 }
 
 .cupon {
@@ -31,8 +31,9 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e-2);
-  /* Baja los botones hasta el campo, no hasta su etiqueta */
-  padding-block-start: var(--e-5);
+  /* Baja los botones hasta el campo, no hasta su etiqueta: el alto de línea de la etiqueta de
+     app-campo (15 px × 1,4) más la separación entre etiqueta y campo */
+  padding-block-start: calc(var(--t-cuerpo) * 1.4 + var(--e-2));
 }
 
 .opcion {

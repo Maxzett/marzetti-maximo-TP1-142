@@ -4,21 +4,31 @@
   gap: var(--e-2);
 }
 
+/*
+ * La etiqueta en Oswald y al tamaño del texto que se escribe: con 12 px en la letra del cuerpo
+ * quedaba más chica que el propio valor y se perdía entre campo y campo. El alto de línea va
+ * fijo porque promociones-orden alinea sus botones con el campo restando justo este alto.
+ */
 .etiqueta {
   display: flex;
   align-items: baseline;
   gap: var(--e-2);
   color: var(--texto);
-  font-size: var(--t-mini);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
 }
 
 /* "obligatorio" escrito, no un asterisco: el asterisco solo no lo entiende nadie */
 .requerido {
   color: var(--texto-tenue);
   font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
+  font-size: var(--t-mini);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-weight: 400;
 }
 
 .control {
@@ -58,7 +68,7 @@
 
 .ayuda,
 .error {
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
   line-height: 1.4;
 }
 

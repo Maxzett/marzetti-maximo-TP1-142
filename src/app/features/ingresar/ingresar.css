@@ -18,7 +18,7 @@ h1 {
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: var(--e-4);
+  gap: var(--e-campos);
   margin-top: var(--e-6);
 }
 

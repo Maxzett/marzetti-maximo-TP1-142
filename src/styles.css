@@ -47,6 +47,7 @@
 
   --t-micro: 0.6875rem; /* 11px · sobretítulos, con tracking alto */
   --t-mini: 0.75rem; /* 12px · metadatos */
+  --t-chico: 0.8125rem; /* 13px · ayudas y errores de formulario, leyendas de grupo */
   --t-cuerpo: 0.9375rem; /* 15px · texto corrido */
   --t-cuerpo-lg: 1.0625rem; /* 17px · bajadas */
   --t-rotulo: 1.25rem; /* 20px · títulos de tarjeta */
@@ -64,6 +65,11 @@
   --e-7: 3rem;
   --e-8: 4rem;
   --e-9: 6rem;
+  /*
+   * Entre un campo de formulario y el siguiente: el triple que entre la etiqueta y su campo
+   * (--e-2), para que cada etiqueta se lea pegada al campo que nombra y no al de arriba.
+   */
+  --e-campos: var(--e-5);
 
   /* ---- Radios ---- */
   /* Chicos a propósito: el retro de imprenta tiene esquina viva */

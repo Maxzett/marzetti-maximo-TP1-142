@@ -59,13 +59,13 @@
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: var(--e-4);
+  gap: var(--e-campos);
 }
 
 fieldset {
   display: flex;
   flex-direction: column;
-  gap: var(--e-4);
+  gap: var(--e-campos);
   min-inline-size: 0;
   margin: 0;
   padding: var(--e-4);
@@ -78,14 +78,14 @@ legend {
   padding-inline: var(--e-2);
   color: var(--acento);
   font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
+  font-size: var(--t-chico);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .par {
   display: grid;
-  gap: var(--e-4);
+  gap: var(--e-campos) var(--e-4);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
 }
 
@@ -97,12 +97,15 @@ legend {
 
 .etiqueta {
   color: var(--texto);
-  font-size: var(--t-mini);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .error {
   color: var(--rojo-claro);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
   line-height: 1.4;
 }
 

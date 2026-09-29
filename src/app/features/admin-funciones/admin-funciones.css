@@ -53,7 +53,7 @@ h2 {
 fieldset {
   display: flex;
   flex-direction: column;
-  gap: var(--e-4);
+  gap: var(--e-campos);
   min-inline-size: 0;
   padding: var(--e-4);
   border: 1px solid var(--borde);
@@ -65,7 +65,7 @@ legend {
   padding-inline: var(--e-2);
   color: var(--acento);
   font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
+  font-size: var(--t-chico);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -78,13 +78,13 @@ legend {
 
 .error {
   color: var(--rojo-claro);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
   line-height: 1.4;
 }
 
 .par {
   display: grid;
-  gap: var(--e-4);
+  gap: var(--e-campos) var(--e-4);
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -231,7 +231,7 @@ tbody tr:last-child > * {
 }
 
 .formulario--dialogo {
-  gap: var(--e-4);
+  gap: var(--e-campos);
 }
 
 .nota {

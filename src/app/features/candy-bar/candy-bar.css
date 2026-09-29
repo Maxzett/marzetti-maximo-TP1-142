@@ -61,13 +61,13 @@ h2 {
 form,
 .pago {
   display: grid;
-  gap: var(--e-4);
+  gap: var(--e-campos);
 }
 
 .ayuda {
   margin: 0;
   color: var(--texto-tenue);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
 }
 
 .acciones {

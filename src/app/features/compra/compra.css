@@ -57,7 +57,7 @@ h2 {
 .ayuda {
   margin-block: 0 var(--e-4);
   color: var(--texto-tenue);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
 }
 
 .seleccion {
@@ -91,7 +91,7 @@ h2 {
 
 form {
   display: grid;
-  gap: var(--e-4);
+  gap: var(--e-campos);
 }
 
 .acciones {
