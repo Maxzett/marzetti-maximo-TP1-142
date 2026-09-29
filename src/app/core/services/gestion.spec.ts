@@ -198,8 +198,10 @@ describe('Gestion', () => {
 
     it('guarda por la función de la base, con los géneros como lista de ids', async () => {
       const falso = crearSupabaseFalso();
+      // guardar_pelicula devuelve el uuid con que quedó: el alta lo necesita para lo que sigue
+      falso.client.rpc.mockResolvedValueOnce({ data: 'nueva-id', error: null } as never);
 
-      await crearServicio(falso).guardarPelicula({
+      const resultado = await crearServicio(falso).guardarPelicula({
         id: null,
         titulo: 'Nueva',
         sinopsis: '',
@@ -216,6 +218,7 @@ describe('Gestion', () => {
         'guardar_pelicula',
         expect.objectContaining({ p_id: null, p_precio_preventa: 3000, p_generos: ['g1', 'g2'] }),
       );
+      expect(resultado).toEqual({ id: 'nueva-id' });
     });
 
     it('muestra el mensaje de la base cuando rechaza el cambio', async () => {
@@ -237,7 +240,7 @@ describe('Gestion', () => {
           precio_preventa: null,
           generos: ['g1'],
         }),
-      ).toContain('funciones programadas');
+      ).toEqual({ error: expect.stringContaining('funciones programadas') });
     });
   });
 

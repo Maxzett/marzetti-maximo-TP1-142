@@ -203,24 +203,30 @@ export class Gestion {
     return peliculas === null || generos.error ? null : { peliculas, generos: generos.data };
   }
 
-  guardarPelicula(pelicula: DatosDePelicula): Promise<string | null> {
-    return this.guardar(
-      'guardar_pelicula',
-      {
-        p_id: pelicula.id,
-        p_titulo: pelicula.titulo,
-        p_sinopsis: pelicula.sinopsis,
-        p_poster_url: pelicula.poster_url,
-        p_duracion: pelicula.duracion_minutos,
-        p_restriccion: pelicula.restriccion_edad,
-        p_estreno: pelicula.fecha_estreno,
-        p_destacada: pelicula.destacada,
-        p_precio_preventa: pelicula.precio_preventa,
-        p_generos: pelicula.generos,
-      },
+  /**
+   * Alta o edición de una película. Devuelve el id con que quedó guardada: en un alta la pantalla
+   * lo necesita para ofrecer "Programar funciones" de esa película.
+   */
+  async guardarPelicula(pelicula: DatosDePelicula): Promise<{ id: string } | { error: string }> {
+    const { data, error } = await this.supabase.client.rpc('guardar_pelicula', {
+      p_id: pelicula.id,
+      p_titulo: pelicula.titulo,
+      p_sinopsis: pelicula.sinopsis,
+      p_poster_url: pelicula.poster_url,
+      p_duracion: pelicula.duracion_minutos,
+      p_restriccion: pelicula.restriccion_edad,
+      p_estreno: pelicula.fecha_estreno,
+      p_destacada: pelicula.destacada,
+      p_precio_preventa: pelicula.precio_preventa,
+      p_generos: pelicula.generos,
+    });
+
+    if (error) {
       // El título no es único (puede haber remakes): un 23505 acá no tiene un motivo que contar
-      'No pudimos guardar la película. Probá de nuevo.',
-    );
+      return { error: mensajeDeError(error, 'No pudimos guardar la película. Probá de nuevo.') };
+    }
+
+    return { id: data as string };
   }
 
   /**

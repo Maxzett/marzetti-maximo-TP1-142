@@ -1,0 +1,169 @@
+.volver {
+  display: inline-block;
+  margin-block-end: var(--e-3);
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  letter-spacing: 0.04em;
+}
+
+.volver:hover {
+  color: var(--acento);
+}
+
+/*
+ * Formulario a la izquierda y vista previa a la derecha, fija al hacer scroll: se ve cómo queda
+ * mientras se escribe más abajo. En el celular, la vista previa va debajo (después en el
+ * documento, así el teclado llega primero al formulario).
+ */
+.editor {
+  display: grid;
+  gap: var(--e-6);
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 64rem) {
+  .editor {
+    grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr);
+  }
+
+  .previa {
+    position: sticky;
+    top: var(--e-5);
+  }
+}
+
+.formulario {
+  gap: var(--e-5);
+}
+
+.generos {
+  display: grid;
+  gap: 0 var(--e-4);
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+
+.archivo-poster {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e-3);
+}
+
+.archivo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  max-inline-size: 100%;
+}
+
+.archivo input {
+  max-inline-size: 100%;
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}
+
+.archivo input::file-selector-button {
+  margin-inline-end: var(--e-3);
+  padding: var(--e-2) var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-chico);
+  background: var(--superficie-alta);
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  cursor: pointer;
+}
+
+.guardada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.guardada .acciones {
+  justify-content: flex-start;
+}
+
+/* ── Vista previa ── */
+.previa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-5);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+.previa__rotulo {
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-chico);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.previa__ficha {
+  display: grid;
+  gap: var(--e-4);
+  align-items: start;
+  grid-template-columns: 9rem minmax(0, 1fr);
+}
+
+.previa__datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-inline-size: 0;
+}
+
+.previa__titulo {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-titulo);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.previa__linea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2) var(--e-3);
+  color: var(--texto-tenue);
+}
+
+.previa__generos,
+.previa__destacada {
+  color: var(--texto-tenue);
+  font-size: var(--t-chico);
+}
+
+.previa__destacada {
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* La sinopsis larga se corta: en la cartelera tampoco se ve entera */
+.previa__sinopsis {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-height: 1.5;
+}
+
+.previa__estado {
+  padding: var(--e-3) var(--e-4);
+  border-inline-start: 3px solid var(--acento);
+  background: var(--superficie-alta);
+  font-size: var(--t-chico);
+  line-height: 1.5;
+}
+
+@media (max-width: 30rem) {
+  .previa__ficha {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+}

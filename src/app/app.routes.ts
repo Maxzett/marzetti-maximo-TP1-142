@@ -104,6 +104,14 @@ export const routes: Routes = [
           import('./features/admin-peliculas/admin-peliculas').then((m) => m.AdminPeliculas),
         title: 'Películas · Administración · Cine Emezeta',
       },
+      // Alta (`nueva`) y edición (`:id`) en una sola ruta: al guardar un alta la URL pasa a la del
+      // id y Angular reutiliza el componente, con el aviso y el paso siguiente en pantalla.
+      {
+        path: 'peliculas/:id',
+        loadComponent: () =>
+          import('./features/admin-pelicula/admin-pelicula').then((m) => m.AdminPelicula),
+        title: 'Película · Administración · Cine Emezeta',
+      },
       {
         path: 'funciones',
         loadComponent: () =>

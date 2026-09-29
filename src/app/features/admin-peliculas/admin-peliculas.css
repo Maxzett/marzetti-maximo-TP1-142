@@ -1,54 +1,7 @@
-.generos {
+/* Editar y Funciones lado a lado, del mismo ancho */
+.acciones-fila {
   display: grid;
-  gap: 0 var(--e-4);
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-}
-
-/* Vista previa chica al lado del selector de archivo; en el celular, uno arriba del otro */
-.poster {
-  display: grid;
-  align-items: start;
-  gap: var(--e-4);
-  grid-template-columns: 7rem minmax(0, 1fr);
-}
-
-.poster__acciones {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--e-3);
-}
-
-.archivo {
-  display: flex;
-  flex-direction: column;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: var(--e-2);
-  max-inline-size: 100%;
-}
-
-.archivo input {
-  max-inline-size: 100%;
-  color: var(--texto-tenue);
-  font-size: var(--t-mini);
-}
-
-.archivo input::file-selector-button {
-  margin-inline-end: var(--e-3);
-  padding: var(--e-2) var(--e-3);
-  border: 1px solid var(--borde-fuerte);
-  border-radius: var(--r-chico);
-  background: var(--superficie-alta);
-  color: var(--texto);
-  font-family: var(--fuente-titulo);
-  cursor: pointer;
-}
-
-@media (max-width: 30rem) {
-  .poster {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .poster__vista {
-    max-inline-size: 9rem;
-  }
 }
