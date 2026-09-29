@@ -1,13 +1,13 @@
 {
-  "name": "Cine — Venta de entradas",
-  "short_name": "Cine",
+  "name": "Cine Emezeta",
+  "short_name": "Emezeta",
   "description": "Venta de entradas online: cartelera, funciones y butacas en tiempo real.",
   "lang": "es",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
-  "background_color": "#0e0e10",
-  "theme_color": "#0e0e10",
+  "background_color": "#120e0b",
+  "theme_color": "#120e0b",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
