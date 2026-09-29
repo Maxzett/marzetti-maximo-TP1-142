@@ -11,7 +11,7 @@ import {
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { describirEdad } from '../../core/catalogo/edad';
-import { Cantidades, comoLineas } from '../../core/compra/candy';
+import { Cantidades, comoLineas, lineasDelPedido } from '../../core/compra/candy';
 import {
   esMenorParaLaFuncion,
   MINIMO_CON_ACOMPANANTE,
@@ -46,6 +46,7 @@ import { Campo } from '../../shared/campo/campo';
 import { Desglose } from '../../shared/desglose/desglose';
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { Pedido } from '../../shared/pedido/pedido';
 import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
@@ -71,6 +72,7 @@ type Paso = 'butacas' | 'datos' | 'pago';
     Desglose,
     MapaSala,
     Mensaje,
+    Pedido,
     PromocionesOrden,
     RouterLink,
     Seleccion,
@@ -186,6 +188,19 @@ export class Compra {
     return this.butacas()
       .filter((b) => estados.get(b.id) === 'propia')
       .sort((a, b) => a.fila.localeCompare(b.fila) || a.numero - b.numero);
+  });
+
+  /** Las butacas escritas para el lateral "Tu pedido": "F7", "R3 · VIP" */
+  protected readonly etiquetasDeButacas = computed(() =>
+    this.elegidas().map(
+      (b) => `${b.fila}${b.numero}${b.tipo === 'estandar' ? '' : ' · ' + this.nombres[b.tipo]}`,
+    ),
+  );
+
+  /** El candy elegido, con nombre, para el mismo lateral */
+  protected readonly lineasDeCandy = computed(() => {
+    const tienda = this.candyBar();
+    return tienda ? lineasDelPedido(tienda, this.productos(), this.combos()) : [];
   });
 
   protected readonly hayVip = computed(() => this.elegidas().some((b) => b.tipo === 'vip'));

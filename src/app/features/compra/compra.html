@@ -108,62 +108,78 @@
       }
 
       @case ('datos') {
-        <app-tarjeta>
-          <h2>Tus datos</h2>
-          <form (submit)="enviarDatos($event)" novalidate>
-            <app-campo
-              etiqueta="Email"
-              tipo="email"
-              autocompletado="email"
-              ayuda="Queda como dato de contacto de tu compra. La entrada con su QR la ves y la descargás al terminar."
-              [requerido]="true"
-              [(valor)]="email"
-            />
+        <!--
+          Con candy: los datos arriba a la derecha, el candy a toda la altura a la izquierda y el
+          pedido con el botón debajo de los datos, acompañando el scroll. En el documento el orden
+          es datos, candy y cierre: el mismo que recorre el teclado y el que se ve en el celular.
+        -->
+        <form
+          class="caja"
+          [class.caja--partida]="candyBar() !== null"
+          (submit)="enviarDatos($event)"
+          novalidate
+        >
+          <app-tarjeta class="caja__datos">
+            <div class="caja__columna">
+              <h2>Tus datos</h2>
+              <app-campo
+                etiqueta="Email"
+                tipo="email"
+                autocompletado="email"
+                ayuda="Queda como dato de contacto de tu compra. La entrada con su QR la ves y la descargás al terminar."
+                [requerido]="true"
+                [(valor)]="email"
+              />
 
-            @if (debeDeclararEdad()) {
-              <!--
-                D-02 revisada: sin cuenta no hay fecha de nacimiento registrada, y esta película
-                tiene restricción. Se firma una casilla; quien no puede firmarla, firma la segunda
-                y va con un adulto (RN-04). Lo firmado queda guardado con la orden.
-              -->
-              <fieldset class="declaracion">
-                <legend>Declaración de edad</legend>
-                <label class="opcion">
-                  <input
-                    type="checkbox"
-                    [checked]="declaraEdad()"
-                    (change)="declaraEdad.set($any($event.target).checked)"
-                  />
-                  Declaro tener {{ restriccion() }} años o más.
-                </label>
-                @if (!declaraEdad()) {
+              @if (debeDeclararEdad()) {
+                <!--
+                  D-02 revisada: sin cuenta no hay fecha de nacimiento registrada, y esta película
+                  tiene restricción. Se firma una casilla; quien no puede firmarla, firma la segunda
+                  y va con un adulto (RN-04). Lo firmado queda guardado con la orden.
+                -->
+                <fieldset class="declaracion">
+                  <legend>Declaración de edad</legend>
                   <label class="opcion">
                     <input
                       type="checkbox"
-                      [checked]="acompanante()"
-                      (change)="acompanante.set($any($event.target).checked)"
+                      [checked]="declaraEdad()"
+                      (change)="declaraEdad.set($any($event.target).checked)"
                     />
-                    Soy menor de {{ restriccion() }} años y voy acompañado por un adulto.
+                    Declaro tener {{ restriccion() }} años o más.
                   </label>
+                  @if (!declaraEdad()) {
+                    <label class="opcion">
+                      <input
+                        type="checkbox"
+                        [checked]="acompanante()"
+                        (change)="acompanante.set($any($event.target).checked)"
+                      />
+                      Soy menor de {{ restriccion() }} años y voy acompañado por un adulto.
+                    </label>
+                    <p class="ayuda">
+                      Si vas con un adulto, la compra tiene que incluir al menos
+                      {{ minimoConAcompanante }} entradas: la tuya y la de quien te acompaña.
+                    </p>
+                  }
                   <p class="ayuda">
-                    Si vas con un adulto, la compra tiene que incluir al menos
-                    {{ minimoConAcompanante }} entradas: la tuya y la de quien te acompaña.
+                    Queda registrado con tu compra. En la entrada al cine te pueden pedir un
+                    documento.
                   </p>
-                }
-                <p class="ayuda">
-                  Queda registrado con tu compra. En la entrada al cine te pueden pedir un
-                  documento.
-                </p>
-              </fieldset>
-            }
+                </fieldset>
+              }
+            </div>
+          </app-tarjeta>
 
-            @if (candyBar(); as tienda) {
-              <!-- RF-34: el candy se compra junto con la entrada y se retira con el mismo QR -->
-              <section class="candy" aria-labelledby="titulo-candy">
-                <h3 id="titulo-candy">¿Sumás algo del candy bar?</h3>
-                <p class="ayuda">
-                  Es opcional. Lo retirás con el mismo QR de tu entrada, en el candy bar del cine.
-                </p>
+          @if (candyBar(); as tienda) {
+            <!-- RF-34: el candy se compra junto con la entrada y se retira con el mismo QR -->
+            <app-tarjeta class="caja__principal">
+              <section class="caja__columna" aria-labelledby="titulo-candy">
+                <div>
+                  <h2 id="titulo-candy">¿Sumás algo del candy bar?</h2>
+                  <p class="ayuda">
+                    Es opcional. Lo retirás con el mismo QR de tu entrada, en el candy bar del cine.
+                  </p>
+                </div>
                 <app-selector-candy
                   [catalogo]="tienda"
                   [butacas]="elegidas().length"
@@ -171,88 +187,124 @@
                   [(combos)]="combos"
                 />
               </section>
-            }
+            </app-tarjeta>
+          }
 
-            @if (errorDeDatos()) {
-              <app-mensaje tono="error">{{ errorDeDatos() }}</app-mensaje>
-            }
+          <app-tarjeta class="caja__lateral" [destacada]="true">
+            <div class="caja__columna">
+              <h2>Tu pedido</h2>
+              <app-pedido
+                [butacas]="etiquetasDeButacas()"
+                [lineas]="lineasDeCandy()"
+                [mostrarCandy]="candyBar() !== null"
+              />
 
-            <div class="acciones">
-              <app-boton variante="borde" (presionado)="volverALasButacas()">
-                Cambiar butacas
-              </app-boton>
-              <app-boton tipo="submit" [cargando]="enviando()">Ver resumen</app-boton>
+              @if (errorDeDatos()) {
+                <app-mensaje tono="error">{{ errorDeDatos() }}</app-mensaje>
+              }
+
+              <div class="acciones">
+                <app-boton tipo="submit" [anchoCompleto]="true" [cargando]="enviando()">
+                  Ver resumen
+                </app-boton>
+                <app-boton
+                  variante="borde"
+                  [anchoCompleto]="true"
+                  (presionado)="volverALasButacas()"
+                >
+                  Cambiar butacas
+                </app-boton>
+              </div>
             </div>
-          </form>
-        </app-tarjeta>
+          </app-tarjeta>
+        </form>
       }
 
       @case ('pago') {
         @if (resumen(); as r) {
-          <app-tarjeta>
-            <h2>Resumen y pago</h2>
+          <!--
+            Lo que cambia el monto a la izquierda y el resumen con el botón de pagar al costado.
+            En el documento el resumen va después: el teclado pasa por cupón, crédito y medio de
+            pago antes de llegar a "Pagar", y en el celular el total queda justo arriba del botón.
+          -->
+          <div class="caja">
+            <app-tarjeta class="caja__principal">
+              <div class="caja__columna">
+                <h2>Descuentos y medio de pago</h2>
 
-            @if (r.tiene_vip) {
-              <!-- RF-17: el aviso de VIP va antes de pagar, con texto y no solo con un color -->
-              <app-mensaje tono="aviso">
-                Tu compra incluye butacas VIP, que tienen un precio mayor. El valor de cada una
-                figura en el detalle.
-              </app-mensaje>
-            }
+                <!--
+                  Promociones (RF-32, RF-39, RF-44, RF-46). Cada cambio se manda a la base, que
+                  devuelve el desglose recalculado: nada de esto se calcula en la pantalla.
+                -->
+                <app-promociones-orden
+                  [desglose]="desglose()"
+                  [saldos]="saldos()"
+                  [haySesion]="haySesion()"
+                  [recompensas]="candyBar()?.recompensas ?? []"
+                  [usarCredito]="usarCredito()"
+                  [recompensaId]="recompensaId()"
+                  [ajustando]="ajustando()"
+                  [error]="errorDeAjuste()"
+                  [(cupon)]="cupon"
+                  (aplicar)="aplicarCupon()"
+                  (usarCupon)="usarCupon($event)"
+                  (quitarCupon)="quitarCupon()"
+                  (alternarCredito)="alternarCredito($event)"
+                  (elegirRecompensa)="elegirRecompensa($event)"
+                />
 
-            @if (desglose(); as d) {
-              <app-desglose [desglose]="d" [mostrarPuntos]="haySesion()" />
-            }
+                @if (total() > 0) {
+                  <app-seleccion
+                    etiqueta="Medio de pago"
+                    marcador="Elegí un medio de pago"
+                    ayuda="Pago simulado: no se hace ningún cobro real."
+                    [opciones]="mediosDePago"
+                    [requerido]="true"
+                    [(valor)]="medio"
+                  />
+                } @else {
+                  <app-mensaje tono="exito">
+                    Tu crédito o tus puntos cubren toda la compra: no hay nada que pagar.
+                  </app-mensaje>
+                }
+              </div>
+            </app-tarjeta>
 
-            <!--
-              Promociones (RF-32, RF-39, RF-44, RF-46). Cada cambio se manda a la base, que
-              devuelve el desglose recalculado: nada de esto se calcula en la pantalla.
-            -->
-            <app-promociones-orden
-              [desglose]="desglose()"
-              [saldos]="saldos()"
-              [haySesion]="haySesion()"
-              [recompensas]="candyBar()?.recompensas ?? []"
-              [usarCredito]="usarCredito()"
-              [recompensaId]="recompensaId()"
-              [ajustando]="ajustando()"
-              [error]="errorDeAjuste()"
-              [(cupon)]="cupon"
-              (aplicar)="aplicarCupon()"
-              (usarCupon)="usarCupon($event)"
-              (quitarCupon)="quitarCupon()"
-              (alternarCredito)="alternarCredito($event)"
-              (elegirRecompensa)="elegirRecompensa($event)"
-            />
+            <app-tarjeta class="caja__lateral" [destacada]="true">
+              <div class="caja__columna">
+                <h2>Resumen y pago</h2>
 
-            @if (total() > 0) {
-              <app-seleccion
-                etiqueta="Medio de pago"
-                marcador="Elegí un medio de pago"
-                ayuda="Pago simulado: no se hace ningún cobro real."
-                [opciones]="mediosDePago"
-                [requerido]="true"
-                [(valor)]="medio"
-              />
-            } @else {
-              <app-mensaje tono="exito">
-                Tu crédito o tus puntos cubren toda la compra: no hay nada que pagar.
-              </app-mensaje>
-            }
+                @if (r.tiene_vip) {
+                  <!-- RF-17: el aviso de VIP va antes de pagar, con texto y no solo con un color -->
+                  <app-mensaje tono="aviso">
+                    Tu compra incluye butacas VIP, que tienen un precio mayor. El valor de cada una
+                    figura en el detalle.
+                  </app-mensaje>
+                }
 
-            @if (errorDePago()) {
-              <app-mensaje tono="error">{{ errorDePago() }}</app-mensaje>
-            }
+                @if (desglose(); as d) {
+                  <app-desglose [desglose]="d" [mostrarPuntos]="haySesion()" />
+                }
 
-            <div class="acciones">
-              <app-boton variante="borde" (presionado)="volverALasButacas()">
-                Cambiar butacas
-              </app-boton>
-              <app-boton [cargando]="pagando()" (presionado)="pagar()">
-                {{ total() > 0 ? 'Pagar ' + formatearPrecio(total()) : 'Confirmar compra' }}
-              </app-boton>
-            </div>
-          </app-tarjeta>
+                @if (errorDePago()) {
+                  <app-mensaje tono="error">{{ errorDePago() }}</app-mensaje>
+                }
+
+                <div class="acciones">
+                  <app-boton [anchoCompleto]="true" [cargando]="pagando()" (presionado)="pagar()">
+                    {{ total() > 0 ? 'Pagar ' + formatearPrecio(total()) : 'Confirmar compra' }}
+                  </app-boton>
+                  <app-boton
+                    variante="borde"
+                    [anchoCompleto]="true"
+                    (presionado)="volverALasButacas()"
+                  >
+                    Cambiar butacas
+                  </app-boton>
+                </div>
+              </div>
+            </app-tarjeta>
+          </div>
         }
       }
     }

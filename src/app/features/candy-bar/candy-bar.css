@@ -54,14 +54,9 @@ h1 {
   text-decoration-thickness: 3px;
 }
 
+/* El espaciado lo pone la columna de la caja (styles.css), no cada pieza */
 h2 {
-  margin-block: 0 var(--e-3);
-}
-
-form,
-.pago {
-  display: grid;
-  gap: var(--e-campos);
+  margin: 0;
 }
 
 .ayuda {
@@ -70,10 +65,8 @@ form,
   font-size: var(--t-chico);
 }
 
+/* En el lateral angosto los botones van apilados y a todo el ancho, el principal arriba */
 .acciones {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--e-3);
-  margin-block-start: var(--e-2);
+  display: grid;
+  gap: var(--e-2);
 }

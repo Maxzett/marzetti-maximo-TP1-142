@@ -107,6 +107,35 @@ export function contenidoDelCombo(combo: Combo): string {
     .join(' · ');
 }
 
+/** Una línea del resumen lateral: qué se eligió y cuántas unidades, sin precio */
+export interface LineaDelPedido {
+  id: string;
+  nombre: string;
+  cantidad: number;
+}
+
+/**
+ * Lo elegido, con nombre, para el resumen "Tu pedido" que acompaña al selector. Combos primero y
+ * después productos, cada uno en el orden del catálogo. Sin precios a propósito: el monto lo
+ * decide la base (calcular_orden) y se ve en el paso de pago, con cupón y crédito ya aplicados.
+ */
+export function lineasDelPedido(
+  catalogo: CatalogoDeCandy,
+  productos: Cantidades,
+  combos: Cantidades,
+): LineaDelPedido[] {
+  const elegidos = (lista: readonly { id: string; nombre: string }[], cantidades: Cantidades) =>
+    lista
+      .filter((item) => (cantidades.get(item.id) ?? 0) > 0)
+      .map((item) => ({
+        id: item.id,
+        nombre: item.nombre,
+        cantidad: cantidades.get(item.id) ?? 0,
+      }));
+
+  return [...elegidos(catalogo.combos, combos), ...elegidos(catalogo.productos, productos)];
+}
+
 /** "20 %" o "$1.500": cómo se dice un descuento */
 export function describirCupon(cupon: Pick<CuponAplicado, 'tipo_descuento' | 'valor'>): string {
   return cupon.tipo_descuento === 'porcentaje'

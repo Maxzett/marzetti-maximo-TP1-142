@@ -26,93 +26,115 @@
   } @else if (tienda(); as t) {
     @switch (paso()) {
       @case ('elegir') {
-        <app-tarjeta>
-          <form (submit)="continuar($event)" novalidate>
-            <h2>¿Qué vas a llevar?</h2>
-            <app-selector-candy
-              [catalogo]="t"
-              [butacas]="0"
-              [(productos)]="productos"
-              [(combos)]="combos"
-            />
-
-            <app-campo
-              etiqueta="Email"
-              tipo="email"
-              autocompletado="email"
-              ayuda="Queda como dato de contacto de tu compra. El ticket lo ves y lo descargás al terminar."
-              [requerido]="true"
-              [(valor)]="email"
-            />
-
-            @if (errorDeEleccion()) {
-              <app-mensaje tono="error">{{ errorDeEleccion() }}</app-mensaje>
-            }
-
-            <div class="acciones">
-              <app-boton tipo="submit" [cargando]="enviando()">Ver resumen</app-boton>
+        <form class="caja" (submit)="continuar($event)" novalidate>
+          <app-tarjeta class="caja__principal">
+            <div class="caja__columna">
+              <h2>¿Qué vas a llevar?</h2>
+              <app-selector-candy
+                [catalogo]="t"
+                [butacas]="0"
+                [(productos)]="productos"
+                [(combos)]="combos"
+              />
             </div>
-          </form>
-        </app-tarjeta>
+          </app-tarjeta>
+
+          <app-tarjeta class="caja__lateral" [destacada]="true">
+            <div class="caja__columna">
+              <h2>Tu pedido</h2>
+              <app-pedido [lineas]="lineas()" vacio="Elegí al menos un producto o un combo." />
+
+              <app-campo
+                etiqueta="Email"
+                tipo="email"
+                autocompletado="email"
+                ayuda="Queda como dato de contacto de tu compra. El ticket lo ves y lo descargás al terminar."
+                [requerido]="true"
+                [(valor)]="email"
+              />
+
+              @if (errorDeEleccion()) {
+                <app-mensaje tono="error">{{ errorDeEleccion() }}</app-mensaje>
+              }
+
+              <app-boton tipo="submit" [anchoCompleto]="true" [cargando]="enviando()">
+                Ver resumen
+              </app-boton>
+            </div>
+          </app-tarjeta>
+        </form>
       }
 
       @case ('pago') {
         @if (desglose(); as d) {
-          <app-tarjeta>
-            <div class="pago">
-              <h2>Resumen y pago</h2>
-              <app-desglose [desglose]="d" [mostrarPuntos]="haySesion()" />
+          <!--
+            Lo que cambia el monto a la izquierda y el resumen con el botón de pagar al costado.
+            En el documento el resumen va después: el teclado pasa por cupón, crédito y medio de
+            pago antes de llegar a "Pagar", y en el celular el total queda justo arriba del botón.
+          -->
+          <div class="caja">
+            <app-tarjeta class="caja__principal">
+              <div class="caja__columna">
+                <h2>Descuentos y medio de pago</h2>
 
-              <app-promociones-orden
-                [desglose]="d"
-                [saldos]="saldos()"
-                [haySesion]="haySesion()"
-                [recompensas]="t.recompensas"
-                [usarCredito]="usarCredito()"
-                [recompensaId]="recompensaId()"
-                [ajustando]="ajustando()"
-                [error]="errorDeAjuste()"
-                [(cupon)]="cupon"
-                (aplicar)="aplicarCupon()"
-                (usarCupon)="usarCupon($event)"
-                (quitarCupon)="quitarCupon()"
-                (alternarCredito)="alternarCredito($event)"
-                (elegirRecompensa)="elegirRecompensa($event)"
-              />
-
-              @if (total() > 0) {
-                <app-seleccion
-                  etiqueta="Medio de pago"
-                  marcador="Elegí un medio de pago"
-                  ayuda="Pago simulado: no se hace ningún cobro real."
-                  [opciones]="mediosDePago"
-                  [requerido]="true"
-                  [(valor)]="medio"
+                <app-promociones-orden
+                  [desglose]="d"
+                  [saldos]="saldos()"
+                  [haySesion]="haySesion()"
+                  [recompensas]="t.recompensas"
+                  [usarCredito]="usarCredito()"
+                  [recompensaId]="recompensaId()"
+                  [ajustando]="ajustando()"
+                  [error]="errorDeAjuste()"
+                  [(cupon)]="cupon"
+                  (aplicar)="aplicarCupon()"
+                  (usarCupon)="usarCupon($event)"
+                  (quitarCupon)="quitarCupon()"
+                  (alternarCredito)="alternarCredito($event)"
+                  (elegirRecompensa)="elegirRecompensa($event)"
                 />
-              } @else {
-                <app-mensaje tono="exito">
-                  Tu crédito o tus puntos cubren toda la compra: no hay nada que pagar.
-                </app-mensaje>
-              }
 
-              <p class="ayuda">
-                Las compras del candy bar no se cancelan. El ticket vale 7 días desde el pago.
-              </p>
-
-              @if (errorDePago()) {
-                <app-mensaje tono="error">{{ errorDePago() }}</app-mensaje>
-              }
-
-              <div class="acciones">
-                <app-boton variante="borde" (presionado)="volverAElegir()">
-                  Cambiar el pedido
-                </app-boton>
-                <app-boton [cargando]="pagando()" (presionado)="pagar()">
-                  {{ total() > 0 ? 'Pagar ' + formatearPrecio(total()) : 'Confirmar compra' }}
-                </app-boton>
+                @if (total() > 0) {
+                  <app-seleccion
+                    etiqueta="Medio de pago"
+                    marcador="Elegí un medio de pago"
+                    ayuda="Pago simulado: no se hace ningún cobro real."
+                    [opciones]="mediosDePago"
+                    [requerido]="true"
+                    [(valor)]="medio"
+                  />
+                } @else {
+                  <app-mensaje tono="exito">
+                    Tu crédito o tus puntos cubren toda la compra: no hay nada que pagar.
+                  </app-mensaje>
+                }
               </div>
-            </div>
-          </app-tarjeta>
+            </app-tarjeta>
+
+            <app-tarjeta class="caja__lateral" [destacada]="true">
+              <div class="caja__columna">
+                <h2>Resumen y pago</h2>
+                <app-desglose [desglose]="d" [mostrarPuntos]="haySesion()" />
+
+                <p class="ayuda">
+                  Las compras del candy bar no se cancelan. El ticket vale 7 días desde el pago.
+                </p>
+
+                @if (errorDePago()) {
+                  <app-mensaje tono="error">{{ errorDePago() }}</app-mensaje>
+                }
+
+                <div class="acciones">
+                  <app-boton [anchoCompleto]="true" [cargando]="pagando()" (presionado)="pagar()">
+                    {{ total() > 0 ? 'Pagar ' + formatearPrecio(total()) : 'Confirmar compra' }}
+                  </app-boton>
+                  <app-boton variante="borde" [anchoCompleto]="true" (presionado)="volverAElegir()">
+                    Cambiar el pedido
+                  </app-boton>
+                </div>
+              </div>
+            </app-tarjeta>
+          </div>
         }
       }
     }

@@ -8,6 +8,7 @@ import {
   describirCupon,
   entradasCubiertas,
   entradasDelCombo,
+  lineasDelPedido,
   MAXIMO_POR_LINEA,
   progresoDeCanje,
   unidadesQueEntran,
@@ -202,5 +203,53 @@ describe('catalogoSinEntradas (RF-34.1)', () => {
 
     expect(catalogo.combos.map((c) => c.id)).toEqual(['candy']);
     expect(catalogo.recompensas.map((r) => r.id)).toEqual(['r2']);
+  });
+});
+
+describe('lineasDelPedido', () => {
+  const catalogo = {
+    categorias: [],
+    productos: [
+      {
+        id: 'p1',
+        categoria_id: 'c',
+        nombre: 'Pochoclo',
+        descripcion: '',
+        imagen_url: null,
+        precio: 1,
+      },
+      {
+        id: 'p2',
+        categoria_id: 'c',
+        nombre: 'Gaseosa',
+        descripcion: '',
+        imagen_url: null,
+        precio: 1,
+      },
+    ],
+    combos: [soloCandy, pareja],
+    recompensas: [],
+  };
+
+  it('lista combos y después productos, en el orden del catálogo, con su cantidad', () => {
+    const lineas = lineasDelPedido(
+      catalogo,
+      new Map([
+        ['p2', 3],
+        ['p1', 1],
+      ]),
+      new Map([['pareja', 2]]),
+    );
+
+    expect(lineas).toEqual([
+      { id: 'pareja', nombre: 'pareja', cantidad: 2 },
+      { id: 'p1', nombre: 'Pochoclo', cantidad: 1 },
+      { id: 'p2', nombre: 'Gaseosa', cantidad: 3 },
+    ]);
+  });
+
+  it('sin nada elegido no hay líneas, y un id que no está en el catálogo no aparece', () => {
+    expect(lineasDelPedido(catalogo, new Map(), new Map())).toEqual([]);
+    expect(lineasDelPedido(catalogo, new Map([['otro', 2]]), new Map())).toEqual([]);
   });
 });

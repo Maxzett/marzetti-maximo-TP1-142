@@ -1,0 +1,25 @@
+@if (butacas().length > 0) {
+  <p class="rotulo" id="pedido-butacas">Butacas</p>
+  <ul class="butacas" aria-labelledby="pedido-butacas">
+    @for (butaca of butacas(); track butaca) {
+      <li>{{ butaca }}</li>
+    }
+  </ul>
+}
+
+@if (mostrarCandy()) {
+  <p class="rotulo" id="pedido-candy">Candy bar</p>
+  @if (lineas().length > 0) {
+    <ul class="lineas" aria-labelledby="pedido-candy">
+      @for (linea of lineas(); track linea.id) {
+        <li>
+          <!-- El nombre va como texto y no en otro span: Angular borra el espacio entre dos
+               elementos, y el lector de pantalla leería "2 ×Combo" -->
+          <span class="cantidad">{{ linea.cantidad }} ×</span> {{ linea.nombre }}
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="vacio">{{ vacio() }}</p>
+  }
+}

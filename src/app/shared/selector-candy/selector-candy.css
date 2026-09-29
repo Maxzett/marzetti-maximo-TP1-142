@@ -8,9 +8,14 @@ h3 {
   font-size: var(--t-rotulo);
 }
 
+/*
+ * Grilla de tarjetas y no renglones: a lo ancho de un escritorio, un renglón dejaba el nombre en
+ * una punta y el contador a casi mil píxeles, en la otra. En el celular sigue siendo una columna.
+ */
 .lista {
   display: grid;
-  gap: var(--e-2);
+  gap: var(--e-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -18,11 +23,9 @@ h3 {
 
 .item {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--e-3);
-  padding: var(--e-3);
+  padding: var(--e-3) var(--e-4);
   border: 1px solid var(--borde);
   border-radius: var(--r-medio);
   background: var(--superficie);
@@ -32,9 +35,15 @@ h3 {
   border-color: var(--borde-fuerte);
 }
 
+/* Lo elegido se nota de lejos; el número del contador ya lo dice sin depender del color */
+.item--elegido {
+  border-color: var(--acento);
+  box-shadow: inset 0 0 0 1px var(--acento);
+}
+
 .texto {
-  flex: 1 1 14rem;
-  min-inline-size: 0;
+  display: grid;
+  gap: var(--e-1);
 }
 
 .texto p {
@@ -44,6 +53,18 @@ h3 {
 .nombre {
   font-family: var(--fuente-titulo);
   font-size: var(--t-cuerpo-lg);
+}
+
+/* El precio y el contador van juntos, abajo de todo: en una fila de tarjetas quedan alineados */
+.pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2) var(--e-3);
+  margin-block-start: auto;
+  padding-block-start: var(--e-3);
+  border-block-start: 1px dashed var(--borde);
 }
 
 .marca {
@@ -57,11 +78,14 @@ h3 {
 
 .detalle {
   color: var(--texto-tenue);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
+  line-height: 1.45;
 }
 
 .precio {
-  margin-block-start: var(--e-1);
+  margin: 0;
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
   font-variant-numeric: tabular-nums;
 }
 

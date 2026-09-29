@@ -1,6 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Cantidades, catalogoSinEntradas, comoLineas } from '../../core/compra/candy';
+import {
+  Cantidades,
+  catalogoSinEntradas,
+  comoLineas,
+  lineasDelPedido,
+} from '../../core/compra/candy';
 import { formatearPrecio } from '../../core/formato/precio';
 import { CatalogoDeCandy } from '../../core/models/candy';
 import {
@@ -19,6 +24,7 @@ import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
 import { Desglose } from '../../shared/desglose/desglose';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { Pedido } from '../../shared/pedido/pedido';
 import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
@@ -43,6 +49,7 @@ type Paso = 'elegir' | 'pago';
     Campo,
     Desglose,
     Mensaje,
+    Pedido,
     PromocionesOrden,
     Seleccion,
     SelectorCandy,
@@ -96,6 +103,12 @@ export class CandyBar {
   protected readonly tienda = computed(() => {
     const catalogo = this.catalogo();
     return catalogo ? catalogoSinEntradas(catalogo) : null;
+  });
+
+  /** Lo elegido, con nombre, para el lateral "Tu pedido" */
+  protected readonly lineas = computed(() => {
+    const tienda = this.tienda();
+    return tienda ? lineasDelPedido(tienda, this.productos(), this.combos()) : [];
   });
 
   protected readonly unidades = computed(

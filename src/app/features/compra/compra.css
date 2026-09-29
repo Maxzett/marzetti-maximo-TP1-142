@@ -89,11 +89,6 @@ h2 {
   color: var(--texto-tenue);
 }
 
-form {
-  display: grid;
-  gap: var(--e-campos);
-}
-
 .acciones {
   display: flex;
   flex-wrap: wrap;
@@ -102,19 +97,19 @@ form {
   margin-block-start: var(--e-4);
 }
 
-h3 {
-  margin-block: 0 var(--e-2);
-  font-size: var(--t-rotulo);
+/* En los pasos 2 y 3 el espaciado lo pone la columna de la caja (styles.css), no cada pieza */
+.caja h2 {
+  margin: 0;
 }
 
-.candy {
+.caja .ayuda {
+  margin: var(--e-1) 0 0;
+}
+
+/* En el lateral angosto los botones van apilados y a todo el ancho, el principal arriba */
+.caja__lateral .acciones {
   display: grid;
-  gap: var(--e-3);
-  padding-block-start: var(--e-4);
-  border-block-start: 1px solid var(--borde);
-}
-
-.candy .ayuda {
+  gap: var(--e-2);
   margin: 0;
 }
 

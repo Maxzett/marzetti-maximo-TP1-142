@@ -332,6 +332,64 @@ svg {
 }
 
 /*
+ * ---- Caja de compra ----
+ * Compra y candy bar arman igual cada paso: lo que se elige en una columna ancha y, al costado,
+ * el resumen con el botón para avanzar. Global y no en cada componente por el mismo motivo que
+ * .boton: son dos pantallas con el mismo armado, y dos copias terminarían siendo distintas.
+ *
+ * En el celular es una sola columna en el orden del documento, que es también el del teclado:
+ * primero se elige, después el resumen y el botón. Desde 64rem el lateral queda al costado y
+ * acompaña el scroll (sticky), así lo elegido y el botón de avanzar están siempre a la vista.
+ */
+.caja {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e-5);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .caja {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+  }
+
+  .caja__lateral {
+    position: sticky;
+    top: var(--e-5);
+  }
+
+  /*
+   * Dos piezas a la derecha (datos arriba, cierre abajo) y lo principal a toda la altura a la
+   * izquierda. Así el orden del teclado sigue siendo datos, candy y recién después el botón de
+   * avanzar, sin que el botón quede antes de lo que todavía falta elegir.
+   */
+  .caja--partida {
+    grid-template-areas:
+      'principal datos'
+      'principal lateral';
+    grid-template-rows: auto 1fr;
+  }
+
+  .caja--partida > .caja__principal {
+    grid-area: principal;
+  }
+
+  .caja--partida > .caja__datos {
+    grid-area: datos;
+  }
+
+  .caja--partida > .caja__lateral {
+    grid-area: lateral;
+  }
+}
+
+/* Una columna del contenido de la caja, con el mismo aire que un formulario */
+.caja__columna {
+  display: grid;
+  gap: var(--e-campos);
+}
+
+/*
  * ---- Alto contraste de Windows ----
  * Con forced-colors el sistema reemplaza nuestros colores por su propia paleta y descarta
  * los background-image. Los estados que hoy se comunican con el relleno ámbar (el chip

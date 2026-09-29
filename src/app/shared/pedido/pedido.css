@@ -1,0 +1,66 @@
+:host {
+  display: grid;
+  gap: var(--e-2);
+}
+
+.rotulo {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-chico);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.butacas + .rotulo {
+  margin-block-start: var(--e-2);
+}
+
+.butacas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.butacas li {
+  padding: var(--e-1) var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+  font-family: var(--fuente-titulo);
+}
+
+.lineas {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Renglones con línea de puntos entre medio: la misma lectura que un ticket impreso */
+.lineas li {
+  display: flex;
+  gap: var(--e-2);
+  padding-block: var(--e-2);
+  border-block-end: 1px dashed var(--borde-fuerte);
+}
+
+.lineas li:last-child {
+  border-block-end: 0;
+}
+
+.cantidad {
+  flex-shrink: 0;
+  min-inline-size: 2.5rem;
+  color: var(--acento);
+  font-family: var(--fuente-titulo);
+  font-variant-numeric: tabular-nums;
+}
+
+.vacio {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-size: var(--t-chico);
+}

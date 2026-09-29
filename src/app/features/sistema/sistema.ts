@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { NIVEL_AA, contraste } from '../../core/a11y/contraste';
-import { Cantidades } from '../../core/compra/candy';
+import { Cantidades, lineasDelPedido } from '../../core/compra/candy';
 import { CatalogoDeCandy, Recompensa } from '../../core/models/candy';
 import { DesgloseDeOrden, EstadoDeButaca, Saldos } from '../../core/models/orden';
 import { Pelicula } from '../../core/models/pelicula';
@@ -22,6 +22,7 @@ import { FichaProxima } from '../../shared/ficha-proxima/ficha-proxima';
 import { DatoDeBarra, GraficoBarras } from '../../shared/grafico-barras/grafico-barras';
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { Pedido } from '../../shared/pedido/pedido';
 import { Poster } from '../../shared/poster/poster';
 import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
 import { SelloEdad } from '../../shared/sello-edad/sello-edad';
@@ -53,6 +54,7 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     GraficoBarras,
     MapaSala,
     Mensaje,
+    Pedido,
     Poster,
     PromocionesOrden,
     Seleccion,
@@ -281,6 +283,9 @@ export class Sistema {
   };
   protected readonly productosDeMuestra = signal<Cantidades>(new Map());
   protected readonly combosDeMuestra = signal<Cantidades>(new Map());
+  protected readonly pedidoDeMuestra = computed(() =>
+    lineasDelPedido(this.candyDeMuestra, this.productosDeMuestra(), this.combosDeMuestra()),
+  );
   protected readonly unidades = signal(1);
   // Un ranking con un valor muy chico: su barra no desaparece contra la más larga
   protected readonly barrasDeMuestra: readonly DatoDeBarra[] = [

@@ -351,6 +351,9 @@
       [(combos)]="combosDeMuestra"
     />
 
+    <h3 class="titulo-caso">Tu pedido, el lateral de la compra (sigue al selector de arriba)</h3>
+    <app-pedido [butacas]="['F7', 'R3 · VIP']" [lineas]="pedidoDeMuestra()" />
+
     <h3 class="titulo-caso">Desglose con cupón, crédito y canje</h3>
     <app-desglose [desglose]="desgloseDeMuestra" [mostrarPuntos]="true" />
 
