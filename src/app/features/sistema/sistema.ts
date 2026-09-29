@@ -126,6 +126,7 @@ export class Sistema {
       fecha_estreno: null,
       destacada: true,
       precio_preventa: null,
+      en_cartelera: true,
       generos: [
         { id: 'a', nombre: 'Acción', slug: 'accion' },
         { id: 'b', nombre: 'Ciencia ficción', slug: 'ciencia-ficcion' },
@@ -141,6 +142,7 @@ export class Sistema {
       fecha_estreno: null,
       destacada: false,
       precio_preventa: null,
+      en_cartelera: true,
       generos: [{ id: 'c', nombre: 'Terror', slug: 'terror' }],
     },
   ];

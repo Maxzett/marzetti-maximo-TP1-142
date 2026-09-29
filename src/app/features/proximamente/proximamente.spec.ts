@@ -22,6 +22,7 @@ function pelicula(id: string, dias: number, preventa: number | null = null): Pel
     fecha_estreno: sumarDias(HOY, dias),
     destacada: false,
     precio_preventa: preventa,
+    en_cartelera: false,
     generos: [],
   };
 }

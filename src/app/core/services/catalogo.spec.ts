@@ -19,6 +19,7 @@ function fila(titulo: string, extra: Record<string, unknown> = {}) {
     fecha_estreno: null,
     destacada: false,
     precio_preventa: null,
+    en_cartelera: true,
     peliculas_generos: [],
     ...extra,
   };
@@ -112,21 +113,34 @@ describe('Catalogo', () => {
       expect(pelicula.generos).toEqual([ACCION]);
     });
 
-    // Las de estreno futuro son de Próximamente (F10): no van a la cartelera
-    it('deja afuera las películas con estreno futuro', async () => {
+    // Qué está en cartelera lo decide la base (en_cartelera, 0028): estrenada y con funciones
+    // por delante. El cliente no repite la cuenta, solo filtra por lo que ella dice.
+    it('deja afuera lo que la base no marca en cartelera: futuras y sin funciones', async () => {
       const servicio = crearServicio(
         crearSupabaseFalso({
           filas: [
-            fila('Ya estrenada', { fecha_estreno: '2000-01-01' }),
-            fila('Sin fecha', { fecha_estreno: null }),
-            fila('Futura', { fecha_estreno: '2999-01-01' }),
+            fila('En cartel', { fecha_estreno: '2000-01-01' }),
+            fila('Ya salió de cartel', { fecha_estreno: '2000-01-01', en_cartelera: false }),
+            fila('Futura', { fecha_estreno: '2999-01-01', en_cartelera: false }),
           ],
         }),
       );
 
       const cartelera = await servicio.cargarCartelera();
 
-      expect(cartelera?.map((p) => p.titulo)).toEqual(['Ya estrenada', 'Sin fecha']);
+      expect(cartelera?.map((p) => p.titulo)).toEqual(['En cartel']);
+    });
+
+    it('pide en_cartelera en la misma consulta del catálogo', async () => {
+      const falso = crearSupabaseFalso({ filas: [] });
+      const servicio = crearServicio(falso);
+
+      await servicio.cargarCartelera();
+
+      const cadena = falso.client.from.mock.results[0].value as {
+        select: ReturnType<typeof vi.fn>;
+      };
+      expect(cadena.select.mock.calls[0][0]).toContain('en_cartelera');
     });
 
     it('devuelve null si la base falla, para no confundir un error con una cartelera vacía', async () => {

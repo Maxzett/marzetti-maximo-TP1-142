@@ -1,5 +1,5 @@
 import { Genero, Pelicula } from '../models/pelicula';
-import { enCartelera, filtrarPeliculas, normalizar } from './filtrar';
+import { filtrarPeliculas, normalizar, yaSeEstreno } from './filtrar';
 
 const ACCION: Genero = { id: 'g1', nombre: 'Acción', slug: 'accion' };
 const COMEDIA: Genero = { id: 'g2', nombre: 'Comedia', slug: 'comedia' };
@@ -16,6 +16,7 @@ function pelicula(titulo: string, generos: Genero[], extra: Partial<Pelicula> = 
     fecha_estreno: null,
     destacada: false,
     precio_preventa: null,
+    en_cartelera: true,
     generos,
     ...extra,
   };
@@ -99,22 +100,22 @@ describe('filtrarPeliculas', () => {
   });
 });
 
-describe('enCartelera', () => {
+describe('yaSeEstreno', () => {
   const HOY = '2026-09-21';
 
-  it('sin fecha de estreno está en cartelera', () => {
-    expect(enCartelera({ fecha_estreno: null }, HOY)).toBe(true);
+  it('sin fecha de estreno ya se estrenó', () => {
+    expect(yaSeEstreno({ fecha_estreno: null }, HOY)).toBe(true);
   });
 
-  it('con estreno pasado está en cartelera', () => {
-    expect(enCartelera({ fecha_estreno: '2026-08-01' }, HOY)).toBe(true);
+  it('con estreno pasado ya se estrenó', () => {
+    expect(yaSeEstreno({ fecha_estreno: '2026-08-01' }, HOY)).toBe(true);
   });
 
-  it('el mismo día del estreno ya está en cartelera', () => {
-    expect(enCartelera({ fecha_estreno: HOY }, HOY)).toBe(true);
+  it('el mismo día del estreno ya cuenta como estrenada', () => {
+    expect(yaSeEstreno({ fecha_estreno: HOY }, HOY)).toBe(true);
   });
 
-  it('con estreno futuro no está: es de Próximamente', () => {
-    expect(enCartelera({ fecha_estreno: '2026-09-22' }, HOY)).toBe(false);
+  it('con estreno futuro no: es de Próximamente', () => {
+    expect(yaSeEstreno({ fecha_estreno: '2026-09-22' }, HOY)).toBe(false);
   });
 });

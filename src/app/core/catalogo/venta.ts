@@ -1,6 +1,6 @@
 import { Pelicula } from '../models/pelicula';
 import { sumarDias } from '../../shared/selector-fecha/fechas';
-import { enCartelera } from './filtrar';
+import { yaSeEstreno } from './filtrar';
 
 /**
  * Cuándo sale a la venta una película (RF-49, RN-10). Es el espejo de venta_desde() de la
@@ -49,9 +49,9 @@ export function estadoDeVenta(pelicula: DatosDeVenta, hoy: string): EstadoDeVent
   return { aLaVenta, desde, enPreventa };
 }
 
-/** RF-08: Próximamente es todo lo que no está en cartelera, preventa incluida */
+/** RF-08: Próximamente es todo lo que todavía no se estrenó, preventa incluida */
 export function esProxima(pelicula: Pick<Pelicula, 'fecha_estreno'>, hoy: string): boolean {
-  return !enCartelera(pelicula, hoy);
+  return !yaSeEstreno(pelicula, hoy);
 }
 
 /**

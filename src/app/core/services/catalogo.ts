@@ -1,6 +1,5 @@
 import { inject, Service } from '@angular/core';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
-import { enCartelera } from '../catalogo/filtrar';
 import { ordenarProximas } from '../catalogo/venta';
 import { Genero, Pelicula, Puntaje, VentaPelicula } from '../models/pelicula';
 import { Supabase } from './supabase';
@@ -11,7 +10,7 @@ import { Supabase } from './supabase';
  * trae la película y sus géneros, en vez de una consulta por película.
  */
 const COLUMNAS =
-  'id, titulo, sinopsis, poster_url, duracion_minutos, restriccion_edad, fecha_estreno, destacada, precio_preventa, peliculas_generos(generos(id, nombre, slug))';
+  'id, titulo, sinopsis, poster_url, duracion_minutos, restriccion_edad, fecha_estreno, destacada, precio_preventa, en_cartelera, peliculas_generos(generos(id, nombre, slug))';
 
 /** Cómo llega la fila: los géneros pasan por la tabla puente */
 type FilaPelicula = Omit<Pelicula, 'generos'> & {
@@ -59,18 +58,12 @@ export class Catalogo {
 
   /**
    * Las películas en cartelera, por título. Null si la consulta falló, para que la pantalla
-   * distinga un error de una cartelera vacía. El filtro de estreno se hace acá y no en la
-   * consulta para que la regla viva en un solo lugar (enCartelera).
+   * distinga un error de una cartelera vacía. Qué es "en cartelera" lo decide la base
+   * (en_cartelera, 0028): estrenada y con funciones por delante.
    */
   async cargarCartelera(): Promise<Pelicula[] | null> {
     const todas = await this.cargarTodas();
-
-    if (todas === null) {
-      return null;
-    }
-
-    const hoy = hoyIso();
-    return todas.filter((pelicula) => enCartelera(pelicula, hoy));
+    return todas === null ? null : todas.filter((pelicula) => pelicula.en_cartelera);
   }
 
   /**

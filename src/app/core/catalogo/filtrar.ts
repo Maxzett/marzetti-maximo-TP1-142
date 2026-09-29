@@ -47,12 +47,15 @@ export function filtrarPeliculas(
 }
 
 /**
- * Una película está en cartelera si ya se estrenó o no tiene fecha de lanzamiento. Las de
- * fecha futura —incluida la preventa, que arranca siete días antes— son de Próximamente.
+ * Si la película ya se estrenó, o no tiene fecha de lanzamiento. Las de fecha futura —incluida
+ * la preventa, que arranca siete días antes— son de Próximamente.
+ *
+ * No es lo mismo que estar en cartelera: además hay que tener funciones por delante, y una
+ * película estrenada sale de cartel cuando pasa la última. Esa regla la decide la base
+ * (en_cartelera, migración 0028) y llega como `Pelicula.en_cartelera`.
  *
  * Las fechas son 'AAAA-MM-DD', así que comparadas como texto ordenan igual que como fechas.
- * La misma regla la aplica peliculas_mas_vendidas() en la base, con la hora de Buenos Aires.
  */
-export function enCartelera(pelicula: Pick<Pelicula, 'fecha_estreno'>, hoy: string): boolean {
+export function yaSeEstreno(pelicula: Pick<Pelicula, 'fecha_estreno'>, hoy: string): boolean {
   return pelicula.fecha_estreno === null || pelicula.fecha_estreno <= hoy;
 }

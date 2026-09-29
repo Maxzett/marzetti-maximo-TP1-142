@@ -82,8 +82,13 @@ export interface PeliculasGestionadas {
   generos: Genero[];
 }
 
-/** Lo que se manda para guardar una película: los géneros van como lista de ids */
-export type DatosDePelicula = Borrador<Omit<Pelicula, 'generos'>> & { generos: string[] };
+/**
+ * Lo que se manda para guardar una película: los géneros van como lista de ids. `en_cartelera`
+ * no se manda: no es un dato, lo calcula la base a partir de las funciones.
+ */
+export type DatosDePelicula = Borrador<Omit<Pelicula, 'generos' | 'en_cartelera'>> & {
+  generos: string[];
+};
 
 /** Lo que se manda para guardar: sin id es un alta */
 export type Borrador<T extends { id: string }> = Omit<T, 'id'> & { id: string | null };

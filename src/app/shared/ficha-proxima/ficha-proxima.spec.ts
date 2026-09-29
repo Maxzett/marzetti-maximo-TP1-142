@@ -15,6 +15,7 @@ const PELICULA: Pelicula = {
   fecha_estreno: '2026-10-15',
   destacada: false,
   precio_preventa: null,
+  en_cartelera: false,
   generos: [],
 };
 

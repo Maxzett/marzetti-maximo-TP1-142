@@ -19,6 +19,7 @@ function futura(titulo: string, estreno: string, preventa: number | null = null)
     fecha_estreno: estreno,
     destacada: false,
     precio_preventa: preventa,
+    en_cartelera: false,
     generos: [{ id: 'g1', nombre: 'Drama', slug: 'drama' }],
   };
 }

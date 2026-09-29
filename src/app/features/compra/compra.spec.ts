@@ -50,6 +50,7 @@ function peliculaDeMuestra(restriccion: 0 | 13 | 18): Pelicula {
     fecha_estreno: null,
     destacada: false,
     precio_preventa: null,
+    en_cartelera: true,
     generos: [],
   };
 }

@@ -20,6 +20,7 @@ const PELICULA: Pelicula = {
   fecha_estreno: null,
   destacada: true,
   precio_preventa: null,
+  en_cartelera: true,
   generos: [
     { id: 'g1', nombre: 'Acción', slug: 'accion' },
     { id: 'g2', nombre: 'Ciencia ficción', slug: 'ciencia-ficcion' },

@@ -30,6 +30,11 @@ export interface Pelicula {
   /** RF-07: el administrador decide qué aparece en la portada */
   destacada: boolean;
   precio_preventa: number | null;
+  /**
+   * Ya se estrenó y le quedan funciones por delante. Es la columna calculada en_cartelera()
+   * (migración 0028): una película sale de cartel cuando pasa su última función.
+   */
+  en_cartelera: boolean;
   generos: Genero[];
 }
 

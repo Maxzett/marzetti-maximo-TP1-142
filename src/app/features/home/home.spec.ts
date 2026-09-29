@@ -25,6 +25,7 @@ function pelicula(titulo: string, generos: Genero[] = [], destacada = false): Pe
     fecha_estreno: null,
     destacada,
     precio_preventa: null,
+    en_cartelera: true,
     generos,
   };
 }
