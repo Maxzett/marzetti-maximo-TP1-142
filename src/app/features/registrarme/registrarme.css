@@ -1,6 +1,14 @@
+/* El ancho lo reparte .acceso (styles.css): formulario y panel de la cuenta */
 .pantalla {
-  max-width: 30rem;
   padding-block: var(--e-7);
+}
+
+/* Dos campos por fila cuando entran; en el celular, uno debajo del otro */
+.par {
+  display: grid;
+  gap: var(--e-campos) var(--e-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  align-items: start;
 }
 
 h1 {
@@ -74,13 +82,5 @@ legend {
 .pie {
   margin-top: var(--e-5);
   color: var(--texto-tenue);
-  font-size: var(--t-mini);
-}
-
-.obligatorio {
-  color: var(--texto-tenue);
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: var(--t-chico);
 }

@@ -393,6 +393,46 @@ svg {
   }
 }
 
+/*
+ * ---- Pantallas de acceso ----
+ * Ingresar y registrarse: el formulario y, al costado, el panel de la cuenta (app-panel-cuenta).
+ * Antes eran una columna de 26 a 30rem en el medio de la página, con el resto vacío. El
+ * formulario conserva un ancho cómodo para leer y tipear, y el panel toma lo que sobra.
+ * En el celular, una columna: el formulario primero, que es a lo que se vino.
+ */
+.acceso {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e-7);
+  align-items: start;
+}
+
+/* En tableta ya es una sola columna ancha: el formulario no se estira más que en escritorio */
+.acceso__formulario {
+  max-inline-size: 28rem;
+}
+
+.acceso--ancho .acceso__formulario {
+  max-inline-size: 38rem;
+}
+
+@media (min-width: 64rem) {
+  .acceso {
+    grid-template-columns: minmax(0, 28rem) minmax(0, 1fr);
+    gap: var(--e-8);
+  }
+
+  /* El registro tiene campos de a pares: necesita más ancho que el ingreso */
+  .acceso--ancho {
+    grid-template-columns: minmax(0, 38rem) minmax(0, 1fr);
+  }
+
+  .acceso__lateral {
+    position: sticky;
+    top: var(--e-5);
+  }
+}
+
 /* Una columna del contenido de la caja, con el mismo aire que un formulario */
 .caja__columna {
   display: grid;

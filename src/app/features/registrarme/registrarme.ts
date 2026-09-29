@@ -15,6 +15,7 @@ import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
 import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { PanelCuenta } from '../../shared/panel-cuenta/panel-cuenta';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 
@@ -24,7 +25,7 @@ function capitalizar(texto: string): string {
 }
 
 @Component({
-  imports: [Boton, Campo, CampoFecha, Mensaje, RouterLink, Seleccion],
+  imports: [Boton, Campo, CampoFecha, Mensaje, PanelCuenta, RouterLink, Seleccion],
   selector: 'app-registrarme',
   styleUrl: './registrarme.css',
   templateUrl: './registrarme.html',

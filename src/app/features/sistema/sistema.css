@@ -67,6 +67,11 @@ h2 {
   max-width: 22rem;
 }
 
+/* El panel de la cuenta al ancho que tiene al costado del formulario de ingreso */
+.muestra-angosta {
+  max-width: 40rem;
+}
+
 /* Los subtítulos de esta sección van uno atrás del otro: sin aire quedan pegados al pie de arriba */
 #s-catalogo .titulo-caso {
   margin-top: var(--e-5);

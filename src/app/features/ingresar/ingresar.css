@@ -1,5 +1,5 @@
+/* El ancho lo reparte .acceso (styles.css): formulario y panel de la cuenta */
 .pantalla {
-  max-width: 26rem;
   padding-block: var(--e-7);
 }
 
@@ -25,5 +25,5 @@ h1 {
 .pie {
   margin-top: var(--e-5);
   color: var(--texto-tenue);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
 }

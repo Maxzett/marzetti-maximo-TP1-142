@@ -1,0 +1,31 @@
+<!--
+  <aside> y no <section>: es contenido que acompaña al formulario, no parte de él. Va después
+  del formulario en el documento, así el teclado y el lector de pantalla llegan primero a lo que
+  la persona vino a hacer.
+-->
+<aside class="panel" aria-labelledby="titulo-panel-cuenta">
+  <span class="guirnalda" aria-hidden="true"></span>
+
+  <div class="cuerpo">
+    <p class="cine">Cine Emezeta</p>
+    <h2 id="titulo-panel-cuenta">{{ titulo() }}</h2>
+
+    <ul class="ventajas">
+      @for (ventaja of ventajas; track ventaja.titulo) {
+        <li>
+          <span class="bombilla" aria-hidden="true"></span>
+          <div>
+            <p class="ventaja-titulo">{{ ventaja.titulo }}</p>
+            <p class="ventaja-detalle">{{ ventaja.detalle }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <p class="sin-cuenta">
+      ¿Solo querés una entrada? También se puede comprar sin cuenta: el QR es el mismo.
+    </p>
+  </div>
+
+  <span class="guirnalda" aria-hidden="true"></span>
+</aside>

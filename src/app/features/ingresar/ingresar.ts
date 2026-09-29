@@ -4,9 +4,10 @@ import { Auth } from '../../core/services/auth';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { PanelCuenta } from '../../shared/panel-cuenta/panel-cuenta';
 
 @Component({
-  imports: [Boton, Campo, Mensaje, RouterLink],
+  imports: [Boton, Campo, Mensaje, PanelCuenta, RouterLink],
   selector: 'app-ingresar',
   styleUrl: './ingresar.css',
   templateUrl: './ingresar.html',

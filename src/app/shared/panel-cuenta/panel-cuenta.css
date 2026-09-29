@@ -1,0 +1,109 @@
+:host {
+  display: block;
+}
+
+/* La misma placa que la marca del header: fondo de madera oscura, borde y luz de marquesina */
+.panel {
+  display: grid;
+  gap: var(--e-3);
+  padding-block: var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-medio);
+  background: linear-gradient(180deg, #241a15, #17100d);
+  box-shadow: var(--sombra-marquesina);
+}
+
+.guirnalda {
+  display: block;
+}
+
+.cuerpo {
+  display: grid;
+  gap: var(--e-4);
+  padding: var(--e-3) var(--e-6);
+}
+
+.cine {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-chico);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 0;
+  color: var(--bombilla);
+  font-family: var(--fuente-display);
+  font-size: var(--t-display);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  text-shadow: var(--neon-marquesina);
+  text-transform: uppercase;
+}
+
+.ventajas {
+  display: grid;
+  gap: var(--e-4);
+  margin: var(--e-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ventajas li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--e-3);
+  align-items: start;
+}
+
+/* Viñeta de bombilla encendida, el mismo dibujo de la guirnalda: decorativa, sin texto */
+.bombilla {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  margin-top: 0.35rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--bombilla) 0 40%, var(--acento) 70%);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--acento) 55%, transparent);
+}
+
+.ventajas p {
+  margin: 0;
+}
+
+.ventaja-titulo {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo-lg);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.ventaja-detalle {
+  margin-top: var(--e-1);
+  color: var(--texto-tenue);
+  font-size: var(--t-chico);
+  line-height: 1.5;
+}
+
+.sin-cuenta {
+  margin: var(--e-2) 0 0;
+  padding-block-start: var(--e-4);
+  border-block-start: 1px dashed var(--borde-fuerte);
+  color: var(--texto-tenue);
+  font-size: var(--t-chico);
+}
+
+@media (max-width: 30rem) {
+  .cuerpo {
+    padding-inline: var(--e-4);
+  }
+}
+
+/* Alto contraste: la viñeta es un fondo, y el sistema los descarta */
+@media (forced-colors: active) {
+  .bombilla {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+}

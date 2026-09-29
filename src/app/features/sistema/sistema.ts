@@ -22,6 +22,7 @@ import { FichaProxima } from '../../shared/ficha-proxima/ficha-proxima';
 import { DatoDeBarra, GraficoBarras } from '../../shared/grafico-barras/grafico-barras';
 import { MapaSala } from '../../shared/mapa-sala/mapa-sala';
 import { Mensaje } from '../../shared/mensaje/mensaje';
+import { PanelCuenta } from '../../shared/panel-cuenta/panel-cuenta';
 import { Pedido } from '../../shared/pedido/pedido';
 import { Poster } from '../../shared/poster/poster';
 import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
@@ -54,6 +55,7 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     GraficoBarras,
     MapaSala,
     Mensaje,
+    PanelCuenta,
     Pedido,
     Poster,
     PromocionesOrden,
