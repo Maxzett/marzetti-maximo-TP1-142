@@ -4,51 +4,89 @@
   <app-mensaje tono="error"
     >No pudimos cargar las funciones. Probá de nuevo en un momento.</app-mensaje
   >
-} @else if (dias().length === 0) {
-  <p class="vacio">Esta película todavía no tiene funciones programadas.</p>
+} @else if (primeraFuera()) {
+  <p class="vacio">
+    Las funciones de esta película empiezan el {{ primeraFuera() }}. Acá se muestran las de los
+    próximos siete días.
+  </p>
+} @else if (semana().length === 0) {
+  <!-- Sin "todavía": también es lo que ve quien abre una película que ya salió de cartel -->
+  <p class="vacio">No hay funciones programadas de esta película.</p>
 } @else {
   <!--
-    Cada decisión en su propio recuadro, en el orden en que se toma: día, horario, versión y
-    el botón. Separados se leen como pasos, y no como una sola pared de chips.
+    Cada decisión en su propio recuadro, en el orden en que se toma: la versión que se busca
+    (opcional), día, horario y versión exacta. Todos en una sola grilla, así se reparten el ancho
+    en fila en escritorio y se apilan en el celular; el día, que es el de más chips, ocupa el
+    doble.
   -->
   <div class="selectores">
-    <div class="bloque">
-      <app-chips-opcion
-        etiqueta="Día de la función"
-        [opciones]="opcionesDeDia()"
-        [valor]="fecha()"
-        (valorChange)="elegirFecha($event)"
-      />
-    </div>
-
-    <div class="bloque">
-      <app-chips-opcion
-        etiqueta="Horario"
-        [opciones]="opcionesDeHora()"
-        [valor]="hora()"
-        (valorChange)="elegirHora($event)"
-      />
-    </div>
-
-    @if (opcionesDeVersion().length > 1) {
+    @if (opcionesDeFormato().length > 0) {
       <div class="bloque">
-        <app-seleccion
-          etiqueta="Formato e idioma"
-          marcador="Elegí una versión"
-          [opciones]="opcionesDeVersion()"
-          [valor]="elegida()?.id ?? ''"
-          (valorChange)="elegirVersion($event)"
+        <app-chips-opcion
+          etiqueta="Formato"
+          [opciones]="opcionesDeFormato()"
+          [valor]="formato()"
+          (valorChange)="elegirFormato($event)"
         />
       </div>
     }
-  </div>
+    @if (opcionesDeIdioma().length > 0) {
+      <div class="bloque">
+        <app-chips-opcion
+          etiqueta="Idioma"
+          [opciones]="opcionesDeIdioma()"
+          [valor]="idioma()"
+          (valorChange)="elegirIdioma($event)"
+        />
+      </div>
+    }
 
-  <div class="accion" [class.accion--lista]="elegida()">
-    @if (elegida(); as funcion) {
-      <p class="eleccion">{{ descripcion() }}</p>
-      <a class="boton boton--primario" [routerLink]="['/comprar', funcion.id]">Elegir butacas</a>
-    } @else {
-      <p class="ayuda">Elegí un día y un horario para seguir con la compra.</p>
+    @if (dias().length > 0) {
+      <div class="bloque bloque--dias">
+        <app-chips-opcion
+          etiqueta="Día de la función"
+          [opciones]="opcionesDeDia()"
+          [valor]="fecha()"
+          (valorChange)="elegirFecha($event)"
+        />
+      </div>
+
+      <div class="bloque">
+        <app-chips-opcion
+          etiqueta="Horario"
+          [opciones]="opcionesDeHora()"
+          [valor]="hora()"
+          (valorChange)="elegirHora($event)"
+        />
+      </div>
+
+      @if (opcionesDeVersion().length > 1) {
+        <div class="bloque">
+          <app-seleccion
+            etiqueta="Formato e idioma"
+            marcador="Elegí una versión"
+            [opciones]="opcionesDeVersion()"
+            [valor]="elegida()?.id ?? ''"
+            (valorChange)="elegirVersion($event)"
+          />
+        </div>
+      }
     }
   </div>
+
+  @if (dias().length === 0) {
+    <div class="sin-version" role="status">
+      <p class="vacio">No hay funciones en {{ versionFiltrada() }} en los próximos siete días.</p>
+      <app-boton variante="borde" (presionado)="quitarFiltros()">Ver todas las versiones</app-boton>
+    </div>
+  } @else {
+    <div class="accion" [class.accion--lista]="elegida()">
+      @if (elegida(); as funcion) {
+        <p class="eleccion">{{ descripcion() }}</p>
+        <a class="boton boton--primario" [routerLink]="['/comprar', funcion.id]">Elegir butacas</a>
+      } @else {
+        <p class="ayuda">Elegí un día y un horario para seguir con la compra.</p>
+      }
+    </div>
+  }
 }

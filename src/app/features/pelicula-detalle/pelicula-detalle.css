@@ -17,52 +17,26 @@
 }
 
 /*
- * Ficha, funciones y reseñas. Una columna en el celular; desde 64rem, la ficha y las funciones
- * lado a lado, y las reseñas debajo a todo el ancho.
+ * Ficha, funciones y reseñas, una debajo de la otra y a todo el ancho en cualquier pantalla.
  *
- * La primera fila son dos tarjetas de la misma altura: la grilla estira la más baja hasta la
- * otra (align-items: stretch, el valor por defecto). Qué tan alta es cada una depende de la
- * película (la sinopsis, el aviso de edad) y de cuántos días y horarios tiene; en vez de pelear
- * contra eso, lo último de cada tarjeta baja al pie y los bordes quedan alineados arriba y abajo.
+ * Antes la ficha y las funciones iban lado a lado. Con los filtros de formato e idioma, las
+ * funciones pasaron a medir mucho más que la ficha y quedaba un hueco debajo de ella. Apiladas,
+ * cada tarjeta mide lo que su contenido, y las funciones reparten sus recuadros en fila.
  */
 .cuerpo {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--e-7);
+  gap: var(--e-6);
 }
 
-@media (min-width: 64rem) {
-  .cuerpo {
-    grid-template-areas:
-      'ficha funciones'
-      'resenas resenas';
-    grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
-    column-gap: var(--e-6);
-    row-gap: var(--e-7);
-  }
-
-  .ficha {
-    grid-area: ficha;
-  }
-
-  .funciones {
-    grid-area: funciones;
-  }
-
-  .resenas {
-    grid-area: resenas;
-  }
+/* Las reseñas se separan más: son otra sección, no otra tarjeta de la película */
+.resenas {
+  margin-top: var(--e-3);
 }
 
-/* El contenido de la tarjeta a toda su altura, para que el cierre pueda bajar al pie */
 .funciones__cuerpo {
   display: flex;
   flex-direction: column;
-  height: 100%;
-}
-
-.elegir {
-  flex: 1;
 }
 
 /* Título de la tarjeta con su filete, bien separado de los recuadros de abajo */
@@ -88,8 +62,8 @@
 }
 
 /*
- * Desde 48rem, póster y datos lado a lado. El póster (modo llenar) acompaña la altura de la
- * tarjeta recortando la imagen en vez de deformarla, con un tope: más allá de 26rem el recorte
+ * Desde 48rem, póster y datos lado a lado. El póster (modo llenar) acompaña la altura de los
+ * datos recortando la imagen en vez de deformarla, con un tope: más allá de 26rem el recorte
  * se comería el póster, y ahí prefiere quedar arriba con aire debajo.
  */
 @media (min-width: 48rem) {
@@ -106,7 +80,7 @@
   gap: var(--e-3);
 }
 
-/* El aviso de edad al pie de la ficha, a la misma altura que el cierre de las funciones */
+/* El aviso de edad al pie de la ficha, alineado con el pie del póster */
 .datos app-mensaje {
   margin-top: auto;
   align-self: stretch;
@@ -159,8 +133,9 @@ h1 {
   color: var(--rojo-claro);
 }
 
+/* A todo el ancho, pero con un largo de renglón que se pueda leer de corrido */
 .sinopsis {
-  max-width: 42rem;
+  max-width: 75ch;
   font-size: var(--t-cuerpo-lg);
   line-height: 1.65;
 }

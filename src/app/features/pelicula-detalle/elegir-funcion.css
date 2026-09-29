@@ -1,15 +1,29 @@
-/* Columna flexible: si la tarjeta es más alta que su contenido, el cierre baja al pie */
 :host {
   display: flex;
   flex-direction: column;
   gap: var(--e-3);
 }
 
+/*
+ * Todos los recuadros en una fila que se parte cuando no entran: en escritorio van lado a lado y
+ * en el celular uno debajo del otro. Flex y no grilla a propósito: cada recuadro crece hasta
+ * llenar su fila, así nunca queda uno solo en una fila con columnas vacías al lado, y los de una
+ * misma fila se estiran a la misma altura (stretch, por defecto).
+ */
 .selectores {
-  display: grid;
-  /* minmax(0, 1fr): una columna con auto crece hasta el ancho de su contenido y desborda el celular */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--e-3);
+}
+
+/* Con estas bases los cuatro entran en una fila desde unos 900 px de pantalla */
+.bloque {
+  flex: 1 1 10rem;
+}
+
+/* El día tiene hasta ocho chips y los demás dos a cuatro: pide casi el doble de lugar */
+.bloque--dias {
+  flex: 2 1 18rem;
 }
 
 /* Un recuadro por decisión, más hundido que la tarjeta que los contiene */
@@ -47,6 +61,17 @@
   margin: 0;
   font-family: var(--fuente-titulo);
   font-size: var(--t-cuerpo-lg);
+}
+
+/* Filtro sin resultados: el motivo y la salida, en el mismo lugar donde irían los días */
+.sin-version {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: var(--r-medio);
 }
 
 .ayuda,
