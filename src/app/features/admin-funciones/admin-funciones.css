@@ -81,6 +81,11 @@ legend {
   text-transform: uppercase;
 }
 
+/* Cada horario es un recuadro propio; el botón de quitarlo va al pie, a su tamaño */
+.pasada app-boton {
+  align-self: flex-start;
+}
+
 .fecha {
   display: flex;
   flex-direction: column;

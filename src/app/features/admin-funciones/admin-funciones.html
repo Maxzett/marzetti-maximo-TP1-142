@@ -72,55 +72,76 @@
           }
         </fieldset>
 
-        <fieldset>
-          <legend>Horario y formato</legend>
+        <!--
+          Un fieldset por horario, numerado: con varios, "Formato" solo no dice de cuál es. El
+          formato, el idioma y el precio se copian del anterior al agregar uno, que es lo habitual
+          (la misma copia a distintas horas).
+        -->
+        @for (pasada of pasadas(); track pasada.clave; let i = $index) {
+          <fieldset class="pasada">
+            <legend>Horario {{ i + 1 }}</legend>
 
-          <div class="fecha">
-            <app-campo-hora
-              etiqueta="Comienza a las"
-              [requerido]="true"
-              [error]="errorHora()"
-              [(valor)]="hora"
-            />
-          </div>
+            <div class="fecha">
+              <app-campo-hora
+                etiqueta="Comienza a las"
+                [requerido]="true"
+                [error]="erroresDePasadas()[i].hora"
+                [(valor)]="pasada.hora"
+              />
+              @if (finDeOcupacionDe(pasada); as fin) {
+                <p class="nota">
+                  Ocupa la sala hasta las {{ fin.hora
+                  }}{{ fin.diaSiguiente ? ' del día siguiente' : '' }}, con los 30 minutos de
+                  limpieza.
+                </p>
+              }
+            </div>
 
-          <div class="par">
-            <app-seleccion
-              etiqueta="Formato"
-              marcador="Formato"
-              [opciones]="opcionesFormato"
-              [requerido]="true"
-              [(valor)]="formato"
-            />
-            <app-seleccion
-              etiqueta="Idioma"
-              marcador="Idioma"
-              [opciones]="opcionesIdioma"
-              [requerido]="true"
-              [(valor)]="idioma"
-            />
-          </div>
+            <div class="par">
+              <app-seleccion
+                etiqueta="Formato"
+                marcador="Formato"
+                [opciones]="opcionesFormato"
+                [requerido]="true"
+                [(valor)]="pasada.formato"
+              />
+              <app-seleccion
+                etiqueta="Idioma"
+                marcador="Idioma"
+                [opciones]="opcionesIdioma"
+                [requerido]="true"
+                [(valor)]="pasada.idioma"
+              />
+            </div>
 
-          <app-campo
-            etiqueta="Precio base de la entrada"
-            tipo="number"
-            ayuda="En pesos. A las butacas VIP se les suma un recargo."
-            [requerido]="true"
-            [error]="errorPrecio()"
-            [(valor)]="precio"
-          />
-        </fieldset>
+            <app-campo
+              etiqueta="Precio base de la entrada"
+              tipo="number"
+              ayuda="En pesos. A las butacas VIP se les suma un recargo."
+              [requerido]="true"
+              [error]="erroresDePasadas()[i].precio"
+              [(valor)]="pasada.precio"
+            />
+
+            @if (pasadas().length > 1) {
+              <app-boton variante="fantasma" (presionado)="quitarPasada(pasada.clave)">
+                Quitar el horario {{ i + 1 }}
+              </app-boton>
+            }
+          </fieldset>
+        }
+
+        @if (pasadas().length < maximoDePasadas) {
+          <app-boton variante="borde" (presionado)="agregarPasada()"
+            >Agregar otro horario</app-boton
+          >
+        }
 
         <!-- Lo que se va a crear, antes de enviar: la base cuenta lo mismo y es la que decide -->
         @if (fechas().length > 0) {
           <p class="previa" aria-live="polite">
-            Se van a crear <strong>{{ fechas().length }}</strong>
-            {{ fechas().length === 1 ? 'función' : 'funciones' }}.
-            @if (finDeOcupacion(); as fin) {
-              Cada una ocupa la sala hasta las <strong>{{ fin.hora }}</strong
-              >{{ fin.diaSiguiente ? ' (del día siguiente)' : '' }}, contando los 30 minutos de
-              separación.
-            }
+            Se van a crear <strong>{{ totalDeFunciones() }}</strong> {{ detalleDelTotal() }} Si
+            alguna no tiene sala, no se crea ninguna.
           </p>
         }
 
@@ -148,8 +169,11 @@
               </app-mensaje>
 
               <ul class="conflictos">
-                @for (conflicto of r.conflictos; track conflicto.fecha) {
+                @for (conflicto of r.conflictos; track conflicto.inicio) {
                   <li>
+                    @if (pasadas().length > 1) {
+                      <p class="secundario">Horario {{ describirPasada(conflicto.pasada) }}</p>
+                    }
                     <p>
                       <strong>{{ fechaLarga(conflicto.fecha) }}</strong> a las
                       {{ horaDe(conflicto.inicio) }}: todas las salas están ocupadas.
@@ -162,7 +186,7 @@
                           <button
                             class="sugerencia"
                             type="button"
-                            (click)="usarSugerencia(sugerencia)"
+                            (click)="usarSugerencia(conflicto, sugerencia)"
                           >
                             {{ horaDe(sugerencia) }}
                           </button>

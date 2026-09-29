@@ -6,7 +6,31 @@ import {
   finDeOcupacion,
   horaLocal,
   instanteDeFuncion,
+  periodoDeCartel,
 } from './programacion';
+
+describe('periodoDeCartel', () => {
+  const HOY = '2026-09-29';
+
+  it('con estreno futuro, cuatro semanas desde el estreno: de jueves a miércoles', () => {
+    expect(periodoDeCartel('2026-10-08', HOY)).toEqual({
+      desde: '2026-10-08',
+      hasta: '2026-11-04',
+    });
+  });
+
+  it('ya estrenada, desde hoy: no se programa en el pasado', () => {
+    expect(periodoDeCartel('2026-09-10', HOY)).toEqual({ desde: HOY, hasta: '2026-10-26' });
+  });
+
+  it('sin fecha de estreno, también desde hoy', () => {
+    expect(periodoDeCartel(null, HOY).desde).toBe(HOY);
+  });
+
+  it('el día del estreno cuenta como hoy', () => {
+    expect(periodoDeCartel(HOY, HOY).desde).toBe(HOY);
+  });
+});
 
 describe('diaDeLaSemana', () => {
   it('numera de 1 (lunes) a 7 (domingo), como ISO 8601', () => {

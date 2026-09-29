@@ -96,15 +96,29 @@ describe('AdminFunciones', () => {
   const raiz = () => fixture.nativeElement as HTMLElement;
   const texto = () => raiz().textContent ?? '';
 
-  /** Las señales del formulario son protected: los tests las fijan por la instancia */
-  function llenar(valores: Record<string, unknown>) {
-    const instancia = fixture.componentInstance as unknown as Record<
-      string,
-      WritableSignal<unknown>
-    >;
+  type PasadaDePrueba = Record<'hora' | 'formato' | 'idioma' | 'precio', WritableSignal<string>>;
 
+  const instancia = () =>
+    fixture.componentInstance as unknown as Record<string, WritableSignal<unknown>> & {
+      agregarPasada(): void;
+    };
+
+  /** Los horarios del formulario, en orden */
+  const pasadas = () => instancia()['pasadas']() as PasadaDePrueba[];
+
+  const CAMPOS_DE_PASADA = ['hora', 'formato', 'idioma', 'precio'];
+
+  /**
+   * Las señales del formulario son protected: los tests las fijan por la instancia. Hora,
+   * formato, idioma y precio son del primer horario.
+   */
+  function llenar(valores: Record<string, unknown>) {
     for (const [campo, valor] of Object.entries(valores)) {
-      instancia[campo].set(valor);
+      if (CAMPOS_DE_PASADA.includes(campo)) {
+        pasadas()[0][campo as keyof PasadaDePrueba].set(valor as string);
+      } else {
+        instancia()[campo].set(valor);
+      }
     }
   }
 
@@ -241,7 +255,7 @@ describe('AdminFunciones', () => {
       llenar({ ...FORMULARIO_VALIDO, precio: '6500,50' });
       await programar();
 
-      expect(servicio.crear).toHaveBeenCalledWith(expect.objectContaining({ precioBase: 6500.5 }));
+      expect(servicio.crear.mock.calls[0][0].pasadas[0].precioBase).toBe(6500.5);
     });
 
     it('dice cuántas funciones se van a crear antes de enviar', async () => {
@@ -254,8 +268,8 @@ describe('AdminFunciones', () => {
 
       expect(previa.textContent).toContain('6');
       expect(previa.textContent).toContain('funciones');
-      // 18:00 + 120 min de película + 30 de separación (RN-01)
-      expect(previa.textContent).toContain('20:30');
+      // 18:00 + 120 min de película + 30 de separación (RN-01), dicho en el horario
+      expect(raiz().querySelector('.pasada')?.textContent).toContain('hasta las 20:30');
     });
 
     it('avisa cuando la función termina de ocupar la sala pasada la medianoche', async () => {
@@ -263,10 +277,10 @@ describe('AdminFunciones', () => {
       llenar({ ...FORMULARIO_VALIDO, hora: '23:00' });
       await estabilizar();
 
-      expect(raiz().querySelector('.previa')?.textContent).toContain('del día siguiente');
+      expect(raiz().querySelector('.pasada')?.textContent).toContain('del día siguiente');
     });
 
-    it('manda película, período, días y horario a la base, y ninguna sala (RF-21)', async () => {
+    it('manda película, período, días y horarios a la base, y ninguna sala (RF-21)', async () => {
       await crear();
       llenar(FORMULARIO_VALIDO);
       await programar();
@@ -276,12 +290,141 @@ describe('AdminFunciones', () => {
         desde: '2026-10-05',
         hasta: '2026-10-18',
         dias: [1, 2, 5],
-        hora: '18:00',
-        formato: '2D',
-        idioma: 'castellano',
-        precioBase: 6500,
+        pasadas: [{ hora: '18:00', formato: '2D', idioma: 'castellano', precioBase: 6500 }],
       });
       expect(JSON.stringify(servicio.crear.mock.calls[0])).not.toContain('sala');
+    });
+
+    describe('varios horarios en un envío', () => {
+      it('un horario nuevo copia formato, idioma y precio del anterior, y no la hora', async () => {
+        await crear();
+        llenar({ ...FORMULARIO_VALIDO, formato: '3D', idioma: 'subtitulada', precio: '8200' });
+
+        instancia().agregarPasada();
+
+        const [, segunda] = pasadas();
+        expect(segunda.hora()).toBe('');
+        expect(segunda.formato()).toBe('3D');
+        expect(segunda.idioma()).toBe('subtitulada');
+        expect(segunda.precio()).toBe('8200');
+      });
+
+      it('se agrega con el botón y cada horario tiene su recuadro numerado', async () => {
+        await crear();
+        boton('Agregar otro horario')!.click();
+        await estabilizar();
+
+        const leyendas = Array.from(raiz().querySelectorAll('.pasada legend')).map((l) =>
+          l.textContent?.trim(),
+        );
+        expect(leyendas).toEqual(['Horario 1', 'Horario 2']);
+        // Con uno solo no se ofrece quitarlo: siempre queda al menos uno
+        expect(boton('Quitar el horario 2')).toBeDefined();
+      });
+
+      it('cuenta días por horarios antes de enviar', async () => {
+        await crear();
+        llenar(FORMULARIO_VALIDO);
+        instancia().agregarPasada();
+        pasadas()[1].hora.set('21:00');
+        await estabilizar();
+
+        const previa = raiz().querySelector('.previa')?.textContent?.replace(/\s+/g, ' ');
+        expect(previa).toContain('12 funciones (6 días por 2 horarios)');
+      });
+
+      it('manda todos los horarios juntos, cada uno con lo suyo', async () => {
+        await crear();
+        llenar(FORMULARIO_VALIDO);
+        instancia().agregarPasada();
+        pasadas()[1].hora.set('21:00');
+        pasadas()[1].formato.set('4D');
+        pasadas()[1].precio.set('10900');
+        await programar();
+
+        expect(servicio.crear).toHaveBeenCalledWith(
+          expect.objectContaining({
+            pasadas: [
+              { hora: '18:00', formato: '2D', idioma: 'castellano', precioBase: 6500 },
+              { hora: '21:00', formato: '4D', idioma: 'castellano', precioBase: 10900 },
+            ],
+          }),
+        );
+      });
+
+      it('no envía la misma hora dos veces', async () => {
+        await crear();
+        llenar(FORMULARIO_VALIDO);
+        instancia().agregarPasada();
+        pasadas()[1].hora.set('18:00');
+        await programar();
+
+        expect(servicio.crear).not.toHaveBeenCalled();
+        expect(texto()).toContain('Ese horario ya está más arriba.');
+      });
+
+      it('un conflicto dice de qué horario es, y su sugerencia cambia solo ese', async () => {
+        await crear({
+          alta: {
+            estado: 'sin_sala',
+            conflictos: [
+              {
+                fecha: '2026-10-06',
+                inicio: '2026-10-07T00:00:00Z',
+                sugerencias: ['2026-10-07T01:00:00Z'],
+                pasada: 1,
+              },
+            ],
+          },
+        });
+        llenar(FORMULARIO_VALIDO);
+        instancia().agregarPasada();
+        pasadas()[1].hora.set('21:00');
+        await programar();
+
+        expect(raiz().querySelector('.conflictos')?.textContent).toContain('Horario 21:00 · 2D');
+
+        (raiz().querySelector('.sugerencia') as HTMLButtonElement).click();
+        await estabilizar();
+
+        expect(pasadas()[0].hora()).toBe('18:00');
+        expect(pasadas()[1].hora()).toBe('22:00');
+        expect(texto()).toContain('Cambiamos el horario de las 21:00 a las 22:00');
+      });
+
+      it('quitar un horario lo saca del envío', async () => {
+        await crear();
+        llenar(FORMULARIO_VALIDO);
+        instancia().agregarPasada();
+        await estabilizar();
+
+        boton('Quitar el horario 2')!.click();
+        await programar();
+
+        expect(servicio.crear.mock.calls[0][0].pasadas).toHaveLength(1);
+      });
+    });
+
+    it('lo que llega por la URL elige la película, el período y el filtro de la agenda', async () => {
+      await crear();
+      fixture.componentRef.setInput('pelicula', 'p1');
+      fixture.componentRef.setInput('desde', '2099-03-05');
+      fixture.componentRef.setInput('hasta', '2099-04-01');
+      await estabilizar();
+
+      expect(instancia()['peliculaId']()).toBe('p1');
+      expect(instancia()['desde']()).toBe('2099-03-05');
+      expect(instancia()['hasta']()).toBe('2099-04-01');
+      expect(instancia()['filtroPelicula']()).toBe('p1');
+      expect(servicio.cargarProgramacion).toHaveBeenLastCalledWith('p1');
+    });
+
+    it('un período de la URL que ya empezó arranca hoy: no se programa en el pasado', async () => {
+      await crear();
+      fixture.componentRef.setInput('desde', '2000-01-01');
+      await estabilizar();
+
+      expect(instancia()['desde']()).toBe(instancia()['hoy']);
     });
 
     it('al salir bien muestra qué sala le tocó a cada función y recarga la agenda', async () => {
@@ -356,14 +499,10 @@ describe('AdminFunciones', () => {
       (raiz().querySelector('.sugerencia') as HTMLButtonElement).click();
       await estabilizar();
 
-      const instancia = fixture.componentInstance as unknown as Record<
-        string,
-        WritableSignal<unknown>
-      >;
-      expect(instancia['hora']()).toBe('19:00');
+      expect(pasadas()[0].hora()).toBe('19:00');
       // El resultado viejo ya no vale: se limpia y se avisa qué se cambió
       expect(raiz().querySelector('.resultado')).toBeNull();
-      expect(texto()).toContain('Cambiamos el horario a las 19:00');
+      expect(texto()).toContain('Cambiamos el horario de las 18:00 a las 19:00');
     });
 
     it('un error de la base se muestra tal cual', async () => {

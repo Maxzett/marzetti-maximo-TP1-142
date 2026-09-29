@@ -48,10 +48,10 @@ const DATOS: DatosProgramacion = {
   desde: '2026-10-05',
   hasta: '2026-10-18',
   dias: [1, 2, 5],
-  hora: '18:00',
-  formato: '2D',
-  idioma: 'castellano',
-  precioBase: 6500,
+  pasadas: [
+    { hora: '18:00', formato: '2D', idioma: 'castellano', precioBase: 6500 },
+    { hora: '21:00', formato: '3D', idioma: 'subtitulada', precioBase: 8200 },
+  ],
 };
 
 describe('Funciones', () => {
@@ -88,7 +88,8 @@ describe('Funciones', () => {
       const falso = crearSupabaseFalso();
       await crearServicio(falso).cargarProgramacion();
 
-      expect(falso.cadena.limit).toHaveBeenCalledWith(500);
+      // Tres semanas de cartelera con cuatro salas son unas 450: el tope es el del servidor
+      expect(falso.cadena.limit).toHaveBeenCalledWith(1000);
     });
 
     it('devuelve null si la base falla, para no confundir un error con una agenda vacía', async () => {
@@ -136,19 +137,20 @@ describe('Funciones', () => {
   });
 
   describe('crear', () => {
-    it('manda los días y el horario a la función de la base, sin elegir sala', async () => {
+    it('manda los días y los horarios a la función de la base, sin elegir sala', async () => {
       const falso = crearSupabaseFalso({ rpc: { ok: true, creadas: [] } });
       await crearServicio(falso).crear(DATOS);
 
-      expect(falso.client.rpc).toHaveBeenCalledWith('crear_funciones', {
+      expect(falso.client.rpc).toHaveBeenCalledWith('crear_funciones_lote', {
         p_pelicula_id: 'p1',
         p_desde: '2026-10-05',
         p_hasta: '2026-10-18',
         p_dias: [1, 2, 5],
-        p_hora: '18:00',
-        p_formato: '2D',
-        p_idioma: 'castellano',
-        p_precio_base: 6500,
+        // Los nombres de cada horario son los que lee la base del jsonb
+        p_pasadas: [
+          { hora: '18:00', formato: '2D', idioma: 'castellano', precio_base: 6500 },
+          { hora: '21:00', formato: '3D', idioma: 'subtitulada', precio_base: 8200 },
+        ],
       });
       // RF-21: la sala no viaja. No hay ningún parámetro para elegirla
       expect(JSON.stringify(falso.client.rpc.mock.calls[0])).not.toContain('sala');

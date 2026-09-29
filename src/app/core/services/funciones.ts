@@ -23,10 +23,13 @@ const COLUMNAS =
 
 const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** PostgREST corta en 1000 filas. La programación de un mes son cientos: se pide con tope explícito */
-const MAXIMO_DE_FUNCIONES = 500;
+/**
+ * PostgREST corta en 1000 filas. Tres semanas de cartelera con cuatro salas son unas 450
+ * funciones: se pide el máximo que el servidor entrega, de forma explícita.
+ */
+const MAXIMO_DE_FUNCIONES = 1000;
 
-/** Lo que devuelve crear_funciones (migración 0019): el resultado es todo o nada */
+/** Lo que devuelve crear_funciones_lote (migración 0028): el resultado es todo o nada */
 type RespuestaDeAlta =
   { ok: true; creadas: FuncionCreada[] } | { ok: false; sin_sala: ConflictoDeSala[] };
 
@@ -123,20 +126,23 @@ export class Funciones {
   }
 
   /**
-   * Programa funciones para los días y el horario elegidos (RF-20). La base asigna la sala de
-   * cada una (RF-21). Si alguna fecha no tiene sala libre no se crea ninguna y se devuelve el
-   * detalle de cuáles, con horarios cercanos (RF-22, D-05).
+   * Programa funciones para los días y los horarios elegidos (RF-20), cada horario con su formato,
+   * idioma y precio. La base asigna la sala de cada una (RF-21). Si alguna fecha de algún
+   * horario no tiene sala libre no se crea ninguna y se devuelve el detalle de cuáles, con
+   * horarios cercanos y a qué horario pertenece cada una (RF-22, D-05).
    */
   async crear(datos: DatosProgramacion): Promise<ResultadoProgramacion> {
-    const { data, error } = await this.supabase.client.rpc('crear_funciones', {
+    const { data, error } = await this.supabase.client.rpc('crear_funciones_lote', {
       p_pelicula_id: datos.peliculaId,
       p_desde: datos.desde,
       p_hasta: datos.hasta,
       p_dias: [...datos.dias],
-      p_hora: datos.hora,
-      p_formato: datos.formato,
-      p_idioma: datos.idioma,
-      p_precio_base: datos.precioBase,
+      p_pasadas: datos.pasadas.map((pasada) => ({
+        hora: pasada.hora,
+        formato: pasada.formato,
+        idioma: pasada.idioma,
+        precio_base: pasada.precioBase,
+      })),
     });
 
     if (error) {

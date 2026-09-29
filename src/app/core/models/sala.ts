@@ -50,6 +50,18 @@ export interface Funcion {
   sala: { nombre: string };
 }
 
+/**
+ * Un horario de la programación con su formato, idioma y precio: "18:20 · 3D subtitulada". Se
+ * repite en todos los días elegidos del período.
+ */
+export interface Pasada {
+  /** 'HH:MM', en la hora del cine */
+  hora: string;
+  formato: FormatoFuncion;
+  idioma: IdiomaFuncion;
+  precioBase: number;
+}
+
 /** Lo que el administrador completa para programar funciones (RF-20) */
 export interface DatosProgramacion {
   peliculaId: string;
@@ -58,11 +70,8 @@ export interface DatosProgramacion {
   hasta: string;
   /** Días de la semana como en ISO 8601: 1 = lunes … 7 = domingo */
   dias: readonly number[];
-  /** 'HH:MM', en la hora del cine */
-  hora: string;
-  formato: FormatoFuncion;
-  idioma: IdiomaFuncion;
-  precioBase: number;
+  /** Uno o más horarios, que la base programa todos o ninguno */
+  pasadas: readonly Pasada[];
 }
 
 /** Lo que se puede cambiar de una función ya programada (RF-23) */
@@ -79,6 +88,8 @@ export interface FuncionCreada {
   inicio: string;
   sala_id: string;
   sala: string;
+  /** A qué horario del alta pertenece: su posición en `DatosProgramacion.pasadas` */
+  pasada?: number;
 }
 
 /**
@@ -89,6 +100,8 @@ export interface ConflictoDeSala {
   fecha: string;
   inicio: string;
   sugerencias: string[];
+  /** En un alta de varios horarios, cuál chocó. No viene al modificar una sola función */
+  pasada?: number;
 }
 
 /**

@@ -2,10 +2,12 @@ import {
   Component,
   ElementRef,
   Injector,
+  WritableSignal,
   afterNextRender,
   computed,
   effect,
   inject,
+  input,
   linkedSignal,
   signal,
   untracked,
@@ -40,12 +42,41 @@ import { CampoHora } from '../../shared/campo-hora/campo-hora';
 import { Chip } from '../../shared/chip/chip';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Mensaje } from '../../shared/mensaje/mensaje';
-import { formatearLargo, hoyIso } from '../../shared/selector-fecha/fechas';
+import { esIsoValida, formatearLargo, hoyIso } from '../../shared/selector-fecha/fechas';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { Spinner } from '../../shared/spinner/spinner';
 
-/** El mismo tope que aplica la base: una programación más grande se rechaza allá */
+/** El mismo tope que aplica la base a cada horario: una programación más grande se rechaza allá */
 const MAXIMO_DE_FUNCIONES_POR_ALTA = 200;
+
+/** El mismo tope de horarios por alta que aplica crear_funciones_lote() */
+const MAXIMO_DE_PASADAS = 8;
+
+/**
+ * Un horario del formulario. Cada campo es su propia señal para poder enlazarlo con
+ * `[(valor)]`, igual que los campos sueltos. La clave es para el `track` del `@for`: la hora no
+ * sirve, se puede repetir o estar vacía mientras se escribe.
+ */
+interface PasadaEnEdicion {
+  clave: number;
+  hora: WritableSignal<string>;
+  formato: WritableSignal<string>;
+  idioma: WritableSignal<string>;
+  precio: WritableSignal<string>;
+}
+
+let proximaClave = 0;
+
+/** Una fila nueva: vacía, o con el formato, el idioma y el precio de la que se toma de modelo */
+function nuevaPasada(modelo?: PasadaEnEdicion): PasadaEnEdicion {
+  return {
+    clave: proximaClave++,
+    hora: signal(''),
+    formato: signal(modelo?.formato() ?? '2D'),
+    idioma: signal(modelo?.idioma() ?? 'castellano'),
+    precio: signal(modelo?.precio() ?? ''),
+  };
+}
 
 /** Filas de la agenda por tanda de "Ver más": unos días de programación, en una pantalla */
 const FUNCIONES_POR_TANDA = 15;
@@ -63,8 +94,10 @@ const TEXTO_DE_IDIOMA: Record<IdiomaFuncion, string> = {
 };
 
 /**
- * Programación de funciones (RF-19 a RF-23). El administrador indica película, días y horario
- * (RF-20); la sala NO se elige: la asigna la base (RF-21) y esta pantalla solo la muestra.
+ * Programación de funciones (RF-19 a RF-23). El administrador indica película, período, días y
+ * uno o más horarios, cada uno con su formato, idioma y precio (RF-20): una semana de cartel real
+ * son varias funciones por día en distintas copias. La sala NO se elige: la asigna la base
+ * (RF-21) y esta pantalla solo la muestra.
  *
  * Todo el cálculo pesado vive en la base, atómico. Acá se valida para dar un mensaje claro
  * antes de ir a la red, y se muestra lo que la base resolvió: qué sala tocó a cada función, o,
@@ -142,15 +175,24 @@ export class AdminFunciones {
     }
   }
 
+  // ── Lo que llega por la URL (withComponentInputBinding) ──
+  /**
+   * `?pelicula=…&desde=…&hasta=…`: el enlace "Programar funciones" de la pantalla de películas
+   * llega con la película elegida y el período de su cartel ya puestos. Es un punto de partida:
+   * el administrador lo puede cambiar.
+   */
+  readonly peliculaDeLaUrl = input('', { alias: 'pelicula' });
+  readonly desdeDeLaUrl = input('', { alias: 'desde' });
+  readonly hastaDeLaUrl = input('', { alias: 'hasta' });
+
   // ── Formulario de alta ──
   protected readonly peliculaId = signal('');
   protected readonly desde = signal('');
   protected readonly hasta = signal('');
   protected readonly diasElegidos = signal<readonly number[]>([]);
-  protected readonly hora = signal('');
-  protected readonly formato = signal<string>('2D');
-  protected readonly idioma = signal<string>('castellano');
-  protected readonly precio = signal('');
+  /** Los horarios del alta, cada uno con su formato, idioma y precio. Siempre hay al menos uno */
+  protected readonly pasadas = signal<readonly PasadaEnEdicion[]>([nuevaPasada()]);
+  protected readonly maximoDePasadas = MAXIMO_DE_PASADAS;
 
   protected readonly intentoHecho = signal(false);
   protected readonly enviando = signal(false);
@@ -166,10 +208,20 @@ export class AdminFunciones {
     fechasDeProgramacion(this.desde(), this.hasta(), this.diasElegidos()),
   );
 
-  /** Hasta qué hora ocupa cada función la sala: película más los 30 minutos de separación (RN-01) */
-  protected readonly finDeOcupacion = computed(() => {
-    const pelicula = this.peliculaElegida();
-    return pelicula ? finDeOcupacion(this.hora(), pelicula.duracion_minutos) : null;
+  /** Fechas por horarios: lo que la base va a crear si hay sala para todo */
+  protected readonly totalDeFunciones = computed(
+    () => this.fechas().length * this.pasadas().length,
+  );
+
+  /** "funciones (12 días por 3 horarios)." — lo que sigue a la cifra en la vista previa */
+  protected readonly detalleDelTotal = computed(() => {
+    const dias = this.fechas().length;
+    const horarios = this.pasadas().length;
+    const sustantivo = this.totalDeFunciones() === 1 ? 'función' : 'funciones';
+
+    return horarios > 1
+      ? `${sustantivo} (${dias} ${dias === 1 ? 'día' : 'días'} por ${horarios} horarios).`
+      : `${sustantivo}.`;
   });
 
   protected readonly errorPelicula = computed(() =>
@@ -196,21 +248,33 @@ export class AdminFunciones {
       return 'Ninguna fecha del período cae en esos días.';
     }
     if (this.fechas().length > MAXIMO_DE_FUNCIONES_POR_ALTA) {
-      return `Son más de ${MAXIMO_DE_FUNCIONES_POR_ALTA} funciones de una sola vez: achicá el período.`;
+      return `Son más de ${MAXIMO_DE_FUNCIONES_POR_ALTA} funciones por horario: achicá el período.`;
     }
     return '';
   });
 
-  protected readonly errorHora = computed(() =>
-    this.intentoHecho() && !this.hora() ? 'Elegí el horario.' : '',
-  );
+  /** Los errores de cada horario, en el mismo orden que `pasadas` */
+  protected readonly erroresDePasadas = computed(() => {
+    const pasadas = this.pasadas();
 
-  protected readonly errorPrecio = computed(() => {
-    if (!this.intentoHecho()) return '';
-    const importe = leerPrecio(this.precio());
-    if (Number.isNaN(importe)) return 'Escribí el precio base.';
-    if (importe < 0) return 'El precio no puede ser negativo.';
-    return '';
+    return pasadas.map((pasada, indice) => {
+      if (!this.intentoHecho()) {
+        return { hora: '', precio: '' };
+      }
+
+      const hora = pasada.hora();
+      const repetida = hora !== '' && pasadas.some((otra, i) => i < indice && otra.hora() === hora);
+      const importe = leerPrecio(pasada.precio());
+
+      return {
+        hora: !hora ? 'Elegí el horario.' : repetida ? 'Ese horario ya está más arriba.' : '',
+        precio: Number.isNaN(importe)
+          ? 'Escribí el precio base.'
+          : importe < 0
+            ? 'El precio no puede ser negativo.'
+            : '',
+      };
+    });
   });
 
   protected readonly hayErrores = computed(
@@ -220,8 +284,7 @@ export class AdminFunciones {
         this.errorDesde() ||
         this.errorHasta() ||
         this.errorDias() ||
-        this.errorHora() ||
-        this.errorPrecio()
+        this.erroresDePasadas().some((error) => error.hora || error.precio)
       ),
   );
 
@@ -268,6 +331,29 @@ export class AdminFunciones {
   constructor() {
     void this.cargarPeliculas();
 
+    // Lo que trae la URL se copia al formulario y al filtro de la agenda, que así muestra lo que
+    // ya tiene programado esa película. Solo se pisa lo que vino: un enlace sin período deja
+    // las fechas como estaban.
+    effect(() => {
+      const pelicula = this.peliculaDeLaUrl();
+      const desde = this.desdeDeLaUrl();
+      const hasta = this.hastaDeLaUrl();
+
+      untracked(() => {
+        if (pelicula) {
+          this.peliculaId.set(pelicula);
+          this.filtroPelicula.set(pelicula);
+        }
+        if (esIsoValida(desde)) {
+          // Un estreno que ya pasó no se puede programar: se empieza por hoy
+          this.desde.set(desde < this.hoy ? this.hoy : desde);
+        }
+        if (esIsoValida(hasta)) {
+          this.hasta.set(hasta);
+        }
+      });
+    });
+
     // Al cambiar el filtro se vuelve a pedir la agenda. untracked: recargar lee y escribe muchas
     // señales, y no tienen que volver a disparar el efecto.
     effect(() => {
@@ -308,17 +394,59 @@ export class AdminFunciones {
     );
   }
 
+  /** Hasta qué hora ocupa la sala cada función de ese horario: película más 30 minutos (RN-01) */
+  protected finDeOcupacionDe(
+    pasada: PasadaEnEdicion,
+  ): { hora: string; diaSiguiente: boolean } | null {
+    const pelicula = this.peliculaElegida();
+    return pelicula ? finDeOcupacion(pasada.hora(), pelicula.duracion_minutos) : null;
+  }
+
   /**
-   * Aplica un horario sugerido (D-05). Cambia la hora de toda la programación, no solo de la
-   * fecha que chocó: el alta es una sola. Puede que otra fecha choque con la nueva hora, y en
-   * ese caso la base lo vuelve a informar.
+   * Un horario más, con el formato, el idioma y el precio del último: lo habitual es cargar
+   * varias copias iguales a distintas horas y cambiar solo alguna.
    */
-  protected usarSugerencia(iso: string): void {
+  protected agregarPasada(): void {
+    const ultima = this.pasadas().at(-1);
+    this.pasadas.update((pasadas) => [...pasadas, nuevaPasada(ultima)]);
+  }
+
+  protected quitarPasada(clave: number): void {
+    this.pasadas.update((pasadas) => pasadas.filter((pasada) => pasada.clave !== clave));
+    this.resultado.set(null);
+  }
+
+  /** "18:20 · 3D subtitulada": cómo se nombra un horario en los conflictos */
+  protected describirPasada(indice: number | undefined): string {
+    const pasada = indice === undefined ? undefined : this.pasadas()[indice];
+
+    if (!pasada) {
+      return '';
+    }
+
+    return `${pasada.hora()} · ${pasada.formato()} ${TEXTO_DE_IDIOMA[pasada.idioma() as IdiomaFuncion].toLowerCase()}`;
+  }
+
+  /**
+   * Aplica un horario sugerido (D-05) al horario que chocó. Cambia esa hora en todo el período,
+   * no solo en la fecha del conflicto: cada horario del alta es uno solo. Puede que otra fecha
+   * choque con la nueva hora, y en ese caso la base lo vuelve a informar.
+   */
+  protected usarSugerencia(conflicto: ConflictoDeSala, iso: string): void {
+    const pasada = this.pasadas()[conflicto.pasada ?? 0];
+
+    if (!pasada) {
+      return;
+    }
+
+    const anterior = pasada.hora();
     const nueva = horaLocal(iso);
 
-    this.hora.set(nueva);
+    pasada.hora.set(nueva);
     this.resultado.set(null);
-    this.avisoDeSugerencia.set(`Cambiamos el horario a las ${nueva}. Revisá y volvé a programar.`);
+    this.avisoDeSugerencia.set(
+      `Cambiamos el horario de las ${anterior} a las ${nueva}. Revisá y volvé a programar.`,
+    );
   }
 
   protected async programar(evento: Event): Promise<void> {
@@ -337,10 +465,12 @@ export class AdminFunciones {
       desde: this.desde(),
       hasta: this.hasta(),
       dias: this.diasElegidos(),
-      hora: this.hora(),
-      formato: this.formato() as FormatoFuncion,
-      idioma: this.idioma() as IdiomaFuncion,
-      precioBase: leerPrecio(this.precio()),
+      pasadas: this.pasadas().map((pasada) => ({
+        hora: pasada.hora(),
+        formato: pasada.formato() as FormatoFuncion,
+        idioma: pasada.idioma() as IdiomaFuncion,
+        precioBase: leerPrecio(pasada.precio()),
+      })),
     });
     this.enviando.set(false);
 

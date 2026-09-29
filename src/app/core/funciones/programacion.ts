@@ -31,6 +31,21 @@ export const DIAS_DE_LA_SEMANA: readonly { numero: number; corto: string; largo:
   { numero: 7, corto: 'Dom', largo: 'Domingo' },
 ];
 
+/** Cuánto dura en cartel una película, por lo general: cuatro semanas de jueves a miércoles */
+export const SEMANAS_DE_CARTEL = 4;
+
+/**
+ * El período que se propone al programar una película: desde el estreno (o desde hoy, si ya se
+ * estrenó o no tiene fecha) y cuatro semanas. Es solo el punto de partida del formulario.
+ */
+export function periodoDeCartel(
+  estreno: string | null,
+  hoy: string,
+): { desde: string; hasta: string } {
+  const desde = estreno !== null && estreno > hoy ? estreno : hoy;
+  return { desde, hasta: sumarDias(desde, SEMANAS_DE_CARTEL * 7 - 1) };
+}
+
 /** El mismo tope que aplica la base a un período: un año más un día, ambos extremos incluidos */
 const MAXIMO_DE_DIAS = 367;
 
