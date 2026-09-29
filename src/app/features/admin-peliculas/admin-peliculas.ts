@@ -7,12 +7,12 @@ import { Pelicula, RestriccionEdad } from '../../core/models/pelicula';
 import { Gestion } from '../../core/services/gestion';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
+import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { Poster } from '../../shared/poster/poster';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { formatearDiaYMes, hoyIso } from '../../shared/selector-fecha/fechas';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { Spinner } from '../../shared/spinner/spinner';
 
 const OPCIONES_DE_EDAD: OpcionSeleccion[] = ([0, 13, 18] as const).map((edad) => ({
@@ -33,7 +33,7 @@ const OPCIONES_DE_EDAD: OpcionSeleccion[] = ([0, 13, 18] as const).map((edad) =>
  * `blob:` local.
  */
 @Component({
-  imports: [Boton, Campo, Dialogo, Mensaje, Poster, Seleccion, SelectorFecha, Spinner],
+  imports: [Boton, Campo, CampoFecha, Dialogo, Mensaje, Poster, Seleccion, Spinner],
   selector: 'app-admin-peliculas',
   styleUrls: ['../../layout/admin/pantalla-admin.css', './admin-peliculas.css'],
   templateUrl: './admin-peliculas.html',

@@ -9,7 +9,10 @@ import { COLORES_DE_OJOS, TIPOS_DE_SANGRE } from '../../core/models/perfil';
 import { salaDeMuestra } from '../../core/salas/muestra';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
+import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
+import { CampoHora } from '../../shared/campo-hora/campo-hora';
 import { Cantidad } from '../../shared/cantidad/cantidad';
+import { ChipsOpcion, OpcionChip } from '../../shared/chips-opcion/chips-opcion';
 import { Chip } from '../../shared/chip/chip';
 import { Desglose } from '../../shared/desglose/desglose';
 import { Dialogo } from '../../shared/dialogo/dialogo';
@@ -23,8 +26,6 @@ import { Poster } from '../../shared/poster/poster';
 import { PromocionesOrden } from '../../shared/promociones-orden/promociones-orden';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 import { SelectorCandy } from '../../shared/selector-candy/selector-candy';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
-import { SelectorHora } from '../../shared/selector-hora/selector-hora';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { Spinner } from '../../shared/spinner/spinner';
 import { Tarjeta } from '../../shared/tarjeta/tarjeta';
@@ -38,8 +39,11 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
   imports: [
     Boton,
     Campo,
+    CampoFecha,
+    CampoHora,
     Cantidad,
     Chip,
+    ChipsOpcion,
     Desglose,
     Dialogo,
     Estrellas,
@@ -52,8 +56,6 @@ import { Temporizador } from '../../shared/temporizador/temporizador';
     PromocionesOrden,
     Seleccion,
     SelectorCandy,
-    SelectorFecha,
-    SelectorHora,
     Spinner,
     Tarjeta,
     Temporizador,
@@ -183,6 +185,15 @@ export class Sistema {
   ];
 
   protected readonly horariosDelDia = ['18:40', '21:10', '23:30'];
+
+  protected readonly opcionesDeDiaDemo: readonly OpcionChip[] = this.diasConFuncion.map((iso) => ({
+    valor: iso,
+    etiqueta: iso.split('-').reverse().slice(0, 2).join('/'),
+  }));
+
+  protected readonly opcionesDeHoraDemo: readonly OpcionChip[] = this.horariosDelDia.map(
+    (hora) => ({ valor: hora, etiqueta: hora }),
+  );
 
   /** La fecha de nacimiento no puede ser futura (RF-38) */
   protected readonly hoy = hoyIso();

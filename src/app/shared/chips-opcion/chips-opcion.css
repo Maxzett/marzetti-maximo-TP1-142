@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+
+.grupo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+/* Reglas propias en vez de importar de shared/chip: mismo criterio que usaba selector-hora
+   con .opcion, para no acoplar este componente al de Chip (que es de dos estados, no un radio) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-ficha);
+  background: transparent;
+  color: var(--texto-tenue);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-mini);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.chip:hover {
+  border-color: var(--acento-hondo);
+  color: var(--texto);
+}
+
+.chip--activo {
+  border: 1.5px solid var(--acento);
+  background: var(--acento);
+  color: var(--texto-sobre-acento);
+  font-weight: 600;
+}
+
+.chip svg {
+  width: 0.6875rem;
+  height: 0.5625rem;
+}
+
+.vacio {
+  color: var(--texto-tenue);
+  font-size: var(--t-mini);
+}

@@ -6,13 +6,17 @@ import {
   funcionesEnHora,
   horasDelDia,
 } from '../../core/compra/agrupar-funciones';
-import { describirInicio } from '../../core/funciones/programacion';
+import {
+  DIAS_DE_LA_SEMANA,
+  describirInicio,
+  diaDeLaSemana,
+} from '../../core/funciones/programacion';
 import { Funcion } from '../../core/models/sala';
 import { Funciones } from '../../core/services/funciones';
+import { ChipsOpcion, OpcionChip } from '../../shared/chips-opcion/chips-opcion';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
-import { SelectorHora } from '../../shared/selector-hora/selector-hora';
+import { hoyIso, sumarDias } from '../../shared/selector-fecha/fechas';
 import { Spinner } from '../../shared/spinner/spinner';
 
 /**
@@ -24,7 +28,7 @@ import { Spinner } from '../../shared/spinner/spinner';
  * que es lo que el espectador decide; la sala la asigna el cine (RF-21) y se ve en la compra.
  */
 @Component({
-  imports: [Mensaje, RouterLink, Seleccion, SelectorFecha, SelectorHora, Spinner],
+  imports: [ChipsOpcion, Mensaje, RouterLink, Seleccion, Spinner],
   selector: 'app-elegir-funcion',
   styleUrl: './elegir-funcion.css',
   templateUrl: './elegir-funcion.html',
@@ -46,6 +50,11 @@ export class ElegirFuncion {
 
   protected readonly dias = computed(() => diasConFunciones(this.funciones() ?? []));
 
+  /** "Hoy 28/9", "Mañana 29/9", "Mié 1/10": los chips no muestran el ISO tal cual (RNF-08) */
+  protected readonly opcionesDeDia = computed<readonly OpcionChip[]>(() =>
+    this.dias().map((iso) => ({ valor: iso, etiqueta: this.etiquetaDeDia(iso) })),
+  );
+
   /** La del usuario si sigue siendo válida; si no, el primer día con función */
   protected readonly fecha = computed(() => {
     const dias = this.dias();
@@ -53,6 +62,10 @@ export class ElegirFuncion {
   });
 
   protected readonly horas = computed(() => horasDelDia(this.funciones() ?? [], this.fecha()));
+
+  protected readonly opcionesDeHora = computed<readonly OpcionChip[]>(() =>
+    this.horas().map((hora) => ({ valor: hora, etiqueta: hora })),
+  );
 
   /** Con un solo horario en el día no hay nada que elegir: queda elegido */
   protected readonly hora = computed(() => {
@@ -106,6 +119,28 @@ export class ElegirFuncion {
 
   protected elegirVersion(id: string): void {
     this.versionTocada.set(id);
+  }
+
+  /** "Hoy 28/9", "Mañana 29/9", o el día de la semana abreviado para el resto ("Mié 1/10") */
+  private etiquetaDeDia(iso: string): string {
+    const hoy = hoyIso();
+    const diaYMes = this.diaYMes(iso);
+
+    if (iso === hoy) {
+      return `Hoy ${diaYMes}`;
+    }
+    if (iso === sumarDias(hoy, 1)) {
+      return `Mañana ${diaYMes}`;
+    }
+
+    const numeroDeDia = diaDeLaSemana(iso);
+    const corto = numeroDeDia !== null ? DIAS_DE_LA_SEMANA[numeroDeDia - 1].corto : '';
+    return `${corto} ${diaYMes}`;
+  }
+
+  private diaYMes(iso: string): string {
+    const [, mes, dia] = iso.split('-');
+    return `${Number(dia)}/${Number(mes)}`;
   }
 
   private async cargar(peliculaId: string): Promise<void> {

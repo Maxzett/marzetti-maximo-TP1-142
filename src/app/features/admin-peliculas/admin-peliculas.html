@@ -110,8 +110,7 @@
         <fieldset>
           <legend>Estreno y preventa</legend>
           <div class="fecha">
-            <p class="etiqueta">Fecha de estreno</p>
-            <app-selector-fecha etiqueta="Fecha de estreno" [(valor)]="estreno" />
+            <app-campo-fecha etiqueta="Fecha de estreno" [(valor)]="estreno" />
             @if (estreno()) {
               <app-boton variante="fantasma" (presionado)="estreno.set('')">
                 Sin fecha: ya está en cartelera

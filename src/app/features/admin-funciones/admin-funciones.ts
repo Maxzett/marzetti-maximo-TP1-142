@@ -34,12 +34,12 @@ import { Catalogo } from '../../core/services/catalogo';
 import { Funciones } from '../../core/services/funciones';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
+import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
+import { CampoHora } from '../../shared/campo-hora/campo-hora';
 import { Chip } from '../../shared/chip/chip';
 import { Dialogo } from '../../shared/dialogo/dialogo';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { formatearLargo, hoyIso } from '../../shared/selector-fecha/fechas';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
-import { SelectorHora } from '../../shared/selector-hora/selector-hora';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 import { Spinner } from '../../shared/spinner/spinner';
 
@@ -67,7 +67,7 @@ const TEXTO_DE_IDIOMA: Record<IdiomaFuncion, string> = {
  * si no había sala libre para alguna fecha, cuál fue y a qué horarios cercanos sí (D-05).
  */
 @Component({
-  imports: [Boton, Campo, Chip, Dialogo, Mensaje, Seleccion, SelectorFecha, SelectorHora, Spinner],
+  imports: [Boton, Campo, CampoFecha, CampoHora, Chip, Dialogo, Mensaje, Seleccion, Spinner],
   selector: 'app-admin-funciones',
   styleUrl: './admin-funciones.css',
   templateUrl: './admin-funciones.html',

@@ -8,16 +8,16 @@
   <p class="vacio">Esta película todavía no tiene funciones programadas.</p>
 } @else {
   <div class="selectores">
-    <app-selector-fecha
+    <app-chips-opcion
       etiqueta="Día de la función"
-      [fechasHabilitadas]="dias()"
+      [opciones]="opcionesDeDia()"
       [valor]="fecha()"
       (valorChange)="elegirFecha($event)"
     />
 
-    <app-selector-hora
+    <app-chips-opcion
       etiqueta="Horario"
-      [opciones]="horas()"
+      [opciones]="opcionesDeHora()"
       [valor]="hora()"
       (valorChange)="elegirHora($event)"
     />

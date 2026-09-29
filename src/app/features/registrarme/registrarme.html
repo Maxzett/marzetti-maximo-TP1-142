@@ -61,32 +61,16 @@
       />
 
       <div class="fecha">
-        <!--
-          El selector ya lleva la etiqueta en el aria-label de su grilla, pero quien ve la
-          pantalla necesita leerla también: sin este rótulo, arriba del calendario no hay
-          nada que diga qué fecha se está pidiendo.
-        -->
-        <p class="etiqueta">
-          Fecha de nacimiento
-          <span class="obligatorio">obligatorio</span>
-        </p>
-
-        <!--
-          El selector propio de la F2 (RNF-08), abierto en la vista de años: para una
-          fecha de nacimiento, empezar por el año es la diferencia entre tres clics y
-          trescientos. El máximo es hoy, así que una fecha futura no se puede elegir.
-        -->
-        <app-selector-fecha
+        <app-campo-fecha
           etiqueta="Fecha de nacimiento"
-          vistaInicial="anios"
           minimo="1920-01-01"
           [maximo]="hoy"
+          [requerido]="true"
+          [error]="errorFecha()"
           [(valor)]="fechaNacimiento"
         />
 
-        @if (errorFecha()) {
-          <p class="error" role="alert">{{ errorFecha() }}</p>
-        } @else {
+        @if (!errorFecha()) {
           <p class="ayuda">La usamos para las funciones con restricción de edad y los cupones.</p>
         }
       </div>

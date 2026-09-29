@@ -22,9 +22,9 @@ import {
 } from '../../core/reportes/periodos';
 import { Reportes } from '../../core/services/reportes';
 import { Boton } from '../../shared/boton/boton';
+import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
 import { DatoDeBarra, GraficoBarras } from '../../shared/grafico-barras/grafico-barras';
 import { Mensaje } from '../../shared/mensaje/mensaje';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { sumarDias } from '../../shared/selector-fecha/fechas';
 import { Spinner } from '../../shared/spinner/spinner';
 
@@ -41,7 +41,7 @@ const MAXIMO_DE_DIAS = 366;
  * mes, contado por la fecha de la función.
  */
 @Component({
-  imports: [Boton, GraficoBarras, Mensaje, SelectorFecha, Spinner],
+  imports: [Boton, CampoFecha, GraficoBarras, Mensaje, Spinner],
   selector: 'app-admin-reportes',
   styleUrls: ['../../layout/admin/pantalla-admin.css', './admin-reportes.css'],
   templateUrl: './admin-reportes.html',

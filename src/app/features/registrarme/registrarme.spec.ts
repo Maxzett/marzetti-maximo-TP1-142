@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { DatosRegistro } from '../../core/models/perfil';
 import { Auth } from '../../core/services/auth';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
+import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
 import { Registrarme } from './registrarme';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
 
@@ -22,7 +22,7 @@ describe('Registrarme', () => {
       .map((n) => (n as HTMLElement).textContent?.trim())
       .join(' | ');
 
-  /** Orden de los <input> en el formulario: mail, contraseña, nombre, apellido, vacaciones */
+  /** Orden de los <input>: mail, contraseña, nombre, apellido, fecha de nacimiento, vacaciones */
   async function escribir(indice: number, texto: string): Promise<void> {
     const entrada = entradas()[indice];
     entrada.value = texto;
@@ -37,12 +37,10 @@ describe('Registrarme', () => {
     await fixture.whenStable();
   }
 
-  /** Empuja la fecha por el model() del selector, que es su API pública */
+  /** Escribe la fecha con el formato DD/MM/AAAA que espera app-campo-fecha (RNF-08) */
   async function elegirFecha(iso: string): Promise<void> {
-    const selector = fixture.debugElement.query(By.directive(SelectorFecha))
-      .componentInstance as SelectorFecha;
-    selector.valor.set(iso);
-    await fixture.whenStable();
+    const [anio, mes, dia] = iso.split('-');
+    await escribir(4, `${dia}${mes}${anio}`);
   }
 
   async function completarTodo(): Promise<void> {
@@ -50,10 +48,10 @@ describe('Registrarme', () => {
     await escribir(1, 'secreta123');
     await escribir(2, 'Ana');
     await escribir(3, 'Gómez');
-    await escribir(4, '21');
+    await elegirFecha('1990-05-14');
+    await escribir(5, '21');
     await elegir(0, 'O+');
     await elegir(1, 'verdes');
-    await elegirFecha('1990-05-14');
   }
 
   async function enviar(): Promise<void> {
@@ -80,12 +78,12 @@ describe('Registrarme', () => {
 
   // RF-38: el registro pide siete campos, más la contraseña de la cuenta
   it('presenta los siete campos del registro', () => {
-    // mail, contraseña, nombre, apellido y días de vacaciones
-    expect(entradas()).toHaveLength(5);
+    // mail, contraseña, nombre, apellido, fecha de nacimiento (campo con máscara) y vacaciones
+    expect(entradas()).toHaveLength(6);
     // tipo de sangre y color de ojos
     expect(listas()).toHaveLength(2);
-    // fecha de nacimiento, con el selector propio de la F2 (RNF-08)
-    expect(fixture.debugElement.query(By.directive(SelectorFecha))).not.toBeNull();
+    // fecha de nacimiento, con el campo de máscara DD/MM/AAAA propio (RNF-08)
+    expect(fixture.debugElement.query(By.directive(CampoFecha))).not.toBeNull();
   });
 
   it('no muestra errores antes del primer intento de envío', () => {
@@ -128,7 +126,7 @@ describe('Registrarme', () => {
 
   it('rechaza días de vacaciones fuera del rango 0 a 365', async () => {
     await completarTodo();
-    await escribir(4, '400');
+    await escribir(5, '400');
     await enviar();
 
     expect(textoDeErrores()).toContain('Tiene que ser un número entre 0 y 365.');
@@ -137,21 +135,21 @@ describe('Registrarme', () => {
 
   it('acepta cero días de vacaciones: es un valor válido, no un campo vacío', async () => {
     await completarTodo();
-    await escribir(4, '0');
+    await escribir(5, '0');
     await enviar();
 
     expect(registrar).toHaveBeenCalledOnce();
     expect((registrar.mock.calls[0][0] as DatosRegistro).diasVacaciones).toBe(0);
   });
 
-  // El selector nunca ofrece una fecha futura, pero el tope queda explícito
+  // El campo nunca acepta una fecha futura, pero el tope queda explícito
   it('no deja elegir una fecha posterior a hoy', () => {
-    const selector = fixture.debugElement.query(By.directive(SelectorFecha))
-      .componentInstance as SelectorFecha;
+    const campo = fixture.debugElement.query(By.directive(CampoFecha))
+      .componentInstance as CampoFecha;
     // hoyIso() y no toISOString(): esa da la fecha UTC, que de 21 a 24 h en Argentina ya es mañana
     const hoy = hoyIso();
 
-    expect(selector.maximo()).toBe(hoy);
+    expect(campo.maximo()).toBe(hoy);
   });
 
   it('manda los siete campos y navega al perfil', async () => {

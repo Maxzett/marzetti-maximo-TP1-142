@@ -27,9 +27,9 @@ import {
 import { hoyEnElCine } from '../../core/reportes/periodos';
 import { REGISTROS_POR_PAGINA, Reportes } from '../../core/services/reportes';
 import { Boton } from '../../shared/boton/boton';
+import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { Spinner } from '../../shared/spinner/spinner';
 
 const ROLES: Record<string, string> = {
@@ -47,7 +47,7 @@ const ROLES: Record<string, string> = {
  * validación en la puerta, y traerlo entero sería cada vez más lento.
  */
 @Component({
-  imports: [Boton, Mensaje, Seleccion, SelectorFecha, Spinner],
+  imports: [Boton, CampoFecha, Mensaje, Seleccion, Spinner],
   selector: 'app-admin-actividad',
   styleUrls: ['../../layout/admin/pantalla-admin.css', './admin-actividad.css'],
   templateUrl: './admin-actividad.html',

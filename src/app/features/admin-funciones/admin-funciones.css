@@ -76,22 +76,6 @@ legend {
   gap: var(--e-2);
 }
 
-.etiqueta {
-  display: flex;
-  align-items: baseline;
-  gap: var(--e-2);
-  color: var(--texto);
-  font-size: var(--t-mini);
-}
-
-.obligatorio {
-  color: var(--texto-tenue);
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .error {
   color: var(--rojo-claro);
   font-size: var(--t-mini);

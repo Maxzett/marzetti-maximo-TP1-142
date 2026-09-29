@@ -1,5 +1,7 @@
 import {
+  aDisplay,
   aIso,
+  aIsoDesdeDisplay,
   dentroDelRango,
   desdeIso,
   desplazamientoPrimerDia,
@@ -82,5 +84,24 @@ describe('formatearDiaYMes', () => {
   it('escribe día de la semana, día y mes, sin año ni coma', () => {
     expect(formatearDiaYMes('2026-10-15')).toBe('jueves 15 de octubre');
     expect(formatearDiaYMes('')).toBe('');
+  });
+});
+
+describe('aDisplay y aIsoDesdeDisplay', () => {
+  it('convierte ISO a DD/MM/AAAA y de vuelta', () => {
+    expect(aDisplay('2026-09-24')).toBe('24/09/2026');
+    expect(aIsoDesdeDisplay('24/09/2026')).toBe('2026-09-24');
+  });
+
+  it('devuelve vacío/null ante una fecha que no existe', () => {
+    expect(aDisplay('no es una fecha')).toBe('');
+    expect(aIsoDesdeDisplay('31/02/2026')).toBeNull();
+  });
+
+  it('rechaza texto incompleto o con otro formato', () => {
+    expect(aIsoDesdeDisplay('24/9/2026')).toBeNull();
+    expect(aIsoDesdeDisplay('24/09/26')).toBeNull();
+    expect(aIsoDesdeDisplay('24-09-2026')).toBeNull();
+    expect(aIsoDesdeDisplay('')).toBeNull();
   });
 });

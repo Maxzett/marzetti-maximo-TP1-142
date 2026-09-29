@@ -1,0 +1,11 @@
+<app-campo
+  #campoRef
+  [etiqueta]="etiqueta()"
+  tipo="text"
+  inputmode="numeric"
+  marcador="HH:MM"
+  [valor]="texto()"
+  (valorChange)="alEscribir($event)"
+  [error]="errorMostrado()"
+  [requerido]="requerido()"
+/>

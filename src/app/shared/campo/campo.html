@@ -31,6 +31,7 @@
     [disabled]="deshabilitado()"
     [required]="requerido()"
     [attr.autocomplete]="autocompletado() || null"
+    [attr.inputmode]="inputmode() || null"
     [attr.aria-invalid]="hayError() ? 'true' : null"
     [attr.aria-describedby]="descripcion()"
     (input)="alEscribir($event)"

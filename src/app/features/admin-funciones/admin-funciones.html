@@ -27,19 +27,23 @@
           <legend>Período</legend>
 
           <div class="fecha">
-            <p class="etiqueta">Desde <span class="obligatorio">obligatorio</span></p>
-            <app-selector-fecha etiqueta="Desde" [minimo]="hoy" [(valor)]="desde" />
-            @if (errorDesde()) {
-              <p class="error" role="alert">{{ errorDesde() }}</p>
-            }
+            <app-campo-fecha
+              etiqueta="Desde"
+              [requerido]="true"
+              [error]="errorDesde()"
+              [minimo]="hoy"
+              [(valor)]="desde"
+            />
           </div>
 
           <div class="fecha">
-            <p class="etiqueta">Hasta <span class="obligatorio">obligatorio</span></p>
-            <app-selector-fecha etiqueta="Hasta" [minimo]="desde() || hoy" [(valor)]="hasta" />
-            @if (errorHasta()) {
-              <p class="error" role="alert">{{ errorHasta() }}</p>
-            }
+            <app-campo-fecha
+              etiqueta="Hasta"
+              [requerido]="true"
+              [error]="errorHasta()"
+              [minimo]="desde() || hoy"
+              [(valor)]="hasta"
+            />
           </div>
         </fieldset>
 
@@ -72,11 +76,12 @@
           <legend>Horario y formato</legend>
 
           <div class="fecha">
-            <p class="etiqueta">Comienza a las <span class="obligatorio">obligatorio</span></p>
-            <app-selector-hora etiqueta="Horario de comienzo" [(valor)]="hora" />
-            @if (errorHora()) {
-              <p class="error" role="alert">{{ errorHora() }}</p>
-            }
+            <app-campo-hora
+              etiqueta="Comienza a las"
+              [requerido]="true"
+              [error]="errorHora()"
+              [(valor)]="hora"
+            />
           </div>
 
           <div class="par">
@@ -265,13 +270,11 @@
 
       <div class="formulario formulario--dialogo">
         <div class="fecha">
-          <p class="etiqueta">Fecha</p>
-          <app-selector-fecha etiqueta="Fecha de la función" [minimo]="hoy" [(valor)]="edFecha" />
+          <app-campo-fecha etiqueta="Fecha de la función" [minimo]="hoy" [(valor)]="edFecha" />
         </div>
 
         <div class="fecha">
-          <p class="etiqueta">Comienza a las</p>
-          <app-selector-hora etiqueta="Horario de comienzo" [(valor)]="edHora" />
+          <app-campo-hora etiqueta="Comienza a las" [(valor)]="edHora" />
         </div>
 
         <div class="par">

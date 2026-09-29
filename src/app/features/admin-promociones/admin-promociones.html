@@ -184,8 +184,7 @@
         <p class="nota">Sin fechas, el cupón no vence.</p>
 
         <div class="fecha">
-          <p class="etiqueta">Desde</p>
-          <app-selector-fecha etiqueta="Vigente desde" [(valor)]="cupDesde" />
+          <app-campo-fecha etiqueta="Vigente desde" [(valor)]="cupDesde" />
           @if (cupDesde()) {
             <app-boton variante="fantasma" (presionado)="cupDesde.set('')">
               Quitar la fecha de inicio
@@ -193,8 +192,7 @@
           }
         </div>
         <div class="fecha">
-          <p class="etiqueta">Hasta</p>
-          <app-selector-fecha etiqueta="Vigente hasta" [minimo]="cupDesde()" [(valor)]="cupHasta" />
+          <app-campo-fecha etiqueta="Vigente hasta" [minimo]="cupDesde()" [(valor)]="cupHasta" />
           @if (cupHasta()) {
             <app-boton variante="fantasma" (presionado)="cupHasta.set('')">
               Quitar la fecha de fin

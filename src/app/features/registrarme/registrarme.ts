@@ -13,9 +13,9 @@ import { COLORES_DE_OJOS, ColorOjos, TIPOS_DE_SANGRE, TipoSangre } from '../../c
 import { Auth } from '../../core/services/auth';
 import { Boton } from '../../shared/boton/boton';
 import { Campo } from '../../shared/campo/campo';
+import { CampoFecha } from '../../shared/campo-fecha/campo-fecha';
 import { Mensaje } from '../../shared/mensaje/mensaje';
 import { hoyIso } from '../../shared/selector-fecha/fechas';
-import { SelectorFecha } from '../../shared/selector-fecha/selector-fecha';
 import { OpcionSeleccion, Seleccion } from '../../shared/seleccion/seleccion';
 
 /** Pone en mayúscula la primera letra para mostrar 'marrones' como 'Marrones' */
@@ -24,7 +24,7 @@ function capitalizar(texto: string): string {
 }
 
 @Component({
-  imports: [Boton, Campo, Mensaje, RouterLink, SelectorFecha, Seleccion],
+  imports: [Boton, Campo, CampoFecha, Mensaje, RouterLink, Seleccion],
   selector: 'app-registrarme',
   styleUrl: './registrarme.css',
   templateUrl: './registrarme.html',

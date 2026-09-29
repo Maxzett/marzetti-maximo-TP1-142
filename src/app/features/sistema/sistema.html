@@ -173,7 +173,7 @@
     <app-estrellas etiqueta="Tu calificación" [editable]="true" [(valor)]="calificacion" />
     <p class="pie">
       Es un <code>radiogroup</code>: el grupo entero es una sola parada de Tab y adentro las flechas
-      mueven y eligen a la vez, igual que el selector de hora. Elegiste
+      mueven y eligen a la vez, igual que los chips de día y horario. Elegiste
       <strong>{{ calificacion() || '—' }}</strong
       >.
     </p>
@@ -225,58 +225,58 @@
   </section>
 
   <section aria-labelledby="s-fechas">
-    <h2 id="s-fechas">Selector de fecha y hora</h2>
+    <h2 id="s-fechas">Fecha y hora</h2>
     <p class="bajada">
-      El cliente rechazó las ruedas nativas y el scroll largo (RNF-08). Estos son los tres casos del
-      sistema, y los dos se manejan enteros con el teclado. En el calendario las flechas mueven el
-      foco y Enter elige, con PageUp y PageDown para cambiar de mes y Shift para saltar de a un año.
-      En el de hora, cada cuadrícula es un grupo de opciones excluyentes: una sola parada de Tab y
-      adentro las flechas mueven y eligen a la vez, como en un grupo de radios.
+      El cliente rechazó el calendario y las ruedas nativas: ni scroll largo ni una vista que hay
+      que abrir para elegir algo (RNF-08 v1.2). Donde las opciones son fijas se eligen con chips,
+      con el teclado de un <code>radiogroup</code>: una sola parada de Tab y las flechas mueven y
+      eligen a la vez. Donde la fecha es libre se escribe con máscara DD/MM/AAAA o HH:MM, nunca con
+      <code>&lt;input type=date&gt;</code> (abre el calendario del navegador) ni
+      <code>&lt;select&gt;</code> de día, mes o año (en iOS es una rueda).
     </p>
 
     <div class="fila fila--selectores">
       <div class="caso">
         <h3 class="titulo-caso">Elegir función · compra</h3>
-        <app-selector-fecha
-          etiqueta="Días con función de El último tren a Retiro"
-          [fechasHabilitadas]="diasConFuncion"
+        <app-chips-opcion
+          etiqueta="Día con función de El último tren a Retiro"
+          [opciones]="opcionesDeDiaDemo"
           [(valor)]="fechaDeFuncion"
         />
+        <app-chips-opcion
+          etiqueta="Horario"
+          [opciones]="opcionesDeHoraDemo"
+          [(valor)]="horarioDeFuncion"
+        />
         <p class="pie">
-          Solo los días con función se pueden elegir. Los demás van tachados, no solo apagados.
-        </p>
-      </div>
-
-      <div class="caso">
-        <h3 class="titulo-caso">Horario · compra</h3>
-        <app-selector-hora [opciones]="horariosDelDia" [(valor)]="horarioDeFuncion" />
-        <p class="pie">
-          En la compra no se elige una hora cualquiera: se elige una de las funciones programadas.
-          Por eso es un <code>radiogroup</code> y no una fila de botones sueltos.
+          Solo los días y horarios con función existen como chip: no hay nada más para elegir.
         </p>
       </div>
 
       <div class="caso">
         <h3 class="titulo-caso">Fecha de nacimiento · registro</h3>
-        <app-selector-fecha
+        <app-campo-fecha
           etiqueta="Fecha de nacimiento"
-          vistaInicial="anios"
+          minimo="1920-01-01"
           [maximo]="hoy"
           [(valor)]="fechaDeNacimiento"
         />
         <p class="pie">
-          Arranca en la vista de años: 1998 sale en tres clics. No deja elegir fechas futuras.
+          Se tipea con máscara DD/MM/AAAA. Una fecha fuera del rango o que no existe (31/02) se
+          avisa sola, sin llegar a cambiar el valor que ve el resto del sistema.
         </p>
       </div>
 
       <div class="caso">
         <h3 class="titulo-caso">Alta de función · admin</h3>
-        <app-selector-fecha etiqueta="Fecha de la función" [minimo]="hoy" [(valor)]="fechaDeAlta" />
-        <app-selector-hora [pasoMinutos]="5" [(valor)]="horarioDeAlta" />
+        <app-campo-fecha etiqueta="Fecha de la función" [minimo]="hoy" [(valor)]="fechaDeAlta" />
+        <app-campo-hora
+          etiqueta="Horario de comienzo"
+          [pasoMinutos]="5"
+          [(valor)]="horarioDeAlta"
+        />
         <p class="pie">
-          Fecha libre desde hoy y hora con paso de 5 minutos. Las 24 horas entran en una grilla de 6
-          × 4: no hay nada que scrollear, y con las flechas se cruza de las 00 a las 23 sin soltar
-          el teclado.
+          Fecha libre desde hoy y hora con paso de 5 minutos: 18:07 se avisa sola, 18:05 no.
         </p>
       </div>
     </div>
@@ -444,10 +444,9 @@
       <li>
         <strong>Chip activo:</strong> tilde adelante y tipografía más pesada, no solo relleno.
       </li>
-      <li><strong>Día sin función:</strong> barra diagonal cruzada sobre la celda.</li>
       <li>
-        <strong>Hoy:</strong> borde punteado, para no confundirlo con el día elegido, que va
-        relleno.
+        <strong>Campo de fecha u hora inválido:</strong> el mismo ícono y borde grueso de un campo
+        con error, además de la fecha o el rango explicados en palabras.
       </li>
       <li>
         <strong>Mensajes:</strong> forma de ícono propia por tono —círculo, triángulo, cuadrado— y
@@ -467,10 +466,9 @@
     <h3 class="titulo-caso">Alto contraste del sistema operativo</h3>
     <p class="pie">
       Con un tema de contraste activado en Windows, el navegador reemplaza nuestra paleta y descarta
-      los degradados: el relleno ámbar y la barra diagonal desaparecerían. El bloque
-      <code>&#64;media (forced-colors: active)</code> de <code>styles.css</code> los reemplaza por
-      un contorno en el color de selección del sistema y por un tachado, para que ningún estado
-      quede sin señal.
+      los degradados: el relleno ámbar de un chip elegido desaparecería. El bloque
+      <code>&#64;media (forced-colors: active)</code> de <code>styles.css</code> lo reemplaza por un
+      contorno en el color de selección del sistema, para que ningún estado quede sin señal.
     </p>
   </section>
 

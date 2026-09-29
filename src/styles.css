@@ -329,11 +329,11 @@ svg {
  * ---- Alto contraste de Windows ----
  * Con forced-colors el sistema reemplaza nuestros colores por su propia paleta y descarta
  * los background-image. Los estados que hoy se comunican con el relleno ámbar (el chip
- * activo, el día elegido, la opción elegida) o con un degradado (la barra del día sin
- * función) se quedarían sin señal, y volveríamos a depender de algo que el usuario no ve.
+ * activo, la opción elegida de semana/mes en los reportes) se quedarían sin señal, y
+ * volveríamos a depender de algo que el usuario no ve.
  *
  * Va acá y no en cada componente aunque los estilos de componente sean scoped: es una
- * corrección transversal del sistema, y repartirla en cuatro archivos serían cuatro
+ * corrección transversal del sistema, y repartirla en varios archivos serían varias
  * fuentes de verdad para la misma regla.
  */
 @media (forced-colors: active) {
@@ -343,14 +343,8 @@ svg {
   }
 
   .chip--activo,
-  .dia--elegida,
   .opcion--elegida {
     outline: 2px solid Highlight;
     outline-offset: -4px;
-  }
-
-  /* El linear-gradient desaparece; el tachado del texto no */
-  .dia--sin-funcion {
-    text-decoration: line-through;
   }
 }

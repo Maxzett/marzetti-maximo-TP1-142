@@ -19,6 +19,8 @@ let contador = 0;
 export class Campo {
   readonly etiqueta = input.required<string>();
   readonly tipo = input<TipoCampo>('text');
+  /** Sugiere el teclado del dispositivo (p. ej. 'numeric') sin cambiar el tipo del control */
+  readonly inputmode = input('');
   readonly marcador = input('');
   readonly ayuda = input('');
   /** Texto del error. Vacío significa que el campo está bien */

@@ -77,16 +77,6 @@ legend {
   font-size: var(--t-mini);
 }
 
-/* Mismo rótulo que usan <app-campo> y <app-seleccion>, para que el bloque de la
-   fecha no parezca de otro formulario */
-.etiqueta {
-  display: flex;
-  align-items: baseline;
-  gap: var(--e-2);
-  color: var(--texto);
-  font-size: var(--t-mini);
-}
-
 .obligatorio {
   color: var(--texto-tenue);
   font-family: var(--fuente-titulo);

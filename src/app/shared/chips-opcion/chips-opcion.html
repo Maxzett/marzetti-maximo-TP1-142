@@ -1,0 +1,30 @@
+<div class="grupo" role="radiogroup" [attr.aria-label]="etiqueta()" (keydown)="alTeclear($event)">
+  @for (opcion of opciones(); track opcion.valor; let primero = $first) {
+    <button
+      class="chip"
+      type="button"
+      role="radio"
+      [class.chip--activo]="opcion.valor === valor()"
+      [attr.data-valor]="opcion.valor"
+      [attr.aria-checked]="opcion.valor === valor()"
+      [tabindex]="opcion.valor === valor() || (!valor() && primero) ? 0 : -1"
+      (click)="elegir(opcion.valor)"
+    >
+      @if (opcion.valor === valor()) {
+        <svg viewBox="0 0 12 10" aria-hidden="true">
+          <path
+            d="M1 5l3.5 3.5L11 1.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      }
+      {{ opcion.etiqueta }}
+    </button>
+  } @empty {
+    <p class="vacio">No hay opciones.</p>
+  }
+</div>

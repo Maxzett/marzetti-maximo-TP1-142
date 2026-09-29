@@ -166,3 +166,33 @@ export function formatearLargo(iso: string): string {
 
   return formato.format(new Date(Date.UTC(fecha.anio, fecha.mes, fecha.dia)));
 }
+
+/** 'AAAA-MM-DD' -> 'DD/MM/AAAA', el formato que se escribe en el campo de texto. Vacío si no es una fecha real */
+export function aDisplay(iso: string): string {
+  const fecha = desdeIso(iso);
+
+  if (!fecha) {
+    return '';
+  }
+
+  const dia = String(fecha.dia).padStart(2, '0');
+  const mes = String(fecha.mes + 1).padStart(2, '0');
+  const anio = String(fecha.anio).padStart(4, '0');
+  return `${dia}/${mes}/${anio}`;
+}
+
+/** 'DD/MM/AAAA' -> 'AAAA-MM-DD'. Null si el texto no tiene el formato completo o no es una fecha real */
+export function aIsoDesdeDisplay(display: string): string | null {
+  const partes = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(display);
+
+  if (!partes) {
+    return null;
+  }
+
+  const dia = Number(partes[1]);
+  const mes = Number(partes[2]) - 1;
+  const anio = Number(partes[3]);
+  const iso = aIso(anio, mes, dia);
+
+  return esIsoValida(iso) ? iso : null;
+}
