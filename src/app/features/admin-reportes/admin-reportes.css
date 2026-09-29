@@ -39,31 +39,6 @@
   color: var(--texto-tenue);
 }
 
-/* ── Candy ── */
-.destacado {
-  max-width: 28rem;
-  padding: var(--e-4) var(--e-5);
-  border: 1px solid var(--acento);
-  border-radius: var(--r-medio);
-  background: var(--superficie);
-  box-shadow: 0 0 18px -8px var(--acento);
-}
-
-.sobretitulo {
-  color: var(--acento);
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-micro);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.ganador {
-  margin-block: var(--e-1);
-  font-family: var(--fuente-display);
-  font-size: var(--t-titulo);
-  letter-spacing: 0.02em;
-}
-
 /* ── Películas ── */
 .controles {
   display: flex;

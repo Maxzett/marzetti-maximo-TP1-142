@@ -113,15 +113,18 @@
         novalidate
         (submit)="$event.preventDefault(); guardarConfiguracion()"
       >
-        @for (opcion of opcionesDeConfiguracion; track opcion.clave) {
-          <app-campo
-            tipo="number"
-            [etiqueta]="opcion.etiqueta"
-            [ayuda]="opcion.ayuda"
-            [valor]="valorDe(opcion.clave)"
-            (valorChange)="cambiarValor(opcion.clave, $event)"
-          />
-        }
+        <!-- Los valores en fila cuando entran: uno debajo del otro dejaban vacío el resto -->
+        <div class="campos-configuracion">
+          @for (opcion of opcionesDeConfiguracion; track opcion.clave) {
+            <app-campo
+              tipo="number"
+              [etiqueta]="opcion.etiqueta"
+              [ayuda]="opcion.ayuda"
+              [valor]="valorDe(opcion.clave)"
+              (valorChange)="cambiarValor(opcion.clave, $event)"
+            />
+          }
+        </div>
 
         @if (errorDeConfiguracion()) {
           <app-mensaje tono="error">{{ errorDeConfiguracion() }}</app-mensaje>

@@ -40,7 +40,7 @@
       }
     </fieldset>
 
-    <div aria-live="polite" [attr.aria-busy]="cargando()" class="resultado">
+    <div [attr.aria-busy]="cargando()" class="resultado">
       @if (cargando() && !resultado()) {
         <app-spinner etiqueta="Cargando la actividad" />
       } @else if (error()) {
@@ -51,9 +51,13 @@
             {{ hayFiltros() ? 'No hay actividad con esos filtros.' : 'Todavía no hay actividad.' }}
           </app-mensaje>
         } @else {
-          <p #cuenta class="cuenta" tabindex="-1">
-            {{ desdeFila() }}–{{ hastaFila() }} de {{ r.total }}
-            {{ r.total === 1 ? 'registro' : 'registros' }}, lo más reciente primero.
+          <!--
+            La región viva es solo el contador: al sumar una tanda, el lector dice "40 de 120"
+            y no lee las veinte filas nuevas de corrido.
+          -->
+          <p #cuenta class="cuenta" tabindex="-1" aria-live="polite">
+            {{ mostrados() }} de {{ r.total }} {{ r.total === 1 ? 'registro' : 'registros' }}, lo
+            más reciente primero.
           </p>
 
           <div class="tabla" role="region" tabindex="0" aria-label="Tabla de actividad">
@@ -86,15 +90,16 @@
             </table>
           </div>
 
-          @if (hayAnterior() || haySiguiente()) {
-            <nav class="paginas" aria-label="Páginas de la actividad">
-              <app-boton variante="borde" [deshabilitado]="!hayAnterior()" (presionado)="irA(-1)">
-                <span aria-hidden="true">←</span> Más recientes
+          @if (errorAlVerMas()) {
+            <app-mensaje tono="error">No pudimos traer más actividad. Probá de nuevo.</app-mensaje>
+          }
+
+          @if (hayMas()) {
+            <div class="ver-mas">
+              <app-boton variante="borde" [cargando]="cargando()" (presionado)="verMas()">
+                Ver más actividad
               </app-boton>
-              <app-boton variante="borde" [deshabilitado]="!haySiguiente()" (presionado)="irA(1)">
-                Más antiguos <span aria-hidden="true">→</span>
-              </app-boton>
-            </nav>
+            </div>
           }
         }
       }

@@ -85,8 +85,6 @@ export class AdminReportes {
     return dias ? totalesDeFacturacion(dias) : null;
   });
 
-  protected readonly masVendido = computed(() => this.candy()?.[0] ?? null);
-
   protected readonly barrasDeCandy = computed<DatoDeBarra[]>(() =>
     (this.candy() ?? []).map((p) => ({ etiqueta: p.nombre, valor: p.unidades })),
   );

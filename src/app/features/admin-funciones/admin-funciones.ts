@@ -6,6 +6,7 @@ import {
   computed,
   effect,
   inject,
+  linkedSignal,
   signal,
   untracked,
   viewChild,
@@ -45,6 +46,9 @@ import { Spinner } from '../../shared/spinner/spinner';
 
 /** El mismo tope que aplica la base: una programación más grande se rechaza allá */
 const MAXIMO_DE_FUNCIONES_POR_ALTA = 200;
+
+/** Filas de la agenda por tanda de "Ver más": unos días de programación, en una pantalla */
+const FUNCIONES_POR_TANDA = 15;
 
 /** Convierte lo que se escribió en el campo de precio. NaN si no es un número */
 function leerPrecio(texto: string): number {
@@ -104,6 +108,39 @@ export class AdminFunciones {
       texto: `${p.titulo} · ${p.duracion_minutos} min`,
     })),
   );
+
+  /**
+   * Cuántas filas de la agenda se ven. Con una programación de semanas la tabla pasaba los
+   * 9000 px: se muestra una tanda y "Ver más" suma la siguiente. Las funciones ya están todas
+   * cargadas (la agenda las necesita para el filtro), así que solo se recorta lo que se dibuja.
+   * Cambiar de película vuelve a la primera tanda; editar o dar de baja no, para que la fila
+   * que se estaba mirando no desaparezca de la vista.
+   */
+  protected readonly filasVisibles = linkedSignal({
+    source: this.filtroPelicula,
+    computation: () => FUNCIONES_POR_TANDA,
+  });
+
+  protected readonly agendaVisible = computed(
+    () => this.programacion()?.slice(0, this.filasVisibles()) ?? [],
+  );
+
+  protected readonly hayMasFunciones = computed(
+    () => (this.programacion()?.length ?? 0) > this.filasVisibles(),
+  );
+
+  private readonly cuentaDeAgenda = viewChild<ElementRef<HTMLElement>>('cuentaDeAgenda');
+
+  protected verMasFunciones(): void {
+    this.filasVisibles.update((n) => n + FUNCIONES_POR_TANDA);
+
+    // Con la última tanda el botón desaparece: el foco pasa al contador y no se cae al <body>
+    if (!this.hayMasFunciones()) {
+      afterNextRender(() => this.cuentaDeAgenda()?.nativeElement.focus(), {
+        injector: this.inyector,
+      });
+    }
+  }
 
   // ── Formulario de alta ──
   protected readonly peliculaId = signal('');

@@ -10,7 +10,7 @@
 
 .cuenta {
   color: var(--texto-tenue);
-  font-size: var(--t-mini);
+  font-size: var(--t-chico);
 }
 
 .cuando {
@@ -34,9 +34,8 @@
   text-transform: uppercase;
 }
 
-.paginas {
+/* "Ver más" centrado debajo de la tabla: es la continuación de la lista */
+.ver-mas {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--e-3);
-  justify-content: space-between;
+  justify-content: center;
 }

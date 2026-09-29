@@ -105,11 +105,12 @@ describe('AdminReportes', () => {
     expect(cifras[3]).toMatch(/^Canceladass*1$/);
   });
 
-  it('el candy más vendido se destaca, con sus unidades', async () => {
+  it('el candy más vendido encabeza el gráfico, con sus unidades', async () => {
     await crear();
 
-    expect(raiz().querySelector('.ganador')?.textContent).toContain('Pochoclo mediano');
-    expect(texto()).toContain('7 unidades');
+    const primera = raiz().querySelector('app-grafico-barras li');
+    expect(primera?.textContent).toContain('Pochoclo mediano');
+    expect(primera?.textContent).toContain('7 unidades');
   });
 
   it('las películas arrancan por la semana actual', async () => {

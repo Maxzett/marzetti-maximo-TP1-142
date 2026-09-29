@@ -204,6 +204,11 @@
             No hay funciones programadas{{ filtroPelicula() ? ' para esa película' : '' }}.
           </app-mensaje>
         } @else {
+          <p #cuentaDeAgenda class="cuenta" tabindex="-1" aria-live="polite">
+            {{ agendaVisible().length }} de {{ funciones.length }}
+            {{ funciones.length === 1 ? 'función' : 'funciones' }}, ordenadas por horario.
+          </p>
+
           <!-- Región con foco: la tabla es más ancha que un celular y un teclado tiene que poder desplazarla -->
           <div class="tabla" role="region" tabindex="0" aria-label="Tabla de próximas funciones">
             <table>
@@ -221,7 +226,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (funcion of funciones; track funcion.id) {
+                @for (funcion of agendaVisible(); track funcion.id) {
                   <tr>
                     <td>{{ describir(funcion.inicio) }}</td>
                     <th scope="row">{{ funcion.pelicula.titulo }}</th>
@@ -252,6 +257,14 @@
               </tbody>
             </table>
           </div>
+
+          @if (hayMasFunciones()) {
+            <div class="ver-mas">
+              <app-boton variante="borde" (presionado)="verMasFunciones()">
+                Ver más funciones
+              </app-boton>
+            </div>
+          }
         }
       } @else {
         <app-mensaje tono="error"

@@ -1,5 +1,17 @@
 :host {
-  display: block;
+  display: grid;
+  gap: var(--e-2);
+}
+
+/* El mismo tratamiento que la etiqueta de app-campo: los grupos se leen como un campo más */
+.etiqueta {
+  margin: 0;
+  color: var(--texto);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cuerpo);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
 }
 
 .grupo {

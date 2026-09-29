@@ -4,6 +4,18 @@
   letter-spacing: 0.06em;
 }
 
-.configuracion {
-  max-width: 32rem;
+/*
+ * Los valores de configuración en columnas iguales, a todo el ancho de la sección. align-items:
+ * start para que un campo con error o con ayuda más larga no estire a los de al lado.
+ */
+.campos-configuracion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--e-campos) var(--e-5);
+  align-items: start;
+}
+
+/* El botón queda debajo del primer campo, no en la otra punta de la pantalla */
+.configuracion .acciones {
+  justify-content: flex-start;
 }

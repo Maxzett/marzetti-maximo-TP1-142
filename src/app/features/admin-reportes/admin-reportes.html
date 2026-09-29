@@ -133,17 +133,7 @@
     </p>
 
     @if (!errorDeVentas() && candy()) {
-      @if (masVendido(); as primero) {
-        <div class="destacado" role="status">
-          <p class="sobretitulo">El más pedido</p>
-          <p class="ganador">{{ primero.nombre }}</p>
-          <p class="secundario">
-            {{ primero.unidades }} {{ primero.unidades === 1 ? 'unidad' : 'unidades' }} ·
-            {{ rango() }}
-          </p>
-        </div>
-      }
-
+      <!-- El ranking alcanza: el primero de la lista es el más pedido, con sus unidades -->
       <app-grafico-barras
         titulo="Los cinco más vendidos"
         vacio="No se vendió candy en este período."

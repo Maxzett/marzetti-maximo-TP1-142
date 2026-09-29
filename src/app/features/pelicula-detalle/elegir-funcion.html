@@ -7,33 +7,43 @@
 } @else if (dias().length === 0) {
   <p class="vacio">Esta película todavía no tiene funciones programadas.</p>
 } @else {
+  <!--
+    Cada decisión en su propio recuadro, en el orden en que se toma: día, horario, versión y
+    el botón. Separados se leen como pasos, y no como una sola pared de chips.
+  -->
   <div class="selectores">
-    <app-chips-opcion
-      etiqueta="Día de la función"
-      [opciones]="opcionesDeDia()"
-      [valor]="fecha()"
-      (valorChange)="elegirFecha($event)"
-    />
+    <div class="bloque">
+      <app-chips-opcion
+        etiqueta="Día de la función"
+        [opciones]="opcionesDeDia()"
+        [valor]="fecha()"
+        (valorChange)="elegirFecha($event)"
+      />
+    </div>
 
-    <app-chips-opcion
-      etiqueta="Horario"
-      [opciones]="opcionesDeHora()"
-      [valor]="hora()"
-      (valorChange)="elegirHora($event)"
-    />
+    <div class="bloque">
+      <app-chips-opcion
+        etiqueta="Horario"
+        [opciones]="opcionesDeHora()"
+        [valor]="hora()"
+        (valorChange)="elegirHora($event)"
+      />
+    </div>
+
+    @if (opcionesDeVersion().length > 1) {
+      <div class="bloque">
+        <app-seleccion
+          etiqueta="Formato e idioma"
+          marcador="Elegí una versión"
+          [opciones]="opcionesDeVersion()"
+          [valor]="elegida()?.id ?? ''"
+          (valorChange)="elegirVersion($event)"
+        />
+      </div>
+    }
   </div>
 
-  @if (opcionesDeVersion().length > 1) {
-    <app-seleccion
-      etiqueta="Formato e idioma"
-      marcador="Elegí una versión"
-      [opciones]="opcionesDeVersion()"
-      [valor]="elegida()?.id ?? ''"
-      (valorChange)="elegirVersion($event)"
-    />
-  }
-
-  <div class="accion">
+  <div class="accion" [class.accion--lista]="elegida()">
     @if (elegida(); as funcion) {
       <p class="eleccion">{{ descripcion() }}</p>
       <a class="boton boton--primario" [routerLink]="['/comprar', funcion.id]">Elegir butacas</a>

@@ -12,8 +12,11 @@ import {
 import { sumarDias } from '../../shared/selector-fecha/fechas';
 import { Supabase } from './supabase';
 
-/** Registros del log por página: una pantalla entera sin que la tabla se vuelva infinita */
-export const REGISTROS_POR_PAGINA = 50;
+/**
+ * Registros del log por tanda. La pantalla muestra una y suma la siguiente con "Ver más":
+ * 20 entran en una pantalla y media, y el log se lee casi siempre por lo más reciente.
+ */
+export const REGISTROS_POR_PAGINA = 20;
 
 /**
  * Reportes y log de actividad del panel de administración (RF-57 a RF-61).

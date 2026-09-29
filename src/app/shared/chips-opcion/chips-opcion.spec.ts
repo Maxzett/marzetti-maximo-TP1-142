@@ -28,9 +28,13 @@ describe('ChipsOpcion', () => {
     expect(porEtiqueta('Hoy 28/9')).toBeDefined();
   });
 
-  it('el grupo es un radiogroup con el aria-label pedido', () => {
-    const grupo = fixture.nativeElement.querySelector('[role="radiogroup"]') as HTMLElement;
-    expect(grupo.getAttribute('aria-label')).toBe('Día de la función');
+  it('el grupo es un radiogroup nombrado por la etiqueta que se ve', () => {
+    const elemento = fixture.nativeElement as HTMLElement;
+    const grupo = elemento.querySelector('[role="radiogroup"]') as HTMLElement;
+    const etiqueta = elemento.querySelector(`#${grupo.getAttribute('aria-labelledby')}`);
+
+    expect(etiqueta?.textContent?.trim()).toBe('Día de la función');
+    expect(etiqueta?.classList).toContain('etiqueta');
   });
 
   it('clic en un chip fija el valor', async () => {

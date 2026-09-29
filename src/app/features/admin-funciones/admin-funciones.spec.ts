@@ -157,6 +157,53 @@ describe('AdminFunciones', () => {
 
       expect(servicio.cargarProgramacion).toHaveBeenLastCalledWith('p1');
     });
+
+    describe('"Ver más" (la agenda de semanas pasaba los 9000 px)', () => {
+      const muchas = (cantidad: number): Funcion[] =>
+        Array.from({ length: cantidad }, (_, i) => ({ ...FUNCION, id: `f${i}` }));
+      const filas = () => raiz().querySelectorAll('tbody tr').length;
+
+      it('arranca con una tanda de 15 y el botón suma la siguiente', async () => {
+        await crear({ funciones: muchas(40) });
+
+        expect(filas()).toBe(15);
+        expect(texto()).toContain('15 de 40 funciones');
+
+        boton('Ver más funciones')!.click();
+        await estabilizar();
+
+        expect(filas()).toBe(30);
+        expect(texto()).toContain('30 de 40 funciones');
+      });
+
+      it('con la última tanda se va el botón y el foco pasa al contador', async () => {
+        await crear({ funciones: muchas(20) });
+
+        boton('Ver más funciones')!.click();
+        await estabilizar();
+
+        expect(filas()).toBe(20);
+        expect(boton('Ver más funciones')).toBeUndefined();
+        expect(document.activeElement?.classList).toContain('cuenta');
+      });
+
+      it('sin más de una tanda no hay botón', async () => {
+        await crear({ funciones: muchas(15) });
+
+        expect(boton('Ver más funciones')).toBeUndefined();
+      });
+
+      it('cambiar la película vuelve a la primera tanda', async () => {
+        await crear({ funciones: muchas(40) });
+        boton('Ver más funciones')!.click();
+        await estabilizar();
+
+        llenar({ filtroPelicula: 'p1' });
+        await estabilizar();
+
+        expect(filas()).toBe(15);
+      });
+    });
   });
 
   describe('programar', () => {

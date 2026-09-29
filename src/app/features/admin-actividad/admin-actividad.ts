@@ -6,7 +6,6 @@ import {
   ElementRef,
   inject,
   Injector,
-  linkedSignal,
   signal,
   untracked,
   viewChild,
@@ -43,8 +42,10 @@ const ROLES: Record<string, string> = {
  * un QR, con fecha y hora. Solo lectura: la tabla no tiene permiso de edición para nadie y los
  * triggers de 0011 impiden además editarla o borrarla aun desde una función de la base.
  *
- * Se filtra por tipo de acción y por días, y se pagina de a 50 en la base: el log crece con cada
- * validación en la puerta, y traerlo entero sería cada vez más lento.
+ * Se filtra por tipo de acción y por días, y se trae de a 20 desde la base: el log crece con cada
+ * validación en la puerta, y traerlo entero sería cada vez más lento. "Ver más" suma la tanda
+ * siguiente debajo de la que ya está, en vez de reemplazarla: se sigue leyendo hacia atrás sin
+ * perder lo de arriba, y la pantalla no arranca con una tabla de varios miles de píxeles.
  */
 @Component({
   imports: [Boton, CampoFecha, Mensaje, Seleccion, Spinner],
@@ -73,9 +74,6 @@ export class AdminActividad {
     hasta: this.hasta(),
   }));
 
-  /** Cambiar un filtro vuelve a la primera página: la página 3 de otro filtro puede no existir */
-  protected readonly pagina = linkedSignal({ source: this.filtro, computation: () => 0 });
-
   protected readonly errorDeRango = computed(() =>
     this.desde() && this.hasta() && this.desde() > this.hasta()
       ? 'La fecha de inicio es posterior a la de fin.'
@@ -85,39 +83,38 @@ export class AdminActividad {
   protected readonly hayFiltros = computed(() => !!(this.accion() || this.desde() || this.hasta()));
 
   protected readonly cargando = signal(true);
+  /** Todo lo traído hasta ahora con el filtro actual, y el total que hay en la base */
   protected readonly resultado = signal<PaginaDeActividad | null>(null);
   protected readonly error = signal(false);
+  /** Falló una tanda de "Ver más": lo ya mostrado sigue valiendo, así que no se lo tapa */
+  protected readonly errorAlVerMas = signal(false);
 
-  protected readonly desdeFila = computed(() => this.pagina() * REGISTROS_POR_PAGINA + 1);
-  protected readonly hastaFila = computed(() =>
-    Math.min((this.pagina() + 1) * REGISTROS_POR_PAGINA, this.resultado()?.total ?? 0),
-  );
-  protected readonly hayAnterior = computed(() => this.pagina() > 0);
-  protected readonly haySiguiente = computed(
-    () => (this.pagina() + 1) * REGISTROS_POR_PAGINA < (this.resultado()?.total ?? 0),
-  );
+  protected readonly mostrados = computed(() => this.resultado()?.registros.length ?? 0);
+  protected readonly hayMas = computed(() => this.mostrados() < (this.resultado()?.total ?? 0));
 
   protected readonly describirAccion = describirAccion;
   protected readonly describirActor = describirActor;
   protected readonly nombreDeAccion = nombreDeAccion;
 
   private consulta = 0;
+  /** La última tanda traída con el filtro actual; cambiar el filtro vuelve a la 0 */
+  private pagina = 0;
 
   /**
-   * Al pasar de página el botón que se tocó puede quedar deshabilitado (en la última no hay
-   * "más antiguos") y el foco se caería al <body>. Se lleva al contador de registros, que además
-   * le dice al lector de pantalla en qué página quedó.
+   * Con la última tanda el botón "Ver más" desaparece, y el foco se caería al <body>. En ese
+   * caso se lleva al contador, que además dice cuántos registros quedaron a la vista. Mientras
+   * haya más, el foco se queda en el botón, listo para la tanda siguiente.
    */
   private enfocarAlCargar = false;
 
   constructor() {
+    // Solo el filtro dispara una carga desde cero; las tandas siguientes las pide verMas()
     effect(() => {
       const filtro = this.filtro();
-      const pagina = this.pagina();
       const valido = !this.errorDeRango();
       untracked(() => {
         if (valido) {
-          void this.cargar(filtro, pagina);
+          void this.cargar(filtro, 0);
         }
       });
     });
@@ -138,28 +135,53 @@ export class AdminActividad {
     this.hasta.set('');
   }
 
-  protected irA(pasos: number): void {
+  protected verMas(): void {
     this.enfocarAlCargar = true;
-    this.pagina.update((p) => Math.max(0, p + pasos));
+    void this.cargar(this.filtro(), this.pagina + 1);
   }
 
   private async cargar(filtro: FiltroDeActividad, pagina: number): Promise<void> {
     const consulta = ++this.consulta;
     this.cargando.set(true);
+    this.errorAlVerMas.set(false);
 
-    const resultado = await this.reportes.actividad(filtro, pagina);
+    const tanda = await this.reportes.actividad(filtro, pagina);
 
     if (consulta !== this.consulta) {
       return;
     }
 
-    this.resultado.set(resultado);
-    this.error.set(resultado === null);
     this.cargando.set(false);
+
+    if (pagina === 0) {
+      this.pagina = 0;
+      this.resultado.set(tanda);
+      this.error.set(tanda === null);
+      return;
+    }
+
+    if (tanda === null) {
+      // No se avanza de tanda: el próximo "Ver más" vuelve a pedir la misma
+      this.errorAlVerMas.set(true);
+      return;
+    }
+
+    this.pagina = pagina;
+
+    // Se descartan los ya mostrados: si entró actividad nueva entre una tanda y otra, el
+    // desplazamiento corre y el primero de esta tanda puede ser el último de la anterior
+    const anteriores = this.resultado()?.registros ?? [];
+    const vistos = new Set(anteriores.map((r) => r.id));
+    this.resultado.set({
+      registros: [...anteriores, ...tanda.registros.filter((r) => !vistos.has(r.id))],
+      total: tanda.total,
+    });
 
     if (this.enfocarAlCargar) {
       this.enfocarAlCargar = false;
-      afterNextRender(() => this.cuenta()?.nativeElement.focus(), { injector: this.injector });
+      if (!this.hayMas()) {
+        afterNextRender(() => this.cuenta()?.nativeElement.focus(), { injector: this.injector });
+      }
     }
   }
 }

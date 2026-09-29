@@ -1,4 +1,16 @@
-<div class="grupo" role="radiogroup" [attr.aria-label]="etiqueta()" (keydown)="alTeclear($event)">
+<!--
+  El nombre del grupo se ve, igual que la etiqueta de un campo: con solo un aria-label, quien
+  mira la pantalla tenía que adivinar qué elegía cada fila de chips. El radiogroup lo toma
+  con aria-labelledby, así el lector dice exactamente el mismo texto que se ve.
+-->
+<p class="etiqueta" [id]="idEtiqueta">{{ etiqueta() }}</p>
+
+<div
+  class="grupo"
+  role="radiogroup"
+  [attr.aria-labelledby]="idEtiqueta"
+  (keydown)="alTeclear($event)"
+>
   @for (opcion of opciones(); track opcion.valor; let primero = $first) {
     <button
       class="chip"

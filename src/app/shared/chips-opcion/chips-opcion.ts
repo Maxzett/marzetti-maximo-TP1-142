@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { destinoEnRadiogroup } from '../radiogroup-lineal';
 
+let contador = 0;
+
 export interface OpcionChip {
   valor: string;
   etiqueta: string;
@@ -31,7 +33,10 @@ export interface OpcionChip {
 export class ChipsOpcion {
   readonly opciones = input.required<readonly OpcionChip[]>();
   readonly valor = model('');
+  /** Se ve arriba de los chips, como la etiqueta de un campo, y nombra al grupo */
   readonly etiqueta = input.required<string>();
+
+  protected readonly idEtiqueta = `chips-opcion-${++contador}`;
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 

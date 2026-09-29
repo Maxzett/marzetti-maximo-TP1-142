@@ -4,14 +4,17 @@
   white-space: normal;
 }
 
+/*
+ * Grilla de tarjetas a todo el ancho, no una lista de 32rem pegada a la izquierda: las
+ * categorías son pocas y cortas, y en escritorio dejaban vacíos dos tercios de la sección.
+ * Sigue siendo una lista (ul), en el orden de la pantalla de compra.
+ */
 .categorias {
-  display: flex;
-  flex-direction: column;
-  max-width: 32rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: var(--e-3);
   margin: 0;
   padding: 0;
-  border: 1px solid var(--borde);
-  border-radius: var(--r-medio);
   list-style: none;
 }
 
@@ -20,11 +23,9 @@
   align-items: center;
   gap: var(--e-3);
   padding: var(--e-2) var(--e-3);
-  border-block-end: 1px solid var(--borde);
-}
-
-.categorias li:last-child {
-  border-block-end: 0;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
 }
 
 .orden {

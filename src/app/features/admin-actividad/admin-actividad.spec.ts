@@ -67,21 +67,61 @@ describe('AdminActividad', () => {
     expect(texto()).toContain('Todavía no hay actividad.');
   });
 
-  it('pagina de a 50 y lleva el foco al contador al cambiar de página', async () => {
-    await crear({ registros: [registro(1)], total: 120 });
+  it('"Ver más" suma la tanda siguiente debajo de la que ya estaba', async () => {
+    await crear({ registros: [registro(1), registro(2)], total: 4 });
+    expect(texto()).toContain('2 de 4 registros');
 
-    expect(texto()).toContain('1–50 de 120 registros');
-    boton('Más antiguos')!.click();
+    actividad.mockResolvedValueOnce({ registros: [registro(3), registro(4)], total: 4 });
+    boton('Ver más actividad')!.click();
     await estabilizar();
 
     expect(actividad).toHaveBeenLastCalledWith({ accion: '', desde: '', hasta: '' }, 1);
-    expect(texto()).toContain('51–100 de 120');
+    expect(raiz().querySelectorAll('tbody tr').length).toBe(4);
+    expect(texto()).toContain('4 de 4 registros');
+  });
+
+  it('con la última tanda se va el botón y el foco pasa al contador', async () => {
+    await crear({ registros: [registro(1)], total: 2 });
+
+    actividad.mockResolvedValueOnce({ registros: [registro(2)], total: 2 });
+    boton('Ver más actividad')!.click();
+    await estabilizar();
+
+    expect(boton('Ver más actividad')).toBeUndefined();
     expect(document.activeElement?.classList).toContain('cuenta');
   });
 
-  it('cambiar un filtro vuelve a la primera página', async () => {
+  it('no repite un registro que ya se mostraba si el log se corrió entre tandas', async () => {
+    await crear({ registros: [registro(1), registro(2)], total: 3 });
+
+    actividad.mockResolvedValueOnce({ registros: [registro(2), registro(3)], total: 3 });
+    boton('Ver más actividad')!.click();
+    await estabilizar();
+
+    expect(raiz().querySelectorAll('tbody tr').length).toBe(3);
+  });
+
+  it('si falla una tanda, lo ya mostrado queda y se puede reintentar', async () => {
+    await crear({ registros: [registro(1)], total: 2 });
+
+    actividad.mockResolvedValueOnce(null);
+    boton('Ver más actividad')!.click();
+    await estabilizar();
+
+    expect(raiz().querySelectorAll('tbody tr').length).toBe(1);
+    expect(texto()).toContain('No pudimos traer más actividad');
+
+    actividad.mockResolvedValueOnce({ registros: [registro(2)], total: 2 });
+    boton('Ver más actividad')!.click();
+    await estabilizar();
+
+    expect(actividad).toHaveBeenLastCalledWith({ accion: '', desde: '', hasta: '' }, 1);
+    expect(raiz().querySelectorAll('tbody tr').length).toBe(2);
+  });
+
+  it('cambiar un filtro vuelve a la primera tanda', async () => {
     await crear({ registros: [registro(1)], total: 120 });
-    boton('Más antiguos')!.click();
+    boton('Ver más actividad')!.click();
     await estabilizar();
 
     const select = raiz().querySelector('select')!;
